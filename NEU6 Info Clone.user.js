@@ -10,7 +10,7 @@
 // @require      http://libs.baidu.com/jquery/1.10.2/jquery.min.js
 // @icon         http://bt.neu6.edu.cn/favicon.ico
 // @supportURL   http://bt.neu6.edu.cn/thread-1555682-1-1.html
-// @version      1.1.1(20160918)
+// @version      1.1.1(20160919)
 // ==/UserScript==
 
 // 脚本控制选项(1为开启，0为关闭)
@@ -214,7 +214,7 @@ var jq = jQuery.noConflict(); //因为引入jQuery库，为防止与Discuz!冲�
                   img.removeAttr('onmouseover');
                   img.removeAttr('onclick');
                   //借用file属性信息修正引用过程中出错的src信息
-                  img.attr('src', img.attr('file'));
+                  img.attr('src','http://bt.neu6.edu.cn'+img.attr('file'));
                   img.removeAttr('file');
                   var hideimg = img.parent('ignore_js_op'); //移动img结点
                   img.insertAfter(hideimg);
