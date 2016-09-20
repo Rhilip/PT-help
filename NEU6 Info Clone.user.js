@@ -10,13 +10,13 @@
 // @require      http://libs.baidu.com/jquery/1.10.2/jquery.min.js
 // @icon         http://bt.neu6.edu.cn/favicon.ico
 // @supportURL   http://bt.neu6.edu.cn/thread-1555682-1-1.html
-// @version      1.1.1(20160919)
+// @version      1.1.1(20160920)
 // ==/UserScript==
 
 // 脚本控制选项(1为开启，0为关闭)
 var signaltoquote = 1; //为种子信号图标添加点击事件，点击信号图标自动跳转并填写
 var autoadd = 1; //实现剧集自动增加集数；动漫自动增加集数；综艺自动增加时间，删除节目内容
-var delimginetm = 1; //移除综艺娱乐版块的图片
+var delimginetm = 1; //移除综艺娱乐版块的图片；保留全部游戏天下图片
 
 // 脚本预处理阶段
 var jq = jQuery.noConflict(); //因为引入jQuery库，为防止与Discuz!冲突，更改默认指示符$为jq(让出对$的控制权)
@@ -219,11 +219,13 @@ var jq = jQuery.noConflict(); //因为引入jQuery库，为防止与Discuz!冲�
                   var hideimg = img.parent('ignore_js_op'); //移动img结点
                   img.insertAfter(hideimg);
                 });
-                //综艺娱乐区图片移除
+                //移除综艺娱乐版块的图片；保留全部游戏天下图片
                 if (delimginetm && descr.find('img')) {
-                    if (seedtype == 16 && descr.find('img').length == 1)
+                    if (seedtype == 16 && descr.find('img').length == 1) {
                         descr.find('img').remove();
-                    else {
+                    } else if (seedtype == 21) {
+                        jq.noop();
+                    } else {
                         descr.find('img:gt(0)').remove();
                     }
                 }
