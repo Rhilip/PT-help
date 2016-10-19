@@ -16,7 +16,7 @@
 // 脚本控制选项(1为开启，0为关闭)
 var signaltoquote = 1; //为种子信号图标添加点击事件，点击信号图标自动跳转并填写
 var autoadd = 1; //实现剧集自动增加集数；动漫自动增加集数；综艺自动增加时间，删除节目内容
-var delimginetm = 1; //移除综艺娱乐版块的图片；保留全部游戏天下图片
+var delotherimg = 0; //移除除第一张图片(一般是海报图)以外的所有图片(，对综艺版是所有图片)
 
 // 脚本预处理阶段
 var jq = jQuery.noConflict(); //因为引入jQuery库，为防止与Discuz!冲突，更改默认指示符$为jq(让出对$的控制权)
@@ -204,28 +204,26 @@ var jq = jQuery.noConflict(); //因为引入jQuery库，为防止与Discuz!冲�
                 }
                 //图片处理（对上传的图片）
                 descr.find('ignore_js_op').each(function() {
-                  var img = jq(this).find('img:first');
-                  //移除引用过程中原图片无用的img属性
-                  img.removeAttr('id');
-                  img.removeAttr('aid');
-                  img.removeAttr('zoomfile');
-                  img.removeAttr('class');
-                  img.removeAttr('inpost');
-                  img.removeAttr('onmouseover');
-                  img.removeAttr('onclick');
-                  //借用file属性信息修正引用过程中出错的src信息
-                  img.attr('src','http://bt.neu6.edu.cn'+img.attr('file'));
-                  img.removeAttr('file');
-                  var hideimg = img.parent('ignore_js_op'); //移动img结点
-                  img.insertAfter(hideimg);
+                    var img = jq(this).find('img:first');
+                    //移除引用过程中原图片无用的img属性
+                    img.removeAttr('id');
+                    img.removeAttr('aid');
+                    img.removeAttr('zoomfile');
+                    img.removeAttr('class');
+                    img.removeAttr('inpost');
+                    img.removeAttr('onmouseover');
+                    img.removeAttr('onclick');
+                    //借用file属性信息修正引用过程中出错的src信息
+                    img.attr('src','http://bt.neu6.edu.cn'+img.attr('file'));
+                    img.removeAttr('file');
+                    var hideimg = img.parent('ignore_js_op'); //移动img结点
+                    img.insertAfter(hideimg);
                 });
-                //移除综艺娱乐版块的图片；保留全部游戏天下图片
-                if (delimginetm && descr.find('img')) {
-                    if (seedtype == 16 && descr.find('img').length == 1) {
+                //移除除第一张图片(一般是海报图)以外的所有图片(，对综艺版是所有图片)
+                if (delotherimg && descr.find('img')) {
+                    if (seedtype == 16 && descr.find('img').length == 1)
                         descr.find('img').remove();
-                    } else if (seedtype == 21) {
-                        jq.noop();
-                    } else {
+                    else {
                         descr.find('img:gt(0)').remove();
                     }
                 }
