@@ -21,7 +21,8 @@ $(document).ready(function(){
         if(loc){
             tr.find("td:nth-child(3) > div").children().eq(0).after('<a href="'+ dlink +'" class="button thumbs-up">下载</a>');
             var thx = tr.find("td:nth-child(3) > div > a:nth-child(1)").addClass("fav_link").removeClass("button thumbs-up");
-            tr.find("td:nth-child(3) > div > ul > li").append(thx);
+            tr.find("td:nth-child(3) > div > ul").children().eq(0).before("<li></li>");
+            tr.find("td:nth-child(3) > div > ul > li").eq(0).append(thx);
         }else{
             tr.find("td.l").children().eq(0).prepend('<a href="'+ dlink +'" class="button button-blue" onclick="return alert_price(0)">▼ 下载种子</a>');
         }
