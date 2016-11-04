@@ -1,17 +1,22 @@
 // ==UserScript==
 // @name         Byrbt MOD help
 // @namespace    http://blog.rhilip.info
-// @version      0.2
+// @version      0.3
 // @description  It's an userscript prepared for uesrs who's Level is highter than Moderator in Byrbt
 // @author       Rhilip
 // @match        http*://bt.byr.cn/*
 // @icon         http://bt.byr.cn/favicon.ico
+// @updateURL    https://github.com/Rhilip/My-Web-help/raw/master/Byrbt%20MOD%20help.user.js
 // @grant        none
 // ==/UserScript==
 
 //Control Options
 var IPv6toLoc = 1;   //Change IPv6 address to Location in page detail.php and viewsnatches.php
-var Subcheck = 1;    //
+var Subcheck = 0;    //
+var Autothxself = 1; //Auto thank your torrents ,because of 10 more bones
+
+//Global Variables
+var myname = $("#info_block > tbody > tr > td > table > tbody > tr > td:nth-child(1) > span > span > a > b").text();
 
 $(document).ready(function(){
     //Change IPv6 address
@@ -62,9 +67,35 @@ $(document).ready(function(){
         }
     }
 
+    //Show subtitles corrensponding torrent's link,and check It's status (exist or not)
+    if(Subcheck && location.pathname == "/subtitles.php"){
+        //Add form columns
+        $("#outer > table > tbody > td.colhead:eq(1)").after('<td class="colhead">对应种子</td><td class="colhead">检查</td>');
+        $("#outer > table > tbody > tr").each(function(){
+            var tr =$(this);
+            var torrentid = tr.find('a[href^=downloadsubs.php?torrentid="]').attr('href').match(/torrentid=(\d+)/)[1];
+            tr.find('td:eq(1)').after('');
         });
+
+    }
+
     //Make the input box in page report.php Wider
     if(location.pathname == "/report.php"){
         $("#outer > table.main > tbody > tr > td > table > tbody > tr > td > form > input:nth-child(3)").attr("style","width: 400px");
+    }
+
+    //High yourself in page uploaders.php
+    if(location.pathname == "/uploaders.php"){
+        var table = $("#outer > table.main > tbody > tr > td > div > div > table > tbody");
+        table.find("tr > td:nth-child(1) > span > a").after("<br />");
+        //High yourself
+        table.find("tr:contains('"+ name +"')").attr("class","free_bg");
+    }
+
+    //Other change in page details.php
+    if(location.pathname == "/details.php"){
+        if(Autothxself && $("#outer > table > tbody > tr:nth-child(1) > td.rowfollow > span > a > b").text() == myname){
+            $("#saythanks[value*='说谢谢']").click();
+        }
     }
 });
