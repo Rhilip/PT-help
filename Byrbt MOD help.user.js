@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Byrbt MOD help
 // @namespace    http://blog.rhilip.info
-// @version      0.4
+// @version      0.5
 // @description  It's an userscript prepared for uesrs who's Level is highter than Moderator in Byrbt
 // @author       Rhilip
 // @match        http*://bt.byr.cn/*
@@ -12,12 +12,14 @@
 
 //Control Options
 var IPv6toLoc = 1;   //Change IPv6 address to Location in page detail.php and viewsnatches.php
-var SubCheck = 0;    //Need to fix!!!!
+var outerGraphCheck = 1;  //Outer chain graph Check in page detail.php
+var SubCheck = 1;    //Need to fix!!!!
 var AutoThxSelf = 1; //Auto thank your torrents ,because of 10 more bones
 var quickResp = 0;   //Prepare to wrtie!!!!
 
 //Global Variables
-var myName = $("#info_block > tbody > tr > td > table > tbody > tr > td:nth-child(1) > span > span > a > b").text();
+var myName = $("table#info_block > tbody > tr > td > table > tbody > tr > td:nth-child(1) > span > span > a > b").text();
+var replyBox = $("textarea#quickreply");
 
 //prepare part
 function trueIp(ip) {
@@ -30,10 +32,10 @@ $(document).ready(function(){
     if(IPv6toLoc){
         //In page detail.php
         if (location.pathname == "/details.php"){
-            $('#hidepeer > a').after('<br><a id="toloc" class="sublink">[地点查询]</a>');
-            $('#toloc').click(function(){
-                $("#peerlist > table > tbody > tr > td:nth-child(1) > br").remove();                 //Display Peer's name in a row,Please Make sure you NEED or not!
-                var maintable = $('#peerlist > table > tbody > tr > td:nth-child(2)');
+            $('span#hidepeer > a').after('<br><a id="toloc" class="sublink">[地点查询]</a>');
+            $('a#toloc').click(function(){
+                $("div#peerlist > table > tbody > tr > td:nth-child(1) > br").remove();                 //Display Peer's name in a row,Please Make sure you NEED or not!
+                var maintable = $('div#peerlist > table > tbody > tr > td:nth-child(2)');
                 maintable.each(function(){
                     var node = $(this);
                     var ip = node.text();
@@ -50,7 +52,7 @@ $(document).ready(function(){
         }
         //In page viewsnatches.php and iphistory.php(Automatically)
         if (location.pathname == "/viewsnatches.php" || location.pathname == "/iphistory.php"){
-            var maintable = $("#outer > table.main > tbody > tr > td > table > tbody > tr > td:nth-child(2)");
+            var maintable = $("td#outer > table.main > tbody > tr > td > table > tbody > tr > td:nth-child(2)");
             maintable.each(function(){
                 var node = $(this);
                 var ip = node.text();
@@ -75,27 +77,48 @@ $(document).ready(function(){
         }
     }
 
+    //Outer chain graph Check in page detail.php and offers.php
+    if(outerGraphCheck) {
+        var infonode = $("div#kdescr");
+        //Count img number
+        var totalimg = infonode.find("img").length;
+        var outimg = totalimg - infonode.find("img[src*='bt.byr.cn']").addClass("Interimg").length;
+        infonode.closest("tr").before('<tr><td class="rowhead" valign="top">图片检查</td><td class="rowfollow" align="left" valign="top"><table border="0" cellspacing="0"><tbody><tr><td class="embedded">该种子简介共用 <span id="totalimg"><b>' + totalimg + '</b></span> 张图片，其中 <span id="outimg"><b>' + outimg + '</b></span> 张外链图</td></tr></tbody></table></td></tr>');
+
+        //Warning if the outer-img exists
+        if(outimg){
+            $('span#outimg').attr("style","color:#ff0000;");
+            replyBox.val(replyBox.val() + '\n请不要使用外链图片，这样做会导致部分校园网流量计费的同学流量损失，请使用本站已有图片（参考教程 [url=http://bt.byr.cn/forums.php?action=viewtopic&forumid=9&topicid=10359]发种小窍门——添加站内webp格式图片[/url]）或者将该图片上传到本站。');
+        }
+    }
+
+    //Make the input box in page report.php Wider
+    $('td#outer > table.main > tbody > tr > td > table > tbody > tr > td > form > input[type="text"]').attr("style","width: 400px");
+
     //Show subtitles corrensponding torrent's link,and check It's status (exist or not)
     if(SubCheck && location.pathname == "/subtitles.php"){
         //Add form columns
-        $("#outer > table > tbody > tr:nth-child(1) > td.colhead:eq(1)").after('<td class="colhead" id="check">对应种子号</td>');
-        $("#outer > table > tbody > tr").each(function(){
+        $("td#outer > table > tbody > tr:nth-child(1) > td.colhead:eq(1)").after('<td class="colhead" id="check">对应种子</td>');
+        $("td#outer > table > tbody > tr").each(function(){
             var tr =$(this);
-            if(tr.find("td.rowfollow").length){
+            if(tr.find('td:nth-child(2) > a').length){
                 var torrentid = tr.find('a[href^="downloadsubs.php?torrentid"]').attr('href').match(/torrentid=(\d+)/)[1];
-                tr.find('td[align=left]').after('<td class="rowfollow" align="center"><a title="点击检查种子存活情况" tagrget="_blank" href="/details.php?id='+ torrentid +'&hit=1">'+ torrentid +'</a></td>');
+                tr.find('td[align=left]').after('<td class="rowfollow" align="center"><a id="status" target="_blank" href="/details.php?id='+ torrentid +'&hit=1">'+ torrentid +'</a></td>');
+                /**Seems to often miscarriage of Justice (Need to fix)
+                 var info = $("a#status");
+                $.get('/details.php?id='+ torrentid +'&hit=1',function (resp) {
+                    if(resp.match(/<td[^>]*>[\u6ca1\u6709\u8be5\u0049\u0044\u7684\u79cd\u5b50\u000d\u000a]*<\/td>/gi)){     //<td class="text">没有该ID的种子</td>
+                        info.attr("title",torrentid).text("种子不存在");
+                    }
+                });
+                */
             }
         });
     }
 
-    //Make the input box in page report.php Wider
-    if(location.pathname == "/report.php"){
-        $("#outer > table.main > tbody > tr > td > table > tbody > tr > td > form > input:nth-child(3)").attr("style","width: 400px");
-    }
-
     //High yourself in page uploaders.php
     if(location.pathname == "/uploaders.php"){
-        var table = $("#outer > table.main > tbody > tr > td > div > div > table > tbody");
+        var table = $("td#outer > table.main > tbody > tr > td > div > div > table > tbody");
         table.find("tr > td:nth-child(1) > span > a").after("<br />");
         //High yourself
         table.find("tr:contains('"+ myName +"')").attr("class","free_bg");
@@ -103,7 +126,8 @@ $(document).ready(function(){
 
     //Other change in page details.php
     if(location.pathname == "/details.php"){
-        if(AutoThxSelf && ($("#outer > table > tbody > tr:nth-child(1) > td.rowfollow > span > a > b").text() == myName)){
+        //Auto thank your torrents ,because of 10 more bones
+        if(AutoThxSelf && ($("td#outer > table > tbody > tr:nth-child(1) > td.rowfollow > span > a > b").text() == myName)){
             var thxbtn = $("#saythanks[value*='说谢谢']");
             thxbtn.parent().siblings(":last").after('<div style="float:right">Auto_thanks Powered by Byrbt MOD help</div>');
             thxbtn.click();
