@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Add Clone btn in NPU
+// @name         NPU - Add Clone btn in torrents page
 // @namespace    http://blog.rhilip.info
 // @version      0.1
 // @description  Direct Clone button in torrent list page

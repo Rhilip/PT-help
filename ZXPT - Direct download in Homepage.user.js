@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Direct download in ZXPT
+// @name         ZXPT - Direct download in Homepage
 // @namespace    http://blog.rhilip.info
 // @version      0.2
 // @description  It's an userscript which helped people in ZXPT download directly in torrent list page
