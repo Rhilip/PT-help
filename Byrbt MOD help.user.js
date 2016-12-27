@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Byrbt MOD help
 // @namespace    http://blog.rhilip.info
-// @version      0.5
+// @version      20161227
 // @description  It's an userscript prepared for uesrs who's Level is highter than Moderator in Byrbt
 // @author       Rhilip
 // @match        http*://bt.byr.cn/*
@@ -10,16 +10,20 @@
 // @grant        none
 // ==/UserScript==
 
-//Control Options
+// == Control Options ==
+// If no other description, 1 means on ,0 means off.
 var IPv6toLoc = 1;   //Change IPv6 address to Location in page detail.php and viewsnatches.php
-var outerGraphCheck = 1;  //Outer chain graph Check in page detail.php
 var SubCheck = 1;    //Need to fix!!!!
-var AutoThx = 1; //2 - Thanks all;1 - Just thanks yourslef;0 - No thanks
-var giveOtherBones = 1;
 var quickResp = 0;   //Prepare to wrtie!!!!
+// Other changes in page detail.php
+var giveOtherBones = 1; //You can give any number of bones you want
+var imgResize = 1; //
+var hideComment = 0; //Hide comment.
+// ==/ Control Options ==
 
 //Global Variables
 var myName = $("table#info_block > tbody > tr > td > table > tbody > tr > td:nth-child(1) > span > span > a > b").text();
+var infoNode = $("div#kdescr");
 var replyBox = $("textarea#quickreply");
 
 //prepare part
@@ -78,27 +82,8 @@ $(document).ready(function(){
         }
     }
 
-    //Outer chain graph Check in page detail.php and offers.php
-    if(outerGraphCheck) {
-        var infonode = $("div#kdescr");
-        //Count img number
-        var totalimg = infonode.find("img").length;
-        var localimg =infonode.find("img[src*='file:///']").length;
-        var outimg = totalimg - infonode.find("img[src*='bt.byr.cn']").addClass("Inbyrimg").length;
-        infonode.closest("tr").before('<tr><td class="rowhead" valign="top">图片检查</td><td class="rowfollow" align="left" valign="top"><table border="0" cellspacing="0"><tbody><tr><td class="embedded">该种子简介共用 <span id="totalimg"><b>' + totalimg + '</b></span> 张图片，其中 <span id="outimg"><b>' + outimg + '</b></span> 张外链图<span id="localimghide" style="display:none">（含本地未上传图片 <span id="localimg"><b>'+ localimg +'</b></span> 张）</span></td></tr></tbody></table></td></tr>');
-
-        //Warning if the outer-img exists
-        if(outimg){
-            $('span#outimg').attr("style","color:#ff0000;");
-            replyBox.val(replyBox.val() + '\n[*]请不要使用外链图片，这样做会导致部分校园网流量计费的同学流量损失，请将该图片上传到本站或者使用本站已有图片（参考教程 [url=/forums.php?action=viewtopic&forumid=9&topicid=10359]发种小窍门——添加站内webp格式图片[/url]）。');
-            if(localimg){
-                $('span#localimghide').attr("style","display:block");
-            }
-        }
-    }
-
     if(quickResp){
-        var qreBox = $('td#outer > table:last > textarea');
+        replyBox.val();
     }
 
     //Make the input box in page report.php Wider
@@ -135,30 +120,26 @@ $(document).ready(function(){
 
     //Other change in page details.php
     if(location.pathname == "/details.php"){
-        var upName = $("td#outer > table > tbody > tr:nth-child(1) > td.rowfollow > span > a > b").text();
-        var thxBtn = $("#saythanks[value*='说谢谢']");
         var torId = location.href.match(/id=(\d+)/)[1];
-        //Auto thank (2 - Thanks all;1 - Just thanks yourself;0 - No thanks)
-        switch (AutoThx) {
-            case 0:
-                break;
-            case 1:
-                if (upName == myName){
-                    thxBtn.parent().siblings(":last").after('<div style="float:right">Auto_thanks Powered by Byrbt MOD help</div>');
-                    thxBtn.click();
-                }
-                break;
-            case 2:
-                thxBtn.parent().siblings(":last").after('<div style="float:right">Auto_thanks Powered by Byrbt MOD help</div>');
-                thxBtn.click();
-                break;
-        }
+        var commentArea = $("td#outer > table.main:last");
 
         if(giveOtherBones){
             $('td.rowfollow').find('input[id^=thankbutton]:last').after('<span>  For Other Number: <input type="text" name="gift" placeholder="请输入一个正浮点数"> <input class="btn" type="button" id="thankbuttonother" value="赠送"></span>');
             $('input#thankbuttonother').click(function(){
                 givebonus(torId,$('input[type="text"][name="gift"]').val(),Number.MAX_VALUE);
             });
+        }
+
+        if(hideComment){      //Discussion on page http://bt.byr.cn/forums.php?action=viewtopic&topicid=10717
+            commentArea.before('<input class="btn" type="button" id="showButton" value="显示评论">').hide();
+            $('input#showButton').click(function(){
+                commentArea.toggle();
+                $('input#showButton').remove();
+            });
+        }
+
+        if(imgResize){       //Discussion on page http://bt.byr.cn/forums.php?action=viewtopic&topicid=10609
+            infoNode.find("img").attr("style","max-width: 100%;");
         }
     }
 });
