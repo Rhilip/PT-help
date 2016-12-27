@@ -11,9 +11,10 @@
 // @require      http://code.jquery.com/jquery-2.2.4.min.js
 // @icon         http://bt.neu6.edu.cn/favicon.ico
 // @supportURL   http://bt.neu6.edu.cn/thread-1555682-1-1.html
-// @version      20161118
+// @version      20161211
 // ==/UserScript==
 // http://code.jquery.com/jquery-2.2.4.min.js
+// http://bt.neu6.edu.cn/static/js/mobile/jquery-1.8.3.min.js
 // ~~~~~~~~~~~~~~~~~~~~~~~~可配置选项~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~常用链接配置~~~~~~~~~~~~~~~~~~~~~~~
 var common_link1 = "http://bt.neu6.edu.cn/thread-1523211-1-1.html";
@@ -434,10 +435,13 @@ var jq = jQuery.noConflict();
                                 if (leapyear(parseInt(year))) {
                                     dayofmonths[1] += 1;
                                 }
-                                var monthadd = parseInt((parseInt(day) + 7) / 30);
+                                var monthadd = parseInt((parseInt(day) + 7) / dayofmonths[parseInt(month) - 1]);
                                 day = numatostring2((parseInt(day) + 7) % dayofmonths[parseInt(month) - 1]);
-                                var yearadd = parseInt((parseInt(month) + monthadd) / 12);
-                                month = numatostring2((parseInt(month) + monthadd) % 12);
+                                var yearadd = 0;
+                                if ((parseInt(month) + monthadd) > 12) {
+                                    yearadd = 1;
+                                    month = numatostring2((parseInt(month) + monthadd) % 12);
+                                }
                                 year = parseInt(year) + yearadd;
                                 fields[0] = "[" + year + month + day + "]";
                             }
