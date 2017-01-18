@@ -4,33 +4,38 @@
 // @author       Rhilip,baishuangxing
 // @description  一键复制六维已有种子的信息
 // @grant        GM_xmlhttpRequest
-// @include      http://bt.neu6.edu.cn*/search.php*
-// @include      http://bt.neu6.edu.cn*/forum*
+// @include      http://bt.neu6.edu.cn/search*
+// @include      http://bt.neu6.edu.cn/forum*
 // @include      http://bt.neu6.edu.cn/thread*
-// @include      http://bt.neu6.edu.cn/forum.php?mod=*
 // @require      http://code.jquery.com/jquery-2.2.4.min.js
 // @icon         http://bt.neu6.edu.cn/favicon.ico
 // @supportURL   http://bt.neu6.edu.cn/thread-1555682-1-1.html
-// @version      20161211
+// @version      20170103
 // ==/UserScript==
-// http://code.jquery.com/jquery-2.2.4.min.js
-// http://bt.neu6.edu.cn/static/js/mobile/jquery-1.8.3.min.js
+
+// jQuery链接(为避免流量，请将第10行juqery源换为下面2的链接)
+// 1：http://code.jquery.com/jquery-2.2.4.min.js
+// 2：http://bt.neu6.edu.cn/static/js/mobile/jquery-1.8.3.min.js
+
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~可配置选项~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~常用链接配置~~~~~~~~~~~~~~~~~~~~~~~
-var common_link1 = "http://bt.neu6.edu.cn/thread-1523211-1-1.html";
-var common_link1_name = "剧版常见问题";
-var common_link2 = "http://bt.neu6.edu.cn/thread-1529941-1-1.html";
-var common_link2_name = "高清剧集版规";
-var common_link3 = "http://bt.neu6.edu.cn/thread-1531028-1-1.html";
-var common_link3_name = "普通剧集版规";
+var common_links = {
+    "剧版常见问题": "http://bt.neu6.edu.cn/thread-1523211-1-1.html",
+    "高清剧集版规": "http://bt.neu6.edu.cn/thread-1529941-1-1.html",
+    "普通剧集版规": "http://bt.neu6.edu.cn/thread-1531028-1-1.html"
+};
 // ~~~~~~~~~~~~~~~~~~~~~~功能开启与关闭~~~~~~~~~~~~~~~~~~~~~~
 var AutoAdd = true; //自动增加集数，可选true,false
 var AutoImgRemove = true; //自动移除最后一张图片，可选true,false
+var OpenSearchEnhance = true; //开启搜索加强工具，可选true,false
+var SearchEnhanceDefaultShow = false; //搜索默认显示/隐藏，可选true,false
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 // 脚本预处理阶段
 var jq = jQuery.noConflict();
 
-(function() {
+(function () {
     // 各板块列表
     if (jq('table#threadlisttableid').length) {
         var cat = 0;
@@ -40,7 +45,7 @@ var jq = jQuery.noConflict();
         } else {
             cat = location.href.match(/fid=(\d+)/)[1];
         }
-        jq("table#threadlisttableid tbody").each(function() {
+        jq("table#threadlisttableid tbody").each(function () {
             var tbody = jq(this);
             if (tbody.find('tr td:eq(1) img').length) {
                 tbody.find('tr td:lt(3)').css("text-align", "center");
@@ -48,7 +53,7 @@ var jq = jQuery.noConflict();
                 tbody.find('tr td:lt(4)').css("text-align", "center");
             }
             var id = 0;
-            if (typeof(tbody.attr('id')) != "undefined" && tbody.attr("id") != "separatorline") {
+            if (typeof (tbody.attr('id')) != "undefined" && tbody.attr("id") != "separatorline") {
                 id = tbody.attr('id').match(/(\d+)/)[1];
             }
             var size = 0;
@@ -62,18 +67,18 @@ var jq = jQuery.noConflict();
                     var td_img1 = tbody.find('tr td:eq(1)');
                     var downloadtorrent1 = tbody.find('tr td:eq(2)');
                     var link1 = "http://bt.neu6.edu.cn/thread-" + id + "-1-1.html";
-                    tr_img1.click(function() {
+                    tr_img1.click(function () {
                         window.open(link);
                     });
-                    downloadtorrent1.click(function() {
-                        jq.get(link1, function(resp) {
+                    downloadtorrent1.click(function () {
+                        jq.get(link1, function (resp) {
                             var str_link = resp.match(/<p class="attnm">[\s\S]*torrent<\/a>/gi)[0];
                             var downlink_temp = str_link.match(/<a href="([\s\S]*)" onmouseover/)[1];
                             var downlink = "http://bt.neu6.edu.cn/" + downlink_temp.replace(/amp[\S]/, "");
                             window.open(downlink);
                         });
                     });
-                    tr_img1.mouseenter(function() {
+                    tr_img1.mouseenter(function () {
                         td_img1.css("background-color", "#DDA0DD");
                         tr_img1.animate({
                             opacity: '0.5',
@@ -81,7 +86,7 @@ var jq = jQuery.noConflict();
                             width: '-=2px'
                         });
                     });
-                    tr_img1.mouseleave(function() {
+                    tr_img1.mouseleave(function () {
                         td_img1.css("background-color", "rgba(0,0,0,0)");
                         tr_img1.animate({
                             opacity: '1',
@@ -89,10 +94,10 @@ var jq = jQuery.noConflict();
                             width: '+=2px'
                         });
                     });
-                    downloadtorrent1.mouseenter(function() {
+                    downloadtorrent1.mouseenter(function () {
                         downloadtorrent1.css("background-color", "#DDA0DD");
                     });
-                    downloadtorrent1.mouseleave(function() {
+                    downloadtorrent1.mouseleave(function () {
                         downloadtorrent1.css("background-color", "rgba(0,0,0,0)");
                     });
                 } else if (tbody.find('tr td:eq(2) img').length) {
@@ -100,18 +105,18 @@ var jq = jQuery.noConflict();
                     var td_img2 = tbody.find('tr td:eq(2)');
                     var downloadtorrent = tbody.find('tr td:eq(3)');
                     var link2 = "http://bt.neu6.edu.cn/thread-" + id + "-1-1.html";
-                    tr_img2.click(function() {
+                    tr_img2.click(function () {
                         window.open(link);
                     });
-                    downloadtorrent.click(function() {
-                        jq.get(link2, function(resp) {
+                    downloadtorrent.click(function () {
+                        jq.get(link2, function (resp) {
                             var str_link = resp.match(/<p class="attnm">[\s\S]*torrent<\/a>/gi)[0];
                             var downlink_temp = str_link.match(/<a href="([\s\S]*)" onmouseover/)[1];
                             var downlink = "http://bt.neu6.edu.cn/" + downlink_temp.replace(/amp[\S]/, "");
                             window.open(downlink);
                         });
                     });
-                    tr_img2.mouseenter(function() {
+                    tr_img2.mouseenter(function () {
                         td_img2.css("background-color", "#DDA0DD");
                         tr_img2.animate({
                             opacity: '0.5',
@@ -119,7 +124,7 @@ var jq = jQuery.noConflict();
                             width: '-=2px'
                         });
                     });
-                    tr_img2.mouseleave(function() {
+                    tr_img2.mouseleave(function () {
                         td_img2.css("background-color", "rgba(0,0,0,0)");
                         tr_img2.animate({
                             opacity: '1',
@@ -127,10 +132,10 @@ var jq = jQuery.noConflict();
                             width: '+=2px'
                         });
                     });
-                    downloadtorrent.mouseenter(function() {
+                    downloadtorrent.mouseenter(function () {
                         downloadtorrent.css("background-color", "#DDA0DD");
                     });
-                    downloadtorrent.mouseleave(function() {
+                    downloadtorrent.mouseleave(function () {
                         downloadtorrent.css("background-color", "rgba(0,0,0,0)");
                     });
                 }
@@ -140,7 +145,7 @@ var jq = jQuery.noConflict();
     }
     // 搜索页面
     if (jq('table.dt').length) {
-        jq('table.dt tr:gt(0)').each(function() {
+        jq('table.dt tr:gt(0)').each(function () {
             var tr = jq(this);
             tr.find('td:lt(2)').css("text-align", "center");
             var cat = tr.find('td:eq(4) a').attr('href').match(/forum-(\d+)-1/)[1];
@@ -151,18 +156,18 @@ var jq = jQuery.noConflict();
                 var td1 = tr.find('td:eq(0)');
                 var downloadtorrent = tr.find('td:eq(1)');
                 var link1 = "http://bt.neu6.edu.cn/thread-" + id + "-1-1.html";
-                tr_img.click(function() {
+                tr_img.click(function () {
                     window.open(link);
                 });
-                downloadtorrent.click(function() {
-                    jq.get(link1, function(resp) {
+                downloadtorrent.click(function () {
+                    jq.get(link1, function (resp) {
                         var str_link = resp.match(/<p class="attnm">[\s\S]*torrent<\/a>/gi)[0];
                         var downlink_temp = str_link.match(/<a href="([\s\S]*)" onmouseover/)[1];
                         var downlink = "http://bt.neu6.edu.cn/" + downlink_temp.replace(/amp[\S]/, "");
                         window.open(downlink);
                     });
                 });
-                tr_img.mouseenter(function() {
+                tr_img.mouseenter(function () {
                     td1.css("background-color", "#DDA0DD");
                     tr_img.animate({
                         opacity: '0.5',
@@ -170,7 +175,7 @@ var jq = jQuery.noConflict();
                         width: '-=2px'
                     });
                 });
-                tr_img.mouseleave(function() {
+                tr_img.mouseleave(function () {
                     td1.css("background-color", "rgba(0,0,0,0)");
                     tr_img.animate({
                         opacity: '1',
@@ -178,15 +183,54 @@ var jq = jQuery.noConflict();
                         width: '+=2px'
                     });
                 });
-                downloadtorrent.mouseenter(function() {
+                downloadtorrent.mouseenter(function () {
                     downloadtorrent.css("background-color", "#DDA0DD");
                 });
-                downloadtorrent.mouseleave(function() {
+                downloadtorrent.mouseleave(function () {
                     downloadtorrent.css("background-color", "rgba(0,0,0,0)");
                 });
             }
         });
     }
+    var value_of_forums = {
+        "forum_big1": [2, 129, 29, 145, 33, 133, 358, 41, 156, 155, 153, 152, 154, 162, 147, 148, 149, 151, 150, 146],
+        "forum_big2": [45, 161, 57, 48, 77, 58, 49, 59, 50, 60, 91, 92],
+        "forum_big3": [13, 81, 79, 61, 14, 73, 62, 16, 72, 112, 17, 292, 96, 65, 15, 126, 144, 63, 127, 128, 44, 293, 165, 52, 125, 69, 21, 329, 78, 171, 124, 163, 56, 18, 138, 54, 66, 19, 160, 159, 84, 74, 169, 67, 20, 368, 70],
+        "forum_big4": [7, 141, 4, 139, 43, 142, 175, 182, 136, 172],
+        "forum_big5": [38, 121, 131, 122, 39, 119, 31, 143],
+        "forum_big6": [32, 87, 123, 137, 93, 113, 114, 135, 36, 116, 115, 187],
+        "forum_resource1": [45, 161, 13, 81, 79],
+        "forum_resource2": [48, 77, 14, 73],
+        "forum_resource3": [16, 72],
+        "forum_resource4": [17, 292, 96],
+        "forum_resource5": [50, 91, 15, 126, 144],
+        "forum_resource6": [49, 127],
+        "forum_resource7": [44, 293, 165, 52, 125],
+        "forum_resource8": [21, 329, 78, 171, 124, 163],
+        "forum_resource9": [18, 138, 54],
+        "forum_resource10": [19, 160, 159, 84, 74, 169],
+        "forum_resource11": [20, 368],
+        "movie1": [45, 161, 13, 81, ],
+        "movie2": [45, 161],
+        "movie3": [13, 81],
+        "movie4": [45, 161, 57, 13, 81, 79, 61],
+        "tvseries1": [48, 77, 14, 73],
+        "tvseries2": [48, 77],
+        "tvseries3": [14, 73],
+        "tvseries4": [77, 73],
+        "tvseries5": [48, 77, 57, 14, 73, 62]
+    };
+    // 搜索页面
+    if (OpenSearchEnhance && location.href.match(/search\.php$/) && jq('div.sttl.mbn').length) {
+        jq("table tr:eq(1)").after('<tr><th>搜索范围</th><td><p id="showsearchenhance">----[显示/隐藏]----</p><div id="mysearchbox" hidden="true"><table bgcolor="#d0d0d0" cellspacing="0" cellpadding="0"><tr>----[大版块]----</tr><tr><td><label class="lb"><b>[各版块]</b></label></td><td><label class="my_search lb" id="forum_big1"><input type="radio" class="pr" name="searchenhance"/>六维索引互动区</label></td><td><label class="my_search lb" id="forum_big2"><input type="radio" class="pr" name="searchenhance"/>六维高清资源区</label></td><td><label class="my_search lb" id="forum_big3"><input type="radio" class="pr" name="searchenhance"/>六维普通资源区</label></td><td><label class="my_search lb" id="forum_big4"><input type="radio" class="pr" name="searchenhance"/>六维休闲娱乐区</label></td><td><label class="my_search lb" id="forum_big5"><input type="radio" class="pr" name="searchenhance"/>六维事务处理区</label></td><td><label class="my_search lb" id="forum_big6"><input type="radio" class="pr" name="searchenhance"/>六维内部交流区</label></td></tr><tr><td><label class="lb"><b>[资源区]</b></label></td><td><label class="my_search lb" id="forum_resource1"><input type="radio" class="pr" name="searchenhance"/>电影剧场</label></td><td><label class="my_search lb" id="forum_resource2"><input type="radio" class="pr" name="searchenhance"/>电视剧集</label></td><td><label class="my_search lb" id="forum_resource3"><input type="radio" class="pr" name="searchenhance"/>综艺娱乐</label></td><td><label class="my_search lb" id="forum_resource4"><input type="radio" class="pr" name="searchenhance"/>体育天地</label></td><td><label class="my_search lb" id="forum_resource5"><input type="radio" class="pr" name="searchenhance"/>音乐地带</label></td><td><label class="my_search lb" id="forum_resource6"><input type="radio" class="pr" name="searchenhance"/>纪录写实</label></td></tr><tr><td></td><td><label class="my_search lb" id="forum_resource7"><input type="radio" class="pr" name="searchenhance"/>卡通动漫</label></td><td><label class="my_search lb" id="forum_resource8"><input type="radio" class="pr" name="searchenhance"/>游戏天下</label></td><td><label class="my_search lb" id="forum_resource9"><input type="radio" class="pr" name="searchenhance"/>资料文档</label></td><td><label class="my_search lb" id="forum_resource10"><input type="radio" class="pr" name="searchenhance"/>软件快跑</label></td><td><label class="my_search lb" id="forum_resource11"><input type="radio" class="pr" name="searchenhance"/>其他资源</label></td></tr></table><table bgcolor="#d0d0d0" cellspacing="0" cellpadding="0"><tr>----[小版块]----</tr><tr><td><label class="lb"><b>[电- -影]</b></label></td><td><label class="my_search lb" id="movie1"><input type="radio" class="pr" name="searchenhance"/>电影--资源区</label></td><td><label class="my_search lb" id="movie2"><input type="radio" class="pr" name="searchenhance"/>电影--高清</label></td><td><label class="my_search lb" id="movie3"><input type="radio" class="pr" name="searchenhance"/>电影--普清</label></td><td><label class="my_search lb" id="movie4"><input type="radio" class="pr" name="searchenhance"/>电影--所有</label></td></tr><tr><td><label class="lb"><b>[剧- -集]</b></label></td><td><label class="my_search lb" id="tvseries1"><input type="radio" class="pr" name="searchenhance"/>剧集--资源区</label></td><td><label class="my_search lb" id="tvseries2"><input type="radio" class="pr" name="searchenhance"/>剧集--高清</label></td><td><label class="my_search lb" id="tvseries3"><input type="radio" class="pr" name="searchenhance"/>剧集--普清</label></td><td><label class="my_search lb" id="tvseries4"><input type="radio" class="pr" name="searchenhance"/>剧集--合集</label></td><td><label class="my_search lb" id="tvseries5"><input type="radio" class="pr" name="searchenhance"/>剧集--所有</label></td></tr></table></div></td></tr>');
+    }
+    jq("label.my_search").click(function () {
+        var spanid = jq(this).attr("id");
+        jq("select#srchfid").val(value_of_forums[spanid]);
+    });
+    jq("p#showsearchenhance").click(function () {
+        jq("div#mysearchbox").toggle();
+    });
     // 帖子页面
     if (location.href.match(/thread-\d+-\d+-\d/) || location.href.match(/mod=viewthread\Stid=\d+/)) {
         if (jq('div.pcb div.mtw.mbw').length) {
@@ -194,23 +238,14 @@ var jq = jQuery.noConflict();
         }
         if (jq('div.pob.cl:first em').length && jq('div.pcb div.mtw.mbw').length) {
             var seedid_match = location.href.match(/thread-(\d+)-\d-\d/);
-            var seedid = 0;
-            if (seedid_match) {
-                seedid = seedid_match[1];
-            } else {
-                seedid = location.href.match(/tid=(\d+)/)[1];
-            }
+            var seedid = seedid_match ? (seedid_match[1]) : (location.href.match(/tid=(\d+)/)[1]);
             var a_length = jq('div#pt div.z a').length - 2;
-            var cat1 = 0;
-            var cat1_match = jq('div#pt div.z a:eq(' + a_length + ')').attr("href").match(/forum-(\d+)-1/);
-            if (cat1_match) {
-                cat1 = cat1_match[1];
-            } else {
-                cat1 = jq('div#pt div.z a:eq(' + a_length + ')').attr("href").match(/fid=(\d+)/)[1];
-            }
+            var cat1_match = jq('div#pt div.z a:eq(' + a_length + ')').attr("href").match(/forum-(\d+)-\d/);
+            var cat1 = cat1_match ? (cat1_match[1]) : (jq('div#pt div.z a:eq(' + a_length + ')').attr("href").match(/fid=(\d+)/)[1]);
+
             var index = 0;
 
-            jq('div.pob.cl').each(function() {
+            jq('div.pob.cl').each(function () {
                 var quote_id = jq('div.pcbs:eq(' + index + ') table:first td:first').attr("id").match(/postmessage_(\d+)/)[1];
                 var link_reply = "http://bt.neu6.edu.cn/forum.php?mod=post&action=reply&fid=" + cat1 + "&extra=page%3D1&tid=" + seedid + "&reppost=" + quote_id;
                 if (index > 0) {
@@ -220,23 +255,38 @@ var jq = jQuery.noConflict();
                 var commonlink = "commonlink_" + index;
                 var seed_p = jq(this).find('p');
                 seed_p.find('a:first').before('<a href="javascript:;" id="' + commonlink + '" onmouseover="showMenu(this.id)" class="showmenu">常用链接</a>');
-                seed_p.after('<ul id="' + commonlink + '_menu" class="p_pop mgcmn" style="display: none;"><li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/084832wh4p2z362amsf4mv.png) no-repeat 4px 50%;" target="_blank" href="' + link_reply + '">回复本帖高级</a></li><li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/104809kzjj6ujkzpv6j6uj.png) no-repeat 4px 50%;" target="_blank" href="' + common_link1 + '">' + common_link1_name + '</a></li><li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/104809kzjj6ujkzpv6j6uj.png) no-repeat 4px 50%;" target="_blank" href="' + common_link2 + '">' + common_link2_name + '</a></li><li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/104809kzjj6ujkzpv6j6uj.png) no-repeat 4px 50%;" target="_blank" href="' + common_link3 + '">' + common_link3_name + '</a><li></ul>');
+                // 常用链接
+                var commonlink_string = '<ul id="' + commonlink + '_menu" class="p_pop mgcmn" style="display: none;"><li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/084832wh4p2z362amsf4mv.png) no-repeat 4px 50%;" target="_blank" href="' + link_reply + '">回复本帖高级</a></li>';
+                for (var key in common_links) {
+                    commonlink_string = commonlink_string + "<li><a style=\"background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/104809kzjj6ujkzpv6j6uj.png) no-repeat 4px 50%;\" target=\"_blank\" href=\"" + common_links[key] + "\">" + key + "</a></li>";
+                }
+                commonlink_string = commonlink_string + "</ul>";
+
+                seed_p.after(commonlink_string);
+                // 搜索字幕
                 var tvname_cn = jq('title').text().match(/\[([\S\s]+?)[\/\]]/)[1];
                 if (null !== tvname_cn) {
                     var subtitle_id = "subtitle_" + index;
-                    var link1 = "http://www.zimuzu.tv/search?keyword=" + encodeURI(tvname_cn);
-                    var link2 = "http://assrt.net/sub/?searchword=" + encodeURI(tvname_cn);
-                    var link3 = "http://subhd.com/search/" + encodeURI(tvname_cn);
-                    var link4 = "http://www.zimuku.net/search?ad=1&q=" + encodeURI(tvname_cn);
-                    var link5 = "http://www.addic7ed.com/";
                     seed_p.find('a:first').before('<a href="javascript:;" id="' + subtitle_id + '" onmouseover="showMenu(this.id)" class="showmenu">搜索字幕</a>');
-                    seed_p.after('<ul id="' + subtitle_id + '_menu" class="p_pop mgcmn" style="display: none;"><li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/062944dfdubs5f99gr5mzu.png) no-repeat 4px 50%;" target="_blank" href="' + link1 + '">ZIMUZU</a></li><li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/062944dfdubs5f99gr5mzu.png) no-repeat 4px 50%;" target="_blank" href="' + link2 + '">SHOOTER</a></li><li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/062944dfdubs5f99gr5mzu.png) no-repeat 4px 50%;" target="_blank" href="' + link3 + '">Sub HD</a></li><li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/062944dfdubs5f99gr5mzu.png) no-repeat 4px 50%;" target="_blank" href="' + link4 + '">ZIMUKU</a><li><li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/062944dfdubs5f99gr5mzu.png) no-repeat 4px 50%;" target="_blank" href="' + link5 + '">ADDIC7ED</a><li></ul>');
+                    var subtitle_links = {
+                        "ZIMUZU": "http://www.zimuzu.tv/search?keyword=" + encodeURI(tvname_cn),
+                        "SHOOTER": "http://assrt.net/sub/?searchword=" + encodeURI(tvname_cn),
+                        "Sub HD": "http://subhd.com/search/" + encodeURI(tvname_cn),
+                        "ZIMUKU": "http://www.zimuku.net/search?ad=1&q=" + encodeURI(tvname_cn),
+                        "ADDIC7ED": "http://www.addic7ed.com/",
+                    };
+                    var subtiltelink_string = '<ul id="' + subtitle_id + '_menu" class="p_pop mgcmn" style="display: none;">';
+                    for (var key_sub in subtitle_links) {
+                        subtiltelink_string = subtiltelink_string + '<li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/062944dfdubs5f99gr5mzu.png) no-repeat 4px 50%;" target="_blank" href="' + subtitle_links[key_sub] + '">' + key_sub + '</a></li>';
+                    }
+                    subtiltelink_string = subtiltelink_string + "</ul>";
+                    seed_p.after(subtiltelink_string);
                 }
             });
         }
     }
     // 码率估算
-    jq('#malvjisuan').click(function() {
+    jq('#malvjisuan').click(function () {
         var bitrate_dur = jq('#malvzhi').val();
         var seed_size_info = jq('div.pcb div.mtw.mbw').text();
         var seed_size = seed_size_info.match(/(\d+[.]{0,1}\d*)/)[1];
@@ -270,10 +320,7 @@ var jq = jQuery.noConflict();
     }
 
     function leapyear(year) {
-        if (((year % 400 === 0) || (year % 100 !== 0)) && (year % 4 === 0))
-            return true;
-        else
-            return false;
+        return (((year % 400 === 0) || (year % 100 !== 0)) && (year % 4 === 0));
     }
 
     function tvseasonhandle(str, type) {
@@ -327,7 +374,7 @@ var jq = jQuery.noConflict();
     }
 
     function requestHTML(url, callback, options) {
-        requestData(url, function(response) {
+        requestData(url, function (response) {
             // console.log(response.readyState, response.status);
             if (response.readyState == 4) {
                 callback(response.responseText
@@ -335,18 +382,18 @@ var jq = jQuery.noConflict();
                     .replace(/<script(\s|>)[\S\s]+?<\/script>/g, '')
                 );
             }
-        }, function(response) {
+        }, function (response) {
             // console.log(response);
             jq('#clone_info').val('Error<---->Timeout');
         }, options);
     }
 
     function requestJson(url, callback, options) {
-        requestData(url, function(response) {
+        requestData(url, function (response) {
             if (response.readyState == 4) {
                 callback(JSON.parse(response.responseText));
             }
-        }, function(response) {
+        }, function (response) {
             jq('#clone_info').val('Error<---->Timeout');
         }, options);
     }
@@ -361,35 +408,34 @@ var jq = jQuery.noConflict();
         }
     }
 
-    function imagehandle(imglink) {
-        if (imglink.length < 1) {
-            return;
-        }
-        ImgWindow = window.open('', '');
-        ImgWindow.document.write("<h1 align=\"center\"><---请选择图片下载到本地再上传到六维---></h1>");
-        for (var i = 0; i < imglink.length; i++) {
-            ImgWindow.document.write("<div style=\"width:20%;float:left;\"><img src=" + imglink[i] + "></div>");
-        }
-        ImgWindow.focus();
-    }
+    // function imagehandle(imglink) {
+    //     if (imglink.length < 1) {
+    //         return;
+    //     }
+    //     ImgWindow = window.open('', '');
+    //     ImgWindow.document.write("<h1 align=\"center\"><---请选择图片下载到本地再上传到六维---></h1>");
+    //     for (var i = 0; i < imglink.length; i++) {
+    //         ImgWindow.document.write("<div style=\"width:20%;float:left;\"><img src=" + imglink[i] + "></div>");
+    //     }
+    //     ImgWindow.focus();
+    // }
 
-    jq('#clone_btn').click(function() {
+    jq('#clone_btn').click(function () {
         var copy_link = jq('#clone_from').val().trim();
         var info = jq('#clone_info');
         if (/^\d+$/.test(copy_link) || copy_link.match(/bt\.neu6\.edu\.cn/)) {
             var seedtype = location.search.match(/fid=(\d+)/)[1];
-            var seedfrom = jq('#clone_from').val().trim();
-            var match = seedfrom.match(/thread-(\d+)/);
-            var match1 = seedfrom.match(/tid=(\d+)/);
-            if (match !== null) {
-                seedfrom = match[1];
-            } else if (match1 !== null) {
-                seedfrom = match1[1];
+            var seedfrom = 0;
+            if (/^\d+$/.test(copy_link)) {
+                seedfrom = copy_link;
+            } else {
+                var match = copy_link.match(/thread-(\d+)/);
+                seedfrom = match ? (match[1]) : (copy_link.match(/tid=(\d+)/)[1]);
             }
             if (/^\d+$/.test(seedfrom)) {
                 // 如果输入了有效的编号，开始读取对应的种子页面
                 info.text('正在读取');
-                jq.get('http://bt.neu6.edu.cn/thread-' + seedfrom + '-1-1.html', function(resp) {
+                jq.get('http://bt.neu6.edu.cn/thread-' + seedfrom + '-1-1.html', function (resp) {
                     var i = 0;
                     info.text('正在分析');
                     var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
@@ -397,8 +443,7 @@ var jq = jQuery.noConflict();
                     var group = body.match(/来自群组: <a[\s\S]*?a>/);
                     if (group) {
                         body = body.substring(0, group.index) + body.substring(group.index + group[0].length, body.length);
-                    }
-                    // body.replace(/来自群组: <a[\s\S]+?<\/a>/,"");
+                }
                     var page = jq(body); // 构造 jQuery 对象，用于后期处理
                     var title = page.find("span#thread_subject").text();
                     if (!title) {
@@ -454,12 +499,15 @@ var jq = jQuery.noConflict();
                     }
 
                     jq('input[name=subject]').attr('value', title); //填写标题
-                    var movietype = page.find("h1.ts a").text().replace(/^\[|\]$/g, '');
-                    var typeid = page.find("h1.ts a").attr("href").match(/typeid=(\d+)/)[1];
-                    if (movietype && typeid) {
-                        jq('#typeid_ctrl_menu li').removeClass('current');
-                        jq('#typeid_ctrl').html(movietype);
-                        jq('#typeid>option').val(typeid);
+                    //填写分类
+                    if (page.find("h1.ts a").length) {
+                        var movietype = page.find("h1.ts a").text().replace(/^\[|\]$/g, '');
+                        var typeid = page.find("h1.ts a").attr("href").match(/typeid=(\d+)/)[1];
+                        if (movietype && typeid) {
+                            jq('#typeid_ctrl_menu li').removeClass('current');
+                            jq('#typeid_ctrl').html(movietype);
+                            jq('#typeid>option').val(typeid);
+                        }
                     }
                     //对将要填入的内容部分进行预处理
                     var descr = page.find('td.t_f').first();
@@ -470,23 +518,6 @@ var jq = jQuery.noConflict();
                         descr.find('br').eq(0).remove();
                         descr.find('br').eq(0).remove();
                     }
-                    //图片处理（对上传的图片）
-                    descr.find('ignore_js_op').each(function() {
-                        var img = jq(this).find('img:first');
-                        //移除引用过程中原图片无用的img属性
-                        img.removeAttr('id');
-                        img.removeAttr('aid');
-                        img.removeAttr('zoomfile');
-                        img.removeAttr('class');
-                        img.removeAttr('inpost');
-                        img.removeAttr('onmouseover');
-                        img.removeAttr('onclick');
-                        //借用file属性信息修正引用过程中出错的src信息
-                        img.attr('src', 'http://bt.neu6.edu.cn' + img.attr('file'));
-                        img.removeAttr('file');
-                        var hideimg = img.parent('ignore_js_op'); //移动img结点
-                        img.insertAfter(hideimg);
-                    });
                     //图片移除
                     if (AutoImgRemove && descr.find('img')) {
                         if (seedtype == 16 && descr.find('img').length >= 1)
@@ -495,17 +526,22 @@ var jq = jQuery.noConflict();
                             descr.find('img:last').remove();
                         }
                     }
+                    //图片处理（对上传的图片）
+                    descr.find('ignore_js_op').each(function () {
+                        var img = jq(this).find('img:first');
+                        //借用file属性信息修正引用过程中出错的src信息
+                        img.attr('src', 'http://bt.neu6.edu.cn' + img.attr('file'));
+                        //移除引用过程中原图片无用的img属性
+                        img.removeAttr('file id aid zoomfile class inpost onmouseover onclick');
+                        var hideimg = img.parent('ignore_js_op'); //移动img结点
+                        img.insertAfter(hideimg);
+                    });
                     //代码部分处理
-                    if (descr.find('div.quote')) {
-                        descr.find('div.quote').remove();
-                    }
-                    if (descr.find('.blockcode')) {
-                        descr.find('.blockcode').remove();
-                    }
-                    if (descr.find('blockcode')) {
-                        descr.find('blockcode').remove();
-                    }
-                    descr.find('ignore_js_op').remove(); //移除含有图片或附件的父节点
+                    descr.find('div.quote').remove();
+                    descr.find('.blockcode').remove();
+                    descr.find('blockcode').remove();
+                    //移除含有图片或附件的父节点
+                    descr.find('ignore_js_op').remove();
                     //填写内容
                     var gonggaomatch = jq('#e_textarea').html().match(/(\Stable[\s\S]+\/table\S)/);
                     if (gonggaomatch) {
@@ -515,13 +551,12 @@ var jq = jQuery.noConflict();
                         jq('#e_iframe').contents().find('body').html(descr.contents());
                     }
                     //填写标签
-                    var tag = new Array();
-                    page.find('div.ptg.mbm.mtn a').each(function() {
+                    var tag = [];
+                    page.find('div.ptg.mbm.mtn a').each(function () {
                         var tagtemp = jq(this).text();
                         tag.push(tagtemp);
                     });
-                    var tag_fin = "";
-                    tag_fin = tag[0];
+                    var tag_fin = tag[0];
                     if (tag.length > 1) {
                         for (i = 1; i < tag.length; i++) {
                             tag_fin = tag_fin + "," + tag[i];
@@ -539,7 +574,7 @@ var jq = jQuery.noConflict();
                 doubanid = matchdouban[1];
             }
             var new_link = "https://api.douban.com/v2/movie/" + doubanid;
-            requestJson(new_link, function(resp) {
+            requestJson(new_link, function (resp) {
                 if (jq('#seedfromtitleinfo').length) {
                     jq('#seedfromtitleinfo').show();
                 }
@@ -596,13 +631,13 @@ var jq = jQuery.noConflict();
                 descr_content = descr_content + "<br/><br/><p>※※※※※※※※※※※※※※※※※※</p>";
                 jq('#seed_from_title').val(resp.alt_title + " " + resp.title);
                 var imagelink = [resp.image];
-                imagehandle(imagelink);
+                // imagehandle(imagelink);
                 changedescibe(descr_content);
                 jq('#tags').val(tag);
                 info.text("Douban Link<---->克隆完成");
             });
         } else if (/https?:\/\/bt\.byr\.cn\/details\.php\?id=\d+/.test(copy_link)) {
-            requestHTML(copy_link, function(doc) {
+            requestHTML(copy_link, function (doc) {
                 if (jq('#seedfromtitleinfo').length) {
                     jq('#seedfromtitleinfo').show();
                 }
@@ -610,19 +645,19 @@ var jq = jQuery.noConflict();
                 var title = sub.find('#share').html()
                         .replace(/\]&[\S\s]+/, "]").trim(),
                     descr = sub.find('#kdescr');
-                var imagelink = new Array();
-                descr.find('img').each(function() {
+                var imagelink = [];
+                descr.find('img').each(function () {
                     var imglink = jq(this).attr('src');
                     imagelink.push(imglink);
                 });
-                imagehandle(imagelink);
+                // imagehandle(imagelink);
                 descr.find('img').remove();
                 jq('#seed_from_title').val(title);
                 changedescibe(descr.html());
                 info.text("BYR Link<---->克隆完成");
             });
         } else if (/https?:\/\/pt\.whu\.edu\.cn\/details\.php\?id=\d+/.test(copy_link)) {
-            requestHTML(copy_link, function(doc) {
+            requestHTML(copy_link, function (doc) {
                 if (jq('#seedfromtitleinfo').length) {
                     jq('#seedfromtitleinfo').show();
                 }
@@ -631,22 +666,22 @@ var jq = jQuery.noConflict();
                         .replace(/<a[\S\s]+/, '').trim(),
                     subtitle = sub.find('div#outer dl#torrenttable dd:eq(1)').text();
                 var descr = sub.find('#kdescr > .bbcode');
-                var imagelink = new Array();
-                descr.find('img').each(function() {
+                var imagelink = [];
+                descr.find('img').each(function () {
                     var imglink = jq(this).attr('full');
                     if (/^attachments/.test(imglink)) {
                         imglink = 'https://pt.whu.edu.cn/' + imglink;
                     }
                     imagelink.push(imglink);
                 });
-                imagehandle(imagelink);
+                // imagehandle(imagelink);
                 jq('#seed_from_title').val(title + " " + subtitle);
                 descr.find('img').remove();
                 changedescibe(descr.html());
                 info.text("WHU link<---->克隆完成");
             });
         } else if (/https?:\/\/hdchina\.club\/details\.php\?id=\d+/.test(copy_link)) {
-            requestHTML(copy_link, function(doc) {
+            requestHTML(copy_link, function (doc) {
                 if (jq('#seedfromtitleinfo').length) {
                     jq('#seedfromtitleinfo').show();
                 }
@@ -654,52 +689,31 @@ var jq = jQuery.noConflict();
                 var title = sub.find('h2#top').text(),
                     subtitle = sub.find('div.m_name h3').text(),
                     descr = sub.find("#kdescr");
-                var imagelink = new Array();
-                descr.find('img').each(function() {
+                var imagelink = [];
+                descr.find('img').each(function () {
                     var imglink = jq(this).attr('src');
                     if (/^attachments/.test(imglink)) {
                         imglink = 'https://hdchina.club/' + imglink;
                     }
                     imagelink.push(imglink);
                 });
-                imagehandle(imagelink);
+                // imagehandle(imagelink);
                 jq('#seed_from_title').val(title + " " + subtitle);
                 descr.find('img').remove();
                 changedescibe(descr.html());
                 info.text("HDChina link<---->克隆完成");
-            });
-        } else if (/https?:\/\/www\.hdarea\.co\/details\.php\?id=\d+/.test(copy_link)) {
-            requestHTML(copy_link, function(doc) {
-                if (jq('#seedfromtitleinfo').length) {
-                    jq('#seedfromtitleinfo').show();
-                }
-                var sub = jq(doc);
-                var title = sub.find('h1#top[align="center"]').html()
-                        .replace(/([^<]+)<[\S\s]+/, "$1")
-                        .replace(/&nbsp;/g, '')
-                        .trim(),
-                    descr = sub.find('#kdescr');
-                var imagelink = new Array();
-                descr.find('img').each(function() {
-                    var imglink = jq(this).attr('src');
-                    if (/https?:\/\//.test(imglink)) {
-                        imagelink.push(imglink);
-                    }
-                });
-                imagehandle(imagelink);
-                jq('#seed_from_title').val(title);
-                descr.find('img').remove();
-                changedescibe(descr.html());
-                info.text("HDArea link<---->克隆完成");
             });
         } else {
             info.text("不支持的链接...");
         }
     });
 
-    jq(document).ready(function() {
+    jq(document).ready(function () {
         if (jq('#seedfromtitleinfo').length) {
             jq('#seedfromtitleinfo').hide();
+        }
+        if (SearchEnhanceDefaultShow) {
+            jq("div#mysearchbox").show();
         }
         var match = location.href.match(/#clone[_]{0,3}(\d+)/);
         if (match) {
