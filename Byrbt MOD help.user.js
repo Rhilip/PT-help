@@ -17,7 +17,6 @@ var SubCheck = 1;    //Need to fix!!!!
 var quickResp = 0;   //Prepare to wrtie!!!!
 // Other changes in page detail.php
 var giveOtherBones = 1; //You can give any number of bones you want
-var imgResize = 1; //
 var hideComment = 0; //Hide comment.
 // ==/ Control Options ==
 
@@ -136,10 +135,6 @@ $(document).ready(function(){
                 commentArea.toggle();
                 $('input#showButton').remove();
             });
-        }
-
-        if(imgResize){       //Discussion on page http://bt.byr.cn/forums.php?action=viewtopic&topicid=10609
-            infoNode.find("img").attr("style","max-width: 100%;");
         }
     }
 });
