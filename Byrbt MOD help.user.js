@@ -16,13 +16,11 @@ var IPv6toLoc = 1;   //Change IPv6 address to Location in page detail.php and vi
 var SubCheck = 1;    //Need to fix!!!!
 var quickResp = 0;   //Prepare to wrtie!!!!
 // Other changes in page detail.php
-var giveOtherBones = 1; //You can give any number of bones you want
 var hideComment = 0; //Hide comment.
 // ==/ Control Options ==
 
 //Global Variables
 var myName = $("table#info_block > tbody > tr > td > table > tbody > tr > td:nth-child(1) > span > span > a > b").text();
-var infoNode = $("div#kdescr");
 var replyBox = $("textarea#quickreply");
 
 //prepare part
@@ -119,14 +117,11 @@ $(document).ready(function(){
 
     //Other change in page details.php
     if(location.pathname == "/details.php"){
-        var torId = location.href.match(/id=(\d+)/)[1];
+
         var commentArea = $("td#outer > table.main:last");
 
         if(giveOtherBones){
-            $('td.rowfollow').find('input[id^=thankbutton]:last').after('<span>  For Other Number: <input type="text" name="gift" placeholder="请输入一个正浮点数"> <input class="btn" type="button" id="thankbuttonother" value="赠送"></span>');
-            $('input#thankbuttonother').click(function(){
-                givebonus(torId,$('input[type="text"][name="gift"]').val(),Number.MAX_VALUE);
-            });
+
         }
 
         if(hideComment){      //Discussion on page http://bt.byr.cn/forums.php?action=viewtopic&topicid=10717
