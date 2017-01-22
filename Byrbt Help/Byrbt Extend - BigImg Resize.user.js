@@ -4,7 +4,7 @@
 // @version      20170118
 // @description  For the too width img in byrbt
 // @author       Rhilip
-// @match        http*://bt.byr.cn/*
+// @match        http*://bt.byr.cn/details.php*
 // @icon         http://bt.byr.cn/favicon.ico
 // @supportURL   http://bt.byr.cn/forums.php?action=viewtopic&topicid=10609
 // @grant        none
