@@ -120,10 +120,6 @@ $(document).ready(function(){
 
         var commentArea = $("td#outer > table.main:last");
 
-        if(giveOtherBones){
-
-        }
-
         if(hideComment){      //Discussion on page http://bt.byr.cn/forums.php?action=viewtopic&topicid=10717
             commentArea.before('<input class="btn" type="button" id="showButton" value="显示评论">').hide();
             $('input#showButton').click(function(){

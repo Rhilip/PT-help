@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         Byrbt : Enhanced log
 // @namespace    http://blog.rhilip.info
-// @version      20170122
+// @version      20170214
 // @description  为log页面增加为有关种子（字幕）添加访问链接和快速搜索关键词，针对管理员设置种子优惠的情况能直接查询优惠类型；在种子页面的热度表中添加种子日志查询入口
 // @author       Rhilip
 // @match        http*://bt.byr.cn/details.php?id=*
-// @match        http*://bt.byr.cn/log.php*action=dailylog
+// @include      /^https?:\/\/bt\.byr\.cn\/log\.php((\?query\=.+)?(\?action\=dailylog$|$))/
 // @icon         http://bt.byr.cn/favicon.ico
 // @grant        none
 // ==/UserScript==
@@ -90,5 +90,5 @@ $(document).ready(function(){
 
 
 /**
- * Created by Rhilip on 01/22/17.
- */
+    * Created by Rhilip on 01/22/17.
+    */

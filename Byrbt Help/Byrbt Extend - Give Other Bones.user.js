@@ -15,40 +15,11 @@ $(document).ready(function(){
     var torId = location.href.match(/id=(\d+)/)[1];
     var bonus0 = $("#thankbutton25").attr("onclick").match(/,((\d*|0).\d*)\)/)[1];
     var bonustext = $('input[type="text"][name="gift"]');
-    var bonus,rate=1;
-    if (bonustext.val().match(/\*/)){
-        bonus = bonustext.val().match(/((\d*|0).\d*)\*(\d*)/)[1];
-        rate = bonustext.val().match(/((\d*|0).\d*)\*(\d*)/)[3];
-    }else{
-        bonus = bonustext.val();
-    }
 
-    $('input#thankbuttonother').click(function(){
-        if(bonus*rate <bonus0){
-            for(var i=0;i<rate;i++){
-                $.ajax({
-                    url: 'givebonus.php',
-                    data: 'type=torrents&torrentid=' + torId + '&bonus=' + bonus,
-                    dataType: 'json',
-                    type: 'POST',
-                    success: function(result) {
-                        if (result.usererror) {
-                            alert("抱歉，该用户无法接受您的" + bonus + "个茉莉汁 =_= .");
-                            return false;
-                        }
-                        if (result.state) {
-                            document.getElementById("nothanksbonus").innerHTML = "";
-                            document.getElementById("addcuruserbonus").innerHTML = document.getElementById("curuserbonus").innerHTML + "(" + bonus + ".0)";
-                            console.log("您已成功赠送 " + bonus + " 个茉莉汁 ^_^ ");
-                        } else {
-                            alert("抱歉，您的茉莉汁少于 " + bonus + " >_< ");
-                        }
-                    }
-                });
-            }
-            alert("您已成功赠送 " + bonus + " 个茉莉汁 ^_^ *" + i);
-        }
+    $('input#thankbuttonother').click(function() {
+        givebonus(torId, bonustext.val(), bonus0);
     });
+
 });
 
 /**

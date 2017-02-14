@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         Byrbt : Img Check
 // @namespace    http://blog.rhilip.info
-// @version      20161121
+// @version      20170214
 // @description  检查外链图片、未完全显示的图片数目
 // @author       Rhilip
-// @match        http*://bt.byr.cn/details.php*
+// @match        http*://bt.byr.cn/details.php?id=*
+// @match        http*://bt.byr.cn/offers.php?id=*
 // @icon         http://bt.byr.cn/favicon.ico
 // @grant        none
 // ==/UserScript==
@@ -27,5 +28,5 @@ $(document).ready(function(){
 });
 
 /**
- * Created by Rhilip on 2016/11/21.
- */
+    * Created by Rhilip on 2016/11/21.
+    */
