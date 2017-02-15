@@ -5,7 +5,7 @@
 // @description  为log页面增加为有关种子（字幕）添加访问链接和快速搜索关键词，针对管理员设置种子优惠的情况能直接查询优惠类型；在种子页面的热度表中添加种子日志查询入口
 // @author       Rhilip
 // @match        http*://bt.byr.cn/details.php?id=*
-// @include      /^https?:\/\/bt\.byr\.cn\/log\.php((\?query\=.+)?(\?action\=dailylog$|$))/
+// @include      /^https?:\/\/bt\.byr\.cn\/log\.php((\?query\=.+)?(\?action\=dailylog(.+?)?(\&page\=\d+)?$|$))/
 // @icon         http://bt.byr.cn/favicon.ico
 // @grant        none
 // ==/UserScript==
@@ -34,7 +34,7 @@ $(document).ready(function(){
                     logfont.parent().append("<a href='/edit.php?id="+ tid +"' style='display: inline-block;float: right;' target='_blank'>快速编辑</a>");
                 }
                 if (logtext.match(/(批量设置了种子优惠|批量置顶了种子)/)){      // 批量设置了种子优惠|批量置顶了种子
-                    logfont.html(logtext.replace(/(\d+)/g,"<a href='/details.php?id=" + "$1" + "' style='color: " +logfont.attr('color')  + "' target='_blank'><u>" + "$1" + "</u></a>"));
+                    logfont.html(logtext.replace(/(\d+),/g,"<a href='/details.php?id=" + "$1" + "' style='color: " +logfont.attr('color')  + "' target='_blank'><u>" + "$1" + "</u></a>,"));
                     logfont.parent().append("<div class='foundbuff' style='display: inline-block;float: right;'>查询优惠类型</div>");
                 }
                 if (logtext.match(/Subtitle/)){         // subtitle
@@ -63,7 +63,7 @@ $(document).ready(function(){
     }
 
     if(location.pathname == "/details.php"){
-        $("td.no_border_wide:last").after("<td class=\"no_border_wide\"><b>种子日志：</b><a id='log'>[查看日志]</a></td>")
+        $("td.no_border_wide:last").after("<td class=\"no_border_wide\"><b>种子日志：</b><a id='log' href='javascript:void(0)'>[查看日志]</a></td>")
             .parents("td").append("<span id='loglist'></span>");
         $("#log").click(function () {
             var logbtn= $(this);
