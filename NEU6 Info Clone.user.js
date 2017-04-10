@@ -3,14 +3,13 @@
 // @namespace    neu6infoclone
 // @author       Rhilip,baishuangxing
 // @description  一键复制六维已有种子的信息
-// @grant        GM_xmlhttpRequest
 // @include      http://bt.neu6.edu.cn/search*
 // @include      http://bt.neu6.edu.cn/forum*
 // @include      http://bt.neu6.edu.cn/thread*
 // @require      http://code.jquery.com/jquery-2.2.4.min.js
 // @icon         http://bt.neu6.edu.cn/favicon.ico
 // @supportURL   http://bt.neu6.edu.cn/thread-1555682-1-1.html
-// @version      20170103
+// @version      20170223
 // ==/UserScript==
 
 // jQuery链接(为避免流量，请将第10行juqery源换为下面2的链接)
@@ -218,11 +217,13 @@ var jq = jQuery.noConflict();
         "tvseries2": [48, 77],
         "tvseries3": [14, 73],
         "tvseries4": [77, 73],
-        "tvseries5": [48, 77, 57, 14, 73, 62]
+        "tvseries5": [48],
+        "tvseries6": [14],
+        "tvseries7": [48, 77, 58, 14, 73, 62]
     };
     // 搜索页面
     if (OpenSearchEnhance && location.href.match(/search\.php$/) && jq('div.sttl.mbn').length) {
-        jq("table tr:eq(1)").after('<tr><th>搜索范围</th><td><p id="showsearchenhance">----[显示/隐藏]----</p><div id="mysearchbox" hidden="true"><table bgcolor="#d0d0d0" cellspacing="0" cellpadding="0"><tr>----[大版块]----</tr><tr><td><label class="lb"><b>[各版块]</b></label></td><td><label class="my_search lb" id="forum_big1"><input type="radio" class="pr" name="searchenhance"/>六维索引互动区</label></td><td><label class="my_search lb" id="forum_big2"><input type="radio" class="pr" name="searchenhance"/>六维高清资源区</label></td><td><label class="my_search lb" id="forum_big3"><input type="radio" class="pr" name="searchenhance"/>六维普通资源区</label></td><td><label class="my_search lb" id="forum_big4"><input type="radio" class="pr" name="searchenhance"/>六维休闲娱乐区</label></td><td><label class="my_search lb" id="forum_big5"><input type="radio" class="pr" name="searchenhance"/>六维事务处理区</label></td><td><label class="my_search lb" id="forum_big6"><input type="radio" class="pr" name="searchenhance"/>六维内部交流区</label></td></tr><tr><td><label class="lb"><b>[资源区]</b></label></td><td><label class="my_search lb" id="forum_resource1"><input type="radio" class="pr" name="searchenhance"/>电影剧场</label></td><td><label class="my_search lb" id="forum_resource2"><input type="radio" class="pr" name="searchenhance"/>电视剧集</label></td><td><label class="my_search lb" id="forum_resource3"><input type="radio" class="pr" name="searchenhance"/>综艺娱乐</label></td><td><label class="my_search lb" id="forum_resource4"><input type="radio" class="pr" name="searchenhance"/>体育天地</label></td><td><label class="my_search lb" id="forum_resource5"><input type="radio" class="pr" name="searchenhance"/>音乐地带</label></td><td><label class="my_search lb" id="forum_resource6"><input type="radio" class="pr" name="searchenhance"/>纪录写实</label></td></tr><tr><td></td><td><label class="my_search lb" id="forum_resource7"><input type="radio" class="pr" name="searchenhance"/>卡通动漫</label></td><td><label class="my_search lb" id="forum_resource8"><input type="radio" class="pr" name="searchenhance"/>游戏天下</label></td><td><label class="my_search lb" id="forum_resource9"><input type="radio" class="pr" name="searchenhance"/>资料文档</label></td><td><label class="my_search lb" id="forum_resource10"><input type="radio" class="pr" name="searchenhance"/>软件快跑</label></td><td><label class="my_search lb" id="forum_resource11"><input type="radio" class="pr" name="searchenhance"/>其他资源</label></td></tr></table><table bgcolor="#d0d0d0" cellspacing="0" cellpadding="0"><tr>----[小版块]----</tr><tr><td><label class="lb"><b>[电- -影]</b></label></td><td><label class="my_search lb" id="movie1"><input type="radio" class="pr" name="searchenhance"/>电影--资源区</label></td><td><label class="my_search lb" id="movie2"><input type="radio" class="pr" name="searchenhance"/>电影--高清</label></td><td><label class="my_search lb" id="movie3"><input type="radio" class="pr" name="searchenhance"/>电影--普清</label></td><td><label class="my_search lb" id="movie4"><input type="radio" class="pr" name="searchenhance"/>电影--所有</label></td></tr><tr><td><label class="lb"><b>[剧- -集]</b></label></td><td><label class="my_search lb" id="tvseries1"><input type="radio" class="pr" name="searchenhance"/>剧集--资源区</label></td><td><label class="my_search lb" id="tvseries2"><input type="radio" class="pr" name="searchenhance"/>剧集--高清</label></td><td><label class="my_search lb" id="tvseries3"><input type="radio" class="pr" name="searchenhance"/>剧集--普清</label></td><td><label class="my_search lb" id="tvseries4"><input type="radio" class="pr" name="searchenhance"/>剧集--合集</label></td><td><label class="my_search lb" id="tvseries5"><input type="radio" class="pr" name="searchenhance"/>剧集--所有</label></td></tr></table></div></td></tr>');
+        jq("table tr:eq(1)").after('<tr><th>搜索范围</th><td><p id="showsearchenhance"><b>----[显示/隐藏]----</b></p><div id="mysearchbox" hidden="true"><table bgcolor="#F0F0F0" cellspacing="0" cellpadding="0"><tr>----[大版块]----</tr><tr><td><label class="lb"><b>[各版块]</b></label></td><td><label class="my_search lb" id="forum_big1"><input type="radio" class="pr" name="searchenhance"/>六维索引互动区</label></td><td><label class="my_search lb" id="forum_big2"><input type="radio" class="pr" name="searchenhance"/>六维高清资源区</label></td><td><label class="my_search lb" id="forum_big3"><input type="radio" class="pr" name="searchenhance"/>六维普通资源区</label></td><td><label class="my_search lb" id="forum_big4"><input type="radio" class="pr" name="searchenhance"/>六维休闲娱乐区</label></td><td><label class="my_search lb" id="forum_big5"><input type="radio" class="pr" name="searchenhance"/>六维事务处理区</label></td><td><label class="my_search lb" id="forum_big6"><input type="radio" class="pr" name="searchenhance"/>六维内部交流区</label></td></tr><tr><td><label class="lb"><b>[资源区]</b></label></td><td><label class="my_search lb" id="forum_resource1"><input type="radio" class="pr" name="searchenhance"/>电影剧场</label></td><td><label class="my_search lb" id="forum_resource2"><input type="radio" class="pr" name="searchenhance"/>电视剧集</label></td><td><label class="my_search lb" id="forum_resource3"><input type="radio" class="pr" name="searchenhance"/>综艺娱乐</label></td><td><label class="my_search lb" id="forum_resource4"><input type="radio" class="pr" name="searchenhance"/>体育天地</label></td><td><label class="my_search lb" id="forum_resource5"><input type="radio" class="pr" name="searchenhance"/>音乐地带</label></td><td><label class="my_search lb" id="forum_resource6"><input type="radio" class="pr" name="searchenhance"/>纪录写实</label></td></tr><tr><td></td><td><label class="my_search lb" id="forum_resource7"><input type="radio" class="pr" name="searchenhance"/>卡通动漫</label></td><td><label class="my_search lb" id="forum_resource8"><input type="radio" class="pr" name="searchenhance"/>游戏天下</label></td><td><label class="my_search lb" id="forum_resource9"><input type="radio" class="pr" name="searchenhance"/>资料文档</label></td><td><label class="my_search lb" id="forum_resource10"><input type="radio" class="pr" name="searchenhance"/>软件快跑</label></td><td><label class="my_search lb" id="forum_resource11"><input type="radio" class="pr" name="searchenhance"/>其他资源</label></td></tr></table><table bgcolor="#F0F0F0" cellspacing="0" cellpadding="0"><tr>----[小版块]----</tr><tr><td><label class="lb"><b>[电- -影]</b></label></td><td><label class="my_search lb" id="movie1"><input type="radio" class="pr" name="searchenhance"/>电影--资源区</label></td><td><label class="my_search lb" id="movie2"><input type="radio" class="pr" name="searchenhance"/>电影--高清</label></td><td><label class="my_search lb" id="movie3"><input type="radio" class="pr" name="searchenhance"/>电影--普清</label></td><td><label class="my_search lb" id="movie4"><input type="radio" class="pr" name="searchenhance"/>电影--所有</label></td></tr><tr><td><label class="lb"><b>[剧- -集]</b></label></td><td><label class="my_search lb" id="tvseries1"><input type="radio" class="pr" name="searchenhance"/>剧集--资源区</label></td><td><label class="my_search lb" id="tvseries2"><input type="radio" class="pr" name="searchenhance"/>剧集--高清</label></td><td><label class="my_search lb" id="tvseries3"><input type="radio" class="pr" name="searchenhance"/>剧集--普清</label></td><td><label class="my_search lb" id="tvseries4"><input type="radio" class="pr" name="searchenhance"/>剧集--合集</label></td><td><label class="my_search lb" id="tvseries5"><input type="radio" class="pr" name="searchenhance"/>高清剧集</label></td><td><label class="my_search lb" id="tvseries6"><input type="radio" class="pr" name="searchenhance"/>电视剧集</label></td><td><label class="my_search lb" id="tvseries7"><input type="radio" class="pr" name="searchenhance"/>剧集--所有</label></td></tr></table></div></td></tr>');
     }
     jq("label.my_search").click(function () {
         var spanid = jq(this).attr("id");
@@ -305,18 +306,27 @@ var jq = jQuery.noConflict();
         jq('div.specialpost.s_clear div.pbt.cl input').attr('style', 'width: 52em');
         jq('#subject').attr('style', 'width: 70em'); //更改发种界面的输入框宽度
         //jq('#custominfo_pmenu').hide();
-        jq('div#postbox').before('<div class="pbt cl"><div class="ftid"><span width="80">种子信息克隆：</span></div><div class="z"><span><input type="text" style="width:300px;" id="clone_from" class="px" placeholder="要克隆的种子编号链接" onkeypress="if(event.keyCode==13){clone_btn.click();}"></span><input type="button" id="clone_btn" style="size:100px;" value=" 克   隆 ">&nbsp;&nbsp;&nbsp;&nbsp;<span>[克隆状态：</span><span id="clone_info">请输入要克隆的种子链接</span><span>]</span></div></div><div class="pbt cl" id="seedfromtitleinfo"><div class="ftid"><span width="80">引用资源标题：</span></div><div class="z"><span><input type="text" style="width:71.5em;" id="seed_from_title" class="px"></span></div></div>');
+        jq('div#postbox').before('<div class="pbt cl"><div class="ftid"><span width="80">种子信息克隆：</span></div><div class="z"><span><input type="text" style="width:300px;" id="clone_from" class="px" placeholder="要克隆的种子编号链接" onkeypress="if(event.keyCode==13){clone_btn.click();}"></span><input type="button" id="clone_btn" style="size:100px;" value=" 克   隆 ">&nbsp;&nbsp;&nbsp;&nbsp;<span>[克隆状态：</span><span id="clone_info">请输入要克隆的种子链接</span><span>]</span></div></div><div id="seedfilename" hidden="true" class="pbt cl"><div class="ftid"><span width="80">种子文件名称：</span></div><div class="z"><input  type="text" style="width:71.5em;" class="px" id="uploadseedname"></div></div>');
         //展开标签栏，预备填写
         jq('#extra_tag_b').addClass('a');
         jq('#extra_tag_c').css('display', 'block');
     }
+    // 自动处理并复制种子文件名
+    function seedname_copy() {
+        jq("div#seedfilename").show();
+        var uploadseedname = jq("div.specialpost.s_clear input").val().replace(/.*\\([^\.\\]+)/g, "$1");
+        uploadseedname = uploadseedname.replace(/(\.torrent$)/, "");
+        uploadseedname = uploadseedname.replace(/(^\[\S+?\][\.]{0,1})/, "");
+        uploadseedname = uploadseedname.replace(/(\.mkv$)|(\.mp4$)|(\.rmvb$)|(\.ts$)|(\.avi$)|(\.iso$)/i, "");
+        uploadseedname = uploadseedname.replace(/(^\s*)|(\s*$)/g, "");
+        uploadseedname = uploadseedname.replace(/([\s])/g, ".");
+        jq("input#uploadseedname").val(uploadseedname);
+        jq("input#uploadseedname").select();
+    }
+
     //AutoAdd处理部分内容
     function numatostring2(num) {
-        var res = 0;
-        res = num;
-        if (res < 10)
-            return "0" + res;
-        return res.toString();
+        return (num < 10) ? ("0" + num) : (num.toString());
     }
 
     function leapyear(year) {
@@ -336,7 +346,6 @@ var jq = jQuery.noConflict();
                 if (bbbtv && bbbtv.length > 1)
                     str = str + bbbtv[1];
             }
-
         }
         if (aaatv && aaatv.length == 2) {
             if (bbbtv && bbbtv.length >= 2 && bbbtv[1] == "E") {
@@ -353,73 +362,9 @@ var jq = jQuery.noConflict();
             else if (bbbtv && bbbtv.length == 3) {
                 str = bbbtv[0] + aaatv[0] + bbbtv[1] + aaatv[1] + bbbtv[2];
             }
-
         }
         return str;
     }
-    // 外站请求函数
-    function requestData(url, successHandle, timeoutHandle, options) {
-        var headers = options ? options : {
-            'User-Agent': navigator.userAgent,
-            'Accept': '"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"'
-        };
-        GM_xmlhttpRequest({
-            method: 'GET',
-            url: url,
-            headers: headers,
-            timeout: 2048,
-            onreadystatechange: successHandle,
-            ontimeout: timeoutHandle,
-        });
-    }
-
-    function requestHTML(url, callback, options) {
-        requestData(url, function (response) {
-            // console.log(response.readyState, response.status);
-            if (response.readyState == 4) {
-                callback(response.responseText
-                    .match(/<head[^>]*?>([\S\s]+)<\/body>/)[1]
-                    .replace(/<script(\s|>)[\S\s]+?<\/script>/g, '')
-                );
-            }
-        }, function (response) {
-            // console.log(response);
-            jq('#clone_info').val('Error<---->Timeout');
-        }, options);
-    }
-
-    function requestJson(url, callback, options) {
-        requestData(url, function (response) {
-            if (response.readyState == 4) {
-                callback(JSON.parse(response.responseText));
-            }
-        }, function (response) {
-            jq('#clone_info').val('Error<---->Timeout');
-        }, options);
-    }
-
-    function changedescibe(descr) {
-        //填写内容
-        var gonggaomatch = jq('#e_textarea').html().match(/(\Stable[\s\S]+\/table\S)/);
-        if (gonggaomatch) {
-            jq('#e_iframe').contents().find('body').html(bbcode2html(gonggaomatch[1]) + descr);
-        } else {
-            jq('#e_iframe').contents().find('body').html(descr);
-        }
-    }
-
-    // function imagehandle(imglink) {
-    //     if (imglink.length < 1) {
-    //         return;
-    //     }
-    //     ImgWindow = window.open('', '');
-    //     ImgWindow.document.write("<h1 align=\"center\"><---请选择图片下载到本地再上传到六维---></h1>");
-    //     for (var i = 0; i < imglink.length; i++) {
-    //         ImgWindow.document.write("<div style=\"width:20%;float:left;\"><img src=" + imglink[i] + "></div>");
-    //     }
-    //     ImgWindow.focus();
-    // }
-
     jq('#clone_btn').click(function () {
         var copy_link = jq('#clone_from').val().trim();
         var info = jq('#clone_info');
@@ -438,12 +383,7 @@ var jq = jQuery.noConflict();
                 jq.get('http://bt.neu6.edu.cn/thread-' + seedfrom + '-1-1.html', function (resp) {
                     var i = 0;
                     info.text('正在分析');
-                    var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
-                    // 移除来自群组
-                    var group = body.match(/来自群组: <a[\s\S]*?a>/);
-                    if (group) {
-                        body = body.substring(0, group.index) + body.substring(group.index + group[0].length, body.length);
-                }
+                    var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0].replace(/来自群组: <a[\s\S]*?a>/, "");
                     var page = jq(body); // 构造 jQuery 对象，用于后期处理
                     var title = page.find("span#thread_subject").text();
                     if (!title) {
@@ -568,150 +508,13 @@ var jq = jQuery.noConflict();
             } else {
                 info.text('请输入有效的种子链接...');
             }
-        } else if (/https?:\/\/movie\.douban\.com\/subject\/\d+/.test(copy_link)) {
-            var matchdouban = copy_link.match(/\/(\d+)/);
-            if (matchdouban) {
-                doubanid = matchdouban[1];
-            }
-            var new_link = "https://api.douban.com/v2/movie/" + doubanid;
-            requestJson(new_link, function (resp) {
-                if (jq('#seedfromtitleinfo').length) {
-                    jq('#seedfromtitleinfo').show();
-                }
-                var i = 0;
-                var tag = "";
-                var descr_content = "<br/><br/><span>※※※※※※※　简介　※※※※※※※</span><br/><br/>";
-                if (resp.alt_title) {
-                    descr_content = descr_content + "<span>◎译　　名&nbsp;&nbsp;&nbsp;&nbsp" + resp.alt_title + "</span><br/>";
-                    tag = tag + resp.alt_title.replace(/[\s]*\/[\s]*/, ",");
-                }
-                if (resp.title) {
-                    descr_content = descr_content + "<span>◎片　　名&nbsp;&nbsp;&nbsp;&nbsp" + resp.title + "</span><br/>";
-                    tag = tag + "," + resp.title.replace(/[\s]*\/[\s]*/, ",");
-                }
-                if (resp.attrs.year)
-                    descr_content = descr_content + "<span>◎年　　代&nbsp;&nbsp;&nbsp;&nbsp" + resp.attrs.year + "</span><br/>";
-                if (resp.attrs.country)
-                    descr_content = descr_content + "<span>◎国　　家&nbsp;&nbsp;&nbsp;&nbsp" + resp.attrs.country + "</span><br/>";
-                if (resp.attrs.movie_type) {
-                    descr_content = descr_content + "<span>◎类　　别&nbsp;&nbsp;&nbsp;&nbsp";
-                    for (i = 0; i < resp.attrs.movie_type.length; i++) {
-                        if (i == (resp.attrs.movie_type.length - 1)) {
-                            descr_content = descr_content + resp.attrs.movie_type[i] + "</span><br/>";
-                        } else {
-                            descr_content = descr_content + resp.attrs.movie_type[i] + "/";
-                        }
-                    }
-                }
-                if (resp.attrs.language)
-                    descr_content = descr_content + "<span>◎语　　言&nbsp;&nbsp;&nbsp;&nbsp" + resp.attrs.language + "</span><br/>";
-                if (resp.attrs.pubdate)
-                    descr_content = descr_content + "<span>◎上映日期&nbsp;&nbsp;&nbsp;&nbsp" + resp.attrs.pubdate + "</span><br/>";
-                if (resp.attrs.rating)
-                    descr_content = descr_content + "<span>◎豆瓣评分&nbsp;&nbsp;&nbsp;&nbsp" + resp.rating.average + "/10 from " + resp.rating.numRaters + " users</span><br/>";
-                if (resp.alt)
-                    descr_content = descr_content + "<span>◎豆瓣链接&nbsp;&nbsp;&nbsp;&nbsp" + resp.alt.replace(/\/movie\//, "/subject/") + "</span><br/>";
-                if (resp.attrs.episodes)
-                    descr_content = descr_content + "<span>◎集　　数&nbsp;&nbsp;&nbsp;&nbsp" + resp.attrs.episodes + "</span><br/>";
-                if (resp.attrs.movie_duration)
-                    descr_content = descr_content + "<span>◎片　　长&nbsp;&nbsp;&nbsp;&nbsp" + resp.attrs.movie_duration + "</span><br/>";
-                if (resp.attrs.director) {
-                    descr_content = descr_content + "<span>◎导　　演</span><br/>";
-                    for (i = 0; i < resp.attrs.director.length; i++) {
-                        descr_content = descr_content + "<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp" + resp.attrs.director[i] + "</span><br/>";
-                    }
-                    descr_content = descr_content + "<span>◎主　　演</span><br/>";
-                    for (i = 0; i < resp.attrs.cast.length; i++) {
-                        descr_content = descr_content + "    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp" + resp.attrs.cast[i] + "</span><br/>";
-                    }
-                    descr_content = descr_content + "<br/>";
-                }
-                if (resp.summary)
-                    descr_content = descr_content + "<p>◎简　　介</p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp" + resp.summary;
-                descr_content = descr_content + "<br/><br/><p>※※※※※※※※※※※※※※※※※※</p>";
-                jq('#seed_from_title').val(resp.alt_title + " " + resp.title);
-                var imagelink = [resp.image];
-                // imagehandle(imagelink);
-                changedescibe(descr_content);
-                jq('#tags').val(tag);
-                info.text("Douban Link<---->克隆完成");
-            });
-        } else if (/https?:\/\/bt\.byr\.cn\/details\.php\?id=\d+/.test(copy_link)) {
-            requestHTML(copy_link, function (doc) {
-                if (jq('#seedfromtitleinfo').length) {
-                    jq('#seedfromtitleinfo').show();
-                }
-                var sub = jq(doc);
-                var title = sub.find('#share').html()
-                        .replace(/\]&[\S\s]+/, "]").trim(),
-                    descr = sub.find('#kdescr');
-                var imagelink = [];
-                descr.find('img').each(function () {
-                    var imglink = jq(this).attr('src');
-                    imagelink.push(imglink);
-                });
-                // imagehandle(imagelink);
-                descr.find('img').remove();
-                jq('#seed_from_title').val(title);
-                changedescibe(descr.html());
-                info.text("BYR Link<---->克隆完成");
-            });
-        } else if (/https?:\/\/pt\.whu\.edu\.cn\/details\.php\?id=\d+/.test(copy_link)) {
-            requestHTML(copy_link, function (doc) {
-                if (jq('#seedfromtitleinfo').length) {
-                    jq('#seedfromtitleinfo').show();
-                }
-                var sub = jq(doc);
-                var title = sub.find('#page-title').html()
-                        .replace(/<a[\S\s]+/, '').trim(),
-                    subtitle = sub.find('div#outer dl#torrenttable dd:eq(1)').text();
-                var descr = sub.find('#kdescr > .bbcode');
-                var imagelink = [];
-                descr.find('img').each(function () {
-                    var imglink = jq(this).attr('full');
-                    if (/^attachments/.test(imglink)) {
-                        imglink = 'https://pt.whu.edu.cn/' + imglink;
-                    }
-                    imagelink.push(imglink);
-                });
-                // imagehandle(imagelink);
-                jq('#seed_from_title').val(title + " " + subtitle);
-                descr.find('img').remove();
-                changedescibe(descr.html());
-                info.text("WHU link<---->克隆完成");
-            });
-        } else if (/https?:\/\/hdchina\.club\/details\.php\?id=\d+/.test(copy_link)) {
-            requestHTML(copy_link, function (doc) {
-                if (jq('#seedfromtitleinfo').length) {
-                    jq('#seedfromtitleinfo').show();
-                }
-                var sub = jq(doc);
-                var title = sub.find('h2#top').text(),
-                    subtitle = sub.find('div.m_name h3').text(),
-                    descr = sub.find("#kdescr");
-                var imagelink = [];
-                descr.find('img').each(function () {
-                    var imglink = jq(this).attr('src');
-                    if (/^attachments/.test(imglink)) {
-                        imglink = 'https://hdchina.club/' + imglink;
-                    }
-                    imagelink.push(imglink);
-                });
-                // imagehandle(imagelink);
-                jq('#seed_from_title').val(title + " " + subtitle);
-                descr.find('img').remove();
-                changedescibe(descr.html());
-                info.text("HDChina link<---->克隆完成");
-            });
         } else {
             info.text("不支持的链接...");
         }
     });
 
     jq(document).ready(function () {
-        if (jq('#seedfromtitleinfo').length) {
-            jq('#seedfromtitleinfo').hide();
-        }
+        jq("div.specialpost.s_clear input").bind("change", seedname_copy);
         if (SearchEnhanceDefaultShow) {
             jq("div#mysearchbox").show();
         }
