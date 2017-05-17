@@ -7,8 +7,8 @@
 // @match http://js.ntwikis.com/jsp/apps/cancollezh/maps/detailnew.jsp?detailid=*
 // ==/UserScript==
 
-have_raw = ["1-13",16,"18-77","80-100",102,"104-115",117,119,"122-144",147,150,"151-153",155,157,158,"160-162","164-168","172-183","185-188","192-195","197-198",
-            200,203,206,209,214,219,223,225,227,228,"233-236",238,239,241,248,253,254,259,260,265,"268-270",275,276,278,279,290,294,298,301,304,307,309,312,315,316];
+have_raw = ["1-13",16,"18-77","80-100",102,"104-115",117,119,"122-144",147,"149-153",155,157,158,"160-162","164-168","171-183","185-188","192-195","197-198",
+            200,203,206,209,214,219,223,225,227,228,"233-236",238,239,241,248,"253-254","259-260",265,"268-270","275-276","278-279","289-290",294,298,301,304,307,309,312,315,316];
 
 
 have = [];
@@ -24,20 +24,20 @@ for (var i in have_raw){
     }
 }
 
-$.getJSON("http://static.jianrmod.cn/ShortShipInfo.json",function (json) {
-    var origin = json;
-    cidlist = {};
-    for (var i=0;i<origin.length;i++) {
-        cidlist[origin[i].pic_id] = origin[i];
-    }
-});
+//$.getJSON("http://static.jianrmod.cn/ShortShipInfo.json",function (json) {
+//    var origin = json;
+//    cidlist = {};
+//    for (var i=0;i<origin.length;i++) {
+//        cidlist[origin[i].pic_id] = origin[i];
+//    }
+//});
 
 function wrapship() {
     var ship = $("ul#map-detail-dropinfos > li > p > a:even");
     var ship_rep = ship.next("a");
     for(var i=0;i<ship.length;i++){
         var ship_id = ship_rep.eq(i).attr("onclick").match(/,'(\d+)',/)[1];
-        ship_rep.eq(i).attr("href","http://www.jianrmod.cn/data/shipGetInfo.html?type=0&cid=" + cidlist[ship_id].cid).attr("target",'_blank');
+        //ship_rep.eq(i).attr("href","http://www.jianrmod.cn/data/shipGetInfo.html?type=0&cid=" + cidlist[ship_id].cid).attr("target",'_blank');
         var ship_class = "<span class='nothave ship_" + ship_id +"'></span>";
         $([ship[i],ship[i].nextSibling,ship_rep[i],ship_rep[i].nextSibling]).wrapAll(ship_class);
     }
