@@ -9,7 +9,7 @@
 // @require      http://code.jquery.com/jquery-2.2.4.min.js
 // @icon         http://bt.neu6.edu.cn/favicon.ico
 // @supportURL   http://bt.neu6.edu.cn/thread-1555682-1-1.html
-// @version      20170223
+// @version      20170531
 // ==/UserScript==
 
 // jQuery链接(为避免流量，请将第10行juqery源换为下面2的链接)
@@ -34,25 +34,20 @@ var SearchEnhanceDefaultShow = false; //搜索默认显示/隐藏，可选true,f
 // 脚本预处理阶段
 var jq = jQuery.noConflict();
 
-(function () {
+(function() {
     // 各板块列表
     if (jq('table#threadlisttableid').length) {
-        var cat = 0;
-        var match = location.href.match(/forum-(\d+)-1/);
-        if (match) {
-            cat = match[1];
-        } else {
-            cat = location.href.match(/fid=(\d+)/)[1];
-        }
-        jq("table#threadlisttableid tbody").each(function () {
+        var match = location.href.match(/(forum-|fid=)(\d+)/);
+        var cat = match ? (match[2]) : 0;
+        jq("table#threadlisttableid tbody").each(function() {
             var tbody = jq(this);
             if (tbody.find('tr td:eq(1) img').length) {
                 tbody.find('tr td:lt(3)').css("text-align", "center");
-            } else {
+            } else if (tbody.find('tr td:eq(2) img').length) {
                 tbody.find('tr td:lt(4)').css("text-align", "center");
             }
             var id = 0;
-            if (typeof (tbody.attr('id')) != "undefined" && tbody.attr("id") != "separatorline") {
+            if (typeof(tbody.attr('id')) != "undefined" && tbody.attr("id") != "separatorline") {
                 id = tbody.attr('id').match(/(\d+)/)[1];
             }
             var size = 0;
@@ -66,18 +61,18 @@ var jq = jQuery.noConflict();
                     var td_img1 = tbody.find('tr td:eq(1)');
                     var downloadtorrent1 = tbody.find('tr td:eq(2)');
                     var link1 = "http://bt.neu6.edu.cn/thread-" + id + "-1-1.html";
-                    tr_img1.click(function () {
+                    tr_img1.click(function() {
                         window.open(link);
                     });
-                    downloadtorrent1.click(function () {
-                        jq.get(link1, function (resp) {
+                    downloadtorrent1.click(function() {
+                        jq.get(link1, function(resp) {
                             var str_link = resp.match(/<p class="attnm">[\s\S]*torrent<\/a>/gi)[0];
                             var downlink_temp = str_link.match(/<a href="([\s\S]*)" onmouseover/)[1];
                             var downlink = "http://bt.neu6.edu.cn/" + downlink_temp.replace(/amp[\S]/, "");
                             window.open(downlink);
                         });
                     });
-                    tr_img1.mouseenter(function () {
+                    tr_img1.mouseenter(function() {
                         td_img1.css("background-color", "#DDA0DD");
                         tr_img1.animate({
                             opacity: '0.5',
@@ -85,7 +80,7 @@ var jq = jQuery.noConflict();
                             width: '-=2px'
                         });
                     });
-                    tr_img1.mouseleave(function () {
+                    tr_img1.mouseleave(function() {
                         td_img1.css("background-color", "rgba(0,0,0,0)");
                         tr_img1.animate({
                             opacity: '1',
@@ -93,10 +88,10 @@ var jq = jQuery.noConflict();
                             width: '+=2px'
                         });
                     });
-                    downloadtorrent1.mouseenter(function () {
+                    downloadtorrent1.mouseenter(function() {
                         downloadtorrent1.css("background-color", "#DDA0DD");
                     });
-                    downloadtorrent1.mouseleave(function () {
+                    downloadtorrent1.mouseleave(function() {
                         downloadtorrent1.css("background-color", "rgba(0,0,0,0)");
                     });
                 } else if (tbody.find('tr td:eq(2) img').length) {
@@ -104,18 +99,18 @@ var jq = jQuery.noConflict();
                     var td_img2 = tbody.find('tr td:eq(2)');
                     var downloadtorrent = tbody.find('tr td:eq(3)');
                     var link2 = "http://bt.neu6.edu.cn/thread-" + id + "-1-1.html";
-                    tr_img2.click(function () {
+                    tr_img2.click(function() {
                         window.open(link);
                     });
-                    downloadtorrent.click(function () {
-                        jq.get(link2, function (resp) {
+                    downloadtorrent.click(function() {
+                        jq.get(link2, function(resp) {
                             var str_link = resp.match(/<p class="attnm">[\s\S]*torrent<\/a>/gi)[0];
                             var downlink_temp = str_link.match(/<a href="([\s\S]*)" onmouseover/)[1];
                             var downlink = "http://bt.neu6.edu.cn/" + downlink_temp.replace(/amp[\S]/, "");
                             window.open(downlink);
                         });
                     });
-                    tr_img2.mouseenter(function () {
+                    tr_img2.mouseenter(function() {
                         td_img2.css("background-color", "#DDA0DD");
                         tr_img2.animate({
                             opacity: '0.5',
@@ -123,7 +118,7 @@ var jq = jQuery.noConflict();
                             width: '-=2px'
                         });
                     });
-                    tr_img2.mouseleave(function () {
+                    tr_img2.mouseleave(function() {
                         td_img2.css("background-color", "rgba(0,0,0,0)");
                         tr_img2.animate({
                             opacity: '1',
@@ -131,10 +126,10 @@ var jq = jQuery.noConflict();
                             width: '+=2px'
                         });
                     });
-                    downloadtorrent.mouseenter(function () {
+                    downloadtorrent.mouseenter(function() {
                         downloadtorrent.css("background-color", "#DDA0DD");
                     });
-                    downloadtorrent.mouseleave(function () {
+                    downloadtorrent.mouseleave(function() {
                         downloadtorrent.css("background-color", "rgba(0,0,0,0)");
                     });
                 }
@@ -144,7 +139,7 @@ var jq = jQuery.noConflict();
     }
     // 搜索页面
     if (jq('table.dt').length) {
-        jq('table.dt tr:gt(0)').each(function () {
+        jq('table.dt tr:gt(0)').each(function() {
             var tr = jq(this);
             tr.find('td:lt(2)').css("text-align", "center");
             var cat = tr.find('td:eq(4) a').attr('href').match(/forum-(\d+)-1/)[1];
@@ -155,18 +150,18 @@ var jq = jQuery.noConflict();
                 var td1 = tr.find('td:eq(0)');
                 var downloadtorrent = tr.find('td:eq(1)');
                 var link1 = "http://bt.neu6.edu.cn/thread-" + id + "-1-1.html";
-                tr_img.click(function () {
+                tr_img.click(function() {
                     window.open(link);
                 });
-                downloadtorrent.click(function () {
-                    jq.get(link1, function (resp) {
+                downloadtorrent.click(function() {
+                    jq.get(link1, function(resp) {
                         var str_link = resp.match(/<p class="attnm">[\s\S]*torrent<\/a>/gi)[0];
                         var downlink_temp = str_link.match(/<a href="([\s\S]*)" onmouseover/)[1];
                         var downlink = "http://bt.neu6.edu.cn/" + downlink_temp.replace(/amp[\S]/, "");
                         window.open(downlink);
                     });
                 });
-                tr_img.mouseenter(function () {
+                tr_img.mouseenter(function() {
                     td1.css("background-color", "#DDA0DD");
                     tr_img.animate({
                         opacity: '0.5',
@@ -174,7 +169,7 @@ var jq = jQuery.noConflict();
                         width: '-=2px'
                     });
                 });
-                tr_img.mouseleave(function () {
+                tr_img.mouseleave(function() {
                     td1.css("background-color", "rgba(0,0,0,0)");
                     tr_img.animate({
                         opacity: '1',
@@ -182,10 +177,10 @@ var jq = jQuery.noConflict();
                         width: '+=2px'
                     });
                 });
-                downloadtorrent.mouseenter(function () {
+                downloadtorrent.mouseenter(function() {
                     downloadtorrent.css("background-color", "#DDA0DD");
                 });
-                downloadtorrent.mouseleave(function () {
+                downloadtorrent.mouseleave(function() {
                     downloadtorrent.css("background-color", "rgba(0,0,0,0)");
                 });
             }
@@ -225,11 +220,11 @@ var jq = jQuery.noConflict();
     if (OpenSearchEnhance && location.href.match(/search\.php$/) && jq('div.sttl.mbn').length) {
         jq("table tr:eq(1)").after('<tr><th>搜索范围</th><td><p id="showsearchenhance"><b>----[显示/隐藏]----</b></p><div id="mysearchbox" hidden="true"><table bgcolor="#F0F0F0" cellspacing="0" cellpadding="0"><tr>----[大版块]----</tr><tr><td><label class="lb"><b>[各版块]</b></label></td><td><label class="my_search lb" id="forum_big1"><input type="radio" class="pr" name="searchenhance"/>六维索引互动区</label></td><td><label class="my_search lb" id="forum_big2"><input type="radio" class="pr" name="searchenhance"/>六维高清资源区</label></td><td><label class="my_search lb" id="forum_big3"><input type="radio" class="pr" name="searchenhance"/>六维普通资源区</label></td><td><label class="my_search lb" id="forum_big4"><input type="radio" class="pr" name="searchenhance"/>六维休闲娱乐区</label></td><td><label class="my_search lb" id="forum_big5"><input type="radio" class="pr" name="searchenhance"/>六维事务处理区</label></td><td><label class="my_search lb" id="forum_big6"><input type="radio" class="pr" name="searchenhance"/>六维内部交流区</label></td></tr><tr><td><label class="lb"><b>[资源区]</b></label></td><td><label class="my_search lb" id="forum_resource1"><input type="radio" class="pr" name="searchenhance"/>电影剧场</label></td><td><label class="my_search lb" id="forum_resource2"><input type="radio" class="pr" name="searchenhance"/>电视剧集</label></td><td><label class="my_search lb" id="forum_resource3"><input type="radio" class="pr" name="searchenhance"/>综艺娱乐</label></td><td><label class="my_search lb" id="forum_resource4"><input type="radio" class="pr" name="searchenhance"/>体育天地</label></td><td><label class="my_search lb" id="forum_resource5"><input type="radio" class="pr" name="searchenhance"/>音乐地带</label></td><td><label class="my_search lb" id="forum_resource6"><input type="radio" class="pr" name="searchenhance"/>纪录写实</label></td></tr><tr><td></td><td><label class="my_search lb" id="forum_resource7"><input type="radio" class="pr" name="searchenhance"/>卡通动漫</label></td><td><label class="my_search lb" id="forum_resource8"><input type="radio" class="pr" name="searchenhance"/>游戏天下</label></td><td><label class="my_search lb" id="forum_resource9"><input type="radio" class="pr" name="searchenhance"/>资料文档</label></td><td><label class="my_search lb" id="forum_resource10"><input type="radio" class="pr" name="searchenhance"/>软件快跑</label></td><td><label class="my_search lb" id="forum_resource11"><input type="radio" class="pr" name="searchenhance"/>其他资源</label></td></tr></table><table bgcolor="#F0F0F0" cellspacing="0" cellpadding="0"><tr>----[小版块]----</tr><tr><td><label class="lb"><b>[电- -影]</b></label></td><td><label class="my_search lb" id="movie1"><input type="radio" class="pr" name="searchenhance"/>电影--资源区</label></td><td><label class="my_search lb" id="movie2"><input type="radio" class="pr" name="searchenhance"/>电影--高清</label></td><td><label class="my_search lb" id="movie3"><input type="radio" class="pr" name="searchenhance"/>电影--普清</label></td><td><label class="my_search lb" id="movie4"><input type="radio" class="pr" name="searchenhance"/>电影--所有</label></td></tr><tr><td><label class="lb"><b>[剧- -集]</b></label></td><td><label class="my_search lb" id="tvseries1"><input type="radio" class="pr" name="searchenhance"/>剧集--资源区</label></td><td><label class="my_search lb" id="tvseries2"><input type="radio" class="pr" name="searchenhance"/>剧集--高清</label></td><td><label class="my_search lb" id="tvseries3"><input type="radio" class="pr" name="searchenhance"/>剧集--普清</label></td><td><label class="my_search lb" id="tvseries4"><input type="radio" class="pr" name="searchenhance"/>剧集--合集</label></td><td><label class="my_search lb" id="tvseries5"><input type="radio" class="pr" name="searchenhance"/>高清剧集</label></td><td><label class="my_search lb" id="tvseries6"><input type="radio" class="pr" name="searchenhance"/>电视剧集</label></td><td><label class="my_search lb" id="tvseries7"><input type="radio" class="pr" name="searchenhance"/>剧集--所有</label></td></tr></table></div></td></tr>');
     }
-    jq("label.my_search").click(function () {
+    jq("label.my_search").click(function() {
         var spanid = jq(this).attr("id");
         jq("select#srchfid").val(value_of_forums[spanid]);
     });
-    jq("p#showsearchenhance").click(function () {
+    jq("p#showsearchenhance").click(function() {
         jq("div#mysearchbox").toggle();
     });
     // 帖子页面
@@ -246,7 +241,7 @@ var jq = jQuery.noConflict();
 
             var index = 0;
 
-            jq('div.pob.cl').each(function () {
+            jq('div.pob.cl').each(function() {
                 var quote_id = jq('div.pcbs:eq(' + index + ') table:first td:first').attr("id").match(/postmessage_(\d+)/)[1];
                 var link_reply = "http://bt.neu6.edu.cn/forum.php?mod=post&action=reply&fid=" + cat1 + "&extra=page%3D1&tid=" + seedid + "&reppost=" + quote_id;
                 if (index > 0) {
@@ -287,7 +282,7 @@ var jq = jQuery.noConflict();
         }
     }
     // 码率估算
-    jq('#malvjisuan').click(function () {
+    jq('#malvjisuan').click(function() {
         var bitrate_dur = jq('#malvzhi').val();
         var seed_size_info = jq('div.pcb div.mtw.mbw').text();
         var seed_size = seed_size_info.match(/(\d+[.]{0,1}\d*)/)[1];
@@ -330,7 +325,7 @@ var jq = jQuery.noConflict();
     }
 
     function leapyear(year) {
-        return (((year % 400 === 0) || (year % 100 !== 0)) && (year % 4 === 0));
+        return ((year % 400 === 0) || ((year % 100 !== 0) && (year % 4 === 0)));
     }
 
     function tvseasonhandle(str, type) {
@@ -365,7 +360,7 @@ var jq = jQuery.noConflict();
         }
         return str;
     }
-    jq('#clone_btn').click(function () {
+    jq('#clone_btn').click(function() {
         var copy_link = jq('#clone_from').val().trim();
         var info = jq('#clone_info');
         if (/^\d+$/.test(copy_link) || copy_link.match(/bt\.neu6\.edu\.cn/)) {
@@ -380,7 +375,7 @@ var jq = jQuery.noConflict();
             if (/^\d+$/.test(seedfrom)) {
                 // 如果输入了有效的编号，开始读取对应的种子页面
                 info.text('正在读取');
-                jq.get('http://bt.neu6.edu.cn/thread-' + seedfrom + '-1-1.html', function (resp) {
+                jq.get('http://bt.neu6.edu.cn/thread-' + seedfrom + '-1-1.html', function(resp) {
                     var i = 0;
                     info.text('正在分析');
                     var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0].replace(/来自群组: <a[\s\S]*?a>/, "");
@@ -413,7 +408,7 @@ var jq = jQuery.noConflict();
                         } else if (seedtype == 16) { //综艺娱乐
                             var fields = title.match(/\[[^\]]*\]/g);
                             if (fields[0].length === 10) {
-                                var dayofmonths = new Array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+                                var dayofmonths = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
                                 var year = fields[0].substring(1, 5);
                                 var month = fields[0].substring(5, 7);
                                 var day = fields[0].substring(7, 9);
@@ -425,9 +420,9 @@ var jq = jQuery.noConflict();
                                 var yearadd = 0;
                                 if ((parseInt(month) + monthadd) > 12) {
                                     yearadd = 1;
-                                    month = numatostring2((parseInt(month) + monthadd) % 12);
                                 }
                                 year = parseInt(year) + yearadd;
+                                month = numatostring2((parseInt(month) + monthadd) % 12);
                                 fields[0] = "[" + year + month + day + "]";
                             }
                             fields[3] = "[]";
@@ -467,7 +462,7 @@ var jq = jQuery.noConflict();
                         }
                     }
                     //图片处理（对上传的图片）
-                    descr.find('ignore_js_op').each(function () {
+                    descr.find('ignore_js_op').each(function() {
                         var img = jq(this).find('img:first');
                         //借用file属性信息修正引用过程中出错的src信息
                         img.attr('src', 'http://bt.neu6.edu.cn' + img.attr('file'));
@@ -492,7 +487,7 @@ var jq = jQuery.noConflict();
                     }
                     //填写标签
                     var tag = [];
-                    page.find('div.ptg.mbm.mtn a').each(function () {
+                    page.find('div.ptg.mbm.mtn a').each(function() {
                         var tagtemp = jq(this).text();
                         tag.push(tagtemp);
                     });
@@ -513,7 +508,7 @@ var jq = jQuery.noConflict();
         }
     });
 
-    jq(document).ready(function () {
+    jq(document).ready(function() {
         jq("div.specialpost.s_clear input").bind("change", seedname_copy);
         if (SearchEnhanceDefaultShow) {
             jq("div#mysearchbox").show();
