@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Byrbt : Enhanced log
 // @namespace    http://blog.rhilip.info
-// @version      20170214
+// @version      20170624
 // @description  为log页面增加为有关种子（字幕）添加访问链接和快速搜索关键词，针对管理员设置种子优惠的情况能直接查询优惠类型；在种子页面的热度表中添加种子日志查询入口
 // @author       Rhilip
 // @match        http*://bt.byr.cn/details.php?id=*
@@ -33,7 +33,7 @@ $(document).ready(function(){
                     logfont.html(logtext.replace(/\((.+?)\)/,"(<a href='/details.php?id=" + tid + "' style='color: " +logfont.attr('color')  + " ' target='_blank'><u>" + logtext.match(/\((.+?)\)/)[1] +"</u></a>)"));
                     logfont.parent().append("<a href='/edit.php?id="+ tid +"' style='display: inline-block;float: right;' target='_blank'>快速编辑</a>");
                 }
-                if (logtext.match(/(批量设置了种子优惠|批量置顶了种子)/)){      // 批量设置了种子优惠|批量置顶了种子
+                if (logtext.match(/批量/)){      // 批量设置了种子优惠|批量置顶了种子|批量取消了置顶
                     logfont.html(logtext.replace(/(\d+),/g,"<a href='/details.php?id=" + "$1" + "' style='color: " +logfont.attr('color')  + "' target='_blank'><u>" + "$1" + "</u></a>,"));
                     logfont.parent().append("<div class='foundbuff' style='display: inline-block;float: right;'>查询优惠类型</div>");
                 }
