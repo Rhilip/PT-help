@@ -57,7 +57,7 @@ $(document).ready(function() {
     $("div#output").click(function () {
         //创建输出窗口
         $.modal('<div id="Out_window">' +
-            '<div id="Out_Title"><div id="Out_ajaxWindowTitle">Bangumi信息导出</div><div id="Out_closeWindowButton" title="clost" class="simplemodal-close">X 关闭</div></div>' +  //<div id="Out_closeAjaxWindow"><small>Esc键可以快速关闭</small></div>
+            '<div id="Out_Title"><div id="Out_ajaxWindowTitle">Bangumi信息导出</div><div id="Out_closeWindowButton" title="close" class="simplemodal-close">X 关闭</div></div>' +  //<div id="Out_closeAjaxWindow"><small>Esc键可以快速关闭</small></div>
             '<div id="Out_Content"><div class="collectBox clearit"><form id="Out_BoxForm" name="OutBoxForm"><div class="cell"><div class="tagList"><span class="tip_j ll">导出格式：</span><div class="inner">' +
             '<a class="btnGray" id="OuttoUBB">BBcode</a><a class="btnGray" id="OuttoHtml">Html</a>' +
             '</div></div></div>' +
@@ -68,7 +68,6 @@ $(document).ready(function() {
             zIndex : 102,
             escClose : true,             //按ESC关闭模态窗口
             overlayClose : true          //按overlay（遮罩层）关闭模态窗口
-
         });
         //仿照Bgm的修改窗口添加样式（待进一步完善）
         $("#Out_window").css({"background": "#fff","color": "#000","text-align": "left","top": "50%","left": "50%","box-shadow": "0px 0 15px #AAA;"});

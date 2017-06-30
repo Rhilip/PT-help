@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Byrbt - IP2Loc
+// @name         Byrbt : IP2Loc
 // @namespace    http://blog.rhilip.info
 // @version      20170517
 // @description  It's an userscript show peer's loc due to their IPv6 address(,only for uesrs who's Level is highter than Moderator)
