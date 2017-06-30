@@ -37,10 +37,11 @@ function update_editor(quote_style_id, menu_str, info_str, clone_skip) {
     var raw_data = CKEDITOR.instances.descr.getData();
     var insert_data_raw = DEFAULT_STYLE[quote_style_id].format(menu_str, info_str);
 
-    var insert_data = raw_data + insert_data_raw;
     if (clone_skip === 1) {
-        insert_data = "<div class='byrbt_info_clone_ignore'>" + insert_data + "</div>";
+        insert_data_raw = "<div class='byrbt_info_clone_ignore'>" + insert_data_raw + "</div>";
     }
+
+    var insert_data = raw_data + insert_data_raw;
     CKEDITOR.instances.descr.setData(insert_data);
 }
 
