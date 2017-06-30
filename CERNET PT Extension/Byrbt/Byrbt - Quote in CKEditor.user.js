@@ -35,7 +35,7 @@ function update_editor(quote_style_id, menu_str, info_str, clone_skip) {
     clone_skip = parseInt(clone_skip);
 
     var raw_data = CKEDITOR.instances.descr.getData();
-    var insert_data_raw = DEFAULT_STYLE[quote_style_id].format(menu_str, info_str);
+    var insert_data_raw = DEFAULT_STYLE[quote_style_id].format(menu_str, info_str.split("\n").join("<br>"));
 
     if (clone_skip === 1) {
         insert_data_raw = "<div class='byrbt_info_clone_ignore'>" + insert_data_raw + "</div>";
@@ -70,6 +70,7 @@ waitForKeyElements("#cke_52", function () {
         $("#modal_update").click(function () {
             var quote_style_id = $("input[name='code_style']:checked").val();
             var menu_str = $("input#modal_title").val();
+
             var info_str = $("#modal_textarea").val();
             var clone_skip = 0;
             if ($("#modal_skip_clone").attr("checked") === "checked") {
