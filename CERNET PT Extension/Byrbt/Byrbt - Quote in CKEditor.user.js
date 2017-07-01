@@ -35,7 +35,7 @@ function update_editor(quote_style_id, menu_str, info_str, clone_skip) {
     clone_skip = parseInt(clone_skip);
 
     var raw_data = CKEDITOR.instances.descr.getData();
-    var insert_data_raw = DEFAULT_STYLE[quote_style_id].format(menu_str, info_str.split("\n").join("<br>"));
+    var insert_data_raw = DEFAULT_STYLE[quote_style_id].format(menu_str, info_str.split("\n").join("<br>")); // .replace("/\n/g","<br>")
 
     if (clone_skip === 1) {
         insert_data_raw = "<div class='byrbt_info_clone_ignore'>" + insert_data_raw + "</div>";
