@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Byrbt : Quote in CKEditor
 // @namespace    http://blog.rhilip.info
-// @version      20170630
+// @version      20170631
 // @description  为BYRBT的编辑器添加代码（code）引用框
 // @author       Rhilip
 // @match        http*://bt.byr.cn/edit.php*
