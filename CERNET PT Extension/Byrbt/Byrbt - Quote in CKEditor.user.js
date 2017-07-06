@@ -12,10 +12,10 @@
 // ==/UserScript==
 
 var DEFAULT_STYLE = [
-    "<div class=\"codetop\" style=\"padding: 3px; font-weight: bold; margin: 0px auto;\">{0}</div><div class=\"codemain\" style=\"font-family: Courier New,serif; border-width: 1px; border-style: solid; padding: 6px; margin: 0px auto;\">{1}</div>",
-    "<fieldset><legend><span style=\"color:#ffffff;\"><span style=\"background-color:#000000;\">&nbsp;{0}&nbsp;</span></span></legend>{1}</fieldset>",
-    "<fieldset><legend><b>{0}</b></legend><div style=\"font-family: Courier New;\">{1}</div></fieldset>",
-    "<div class=\"sub\"><b>{0}</b></div><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"background-color:#5a5;\"><td style=\"font-family: Courier New; border: 1px black dotted\">{1}</td></table>"
+    "<div class=\"codetop\" style=\"padding: 3px; font-weight: bold; margin: 0 auto;\">{0}</div><div class=\"codemain\" style=\"font-family: Consolas,monospace; border-width: 1px; border-style: solid; padding: 6px; margin: 0 auto;\">{1}</div>",
+    "<fieldset style=\"font-family: Consolas,monospace;\"><legend><span style=\"color:#ffffff;background-color:#000000;\">&nbsp;{0}&nbsp;</span></legend>{1}</fieldset>",
+    "<fieldset><legend><b>{0}</b></legend><div style=\"font-family: Consolas,monospace;\">{1}</div></fieldset>",
+    "<div class=\"sub\"><b>{0}</b></div><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"background-color:#5a5;\"><td style=\"font-family: Consolas,monospace; border: 1px black dotted\">{1}</td></table>"
 ];
 
 if (!String.prototype.format) {
