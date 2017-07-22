@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         Bangumi Info Export
 // @namespace    blog.rhilip.info
-// @version      20170105
+// @version      20170722
 // @description  Export Anime Info form Bangumi as BBCode or Html
 // @author       Rhilip
 // @include      /^https?:\/\/(bgm\.tv|bangumi\.tv|chii\.in)\/subject\//
 // @require      http://cdn.bootcss.com/simplemodal/1.4.4/jquery.simplemodal.min.js
-// @grant        none
+// @grant        GM_setClipboard
 // ==/UserScript==
 
 ////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ $(document).ready(function() {
 
     $("div#output").click(function () {
         //创建输出窗口
-        $.modal('<div id="Out_window">' +
+        $.modal('<div id="Out_window" style="box-shadow:0px 0 15px #AAA;margin:0;border:2px;border-radius:0px 0px 10px 10px;">' +
             '<div id="Out_Title"><div id="Out_ajaxWindowTitle">Bangumi信息导出</div><div id="Out_closeWindowButton" title="close" class="simplemodal-close">X 关闭</div></div>' +  //<div id="Out_closeAjaxWindow"><small>Esc键可以快速关闭</small></div>
             '<div id="Out_Content"><div class="collectBox clearit"><form id="Out_BoxForm" name="OutBoxForm"><div class="cell"><div class="tagList"><span class="tip_j ll">导出格式：</span><div class="inner">' +
             '<a class="btnGray" id="OuttoUBB">BBcode</a><a class="btnGray" id="OuttoHtml">Html</a>' +
@@ -64,13 +64,15 @@ $(document).ready(function() {
             '<hr />' +
             '<div class="cell"><textarea name="Out_text" id="Out_text" cols="32" rows="20" class="quick"></textarea></div></form></div></div>' +
             '</div>',{                    // !-- SimpleModal插件属性
+            //containerCss:{"margin-left": "-265px","width": "530px","margin-top": "-195px","display":"block"},
             autoPosition : true,         // 自动定位
             zIndex : 102,
             escClose : true,             //按ESC关闭模态窗口
             overlayClose : true          //按overlay（遮罩层）关闭模态窗口
+
         });
         //仿照Bgm的修改窗口添加样式（待进一步完善）
-        $("#Out_window").css({"background": "#fff","color": "#000","text-align": "left","top": "50%","left": "50%","box-shadow": "0px 0 15px #AAA;"});
+        $("#Out_window").css({"background": "#fff","color": "#000","text-align": "left","top": "50%","left": "50%"});
         $("#Out_Title").css({"background": "#e8e8e8 url(/img/bangumi/bangumi_ui_1.png) repeat-x scroll 0 -113px","height": "30px","color": "#FFF","position": "relative"});
         $("#Out_ajaxWindowTitle").css({"float": "left","padding": "0 15px","line-height": "30px","font-size": "13px"});
         $("#Out_closeWindowButton").css({"color": "#FFF","text-indent": "-9999px","background": "url(/img/ico/closebox.png)","width": "30px","height": "30px", "cursor": "pointer","position": "absolute","top": "-12px","right": "-12px"});
@@ -81,7 +83,7 @@ $(document).ready(function() {
         });
 
         var toUBBbtn = $("#OuttoUBB").click(function (){                //BBCode
-            var outubb = //img + UBB.sectiondivision +
+            var outubb = //"[img]" + img + "[/img]" + UBB.sectiondivision +
                 UBB.before + MENU[0] + UBB.after + UBB.linedivision +
                 story + UBB.sectiondivision +
                 UBB.before + MENU[1] + UBB.after + UBB.linedivision +
@@ -90,10 +92,11 @@ $(document).ready(function() {
                 raw_cast.join(UBB.linedivision) + UBB.sectiondivision +
                 "(来源于" + base_link +")" + UBB.linedivision;
             outTextBox.val(outubb).select();                           //向输出框填入合成的BBcode代码并自动全选
+            GM_setClipboard(outubb);
         });
 
         var toHtmlbtn = $("#OuttoHtml").click(function () {              //Html
-            var outhtml = //img + HTML.sectiondivision +
+            var outhtml = //"<img href='" + img +"'>" + HTML.sectiondivision +
                 HTML.before + MENU[0] + HTML.after + HTML.linedivision +
                 story + HTML.sectiondivision +
                 HTML.before + MENU[1] + HTML.after + HTML.linedivision +
@@ -102,6 +105,7 @@ $(document).ready(function() {
                 raw_cast.join(HTML.linedivision) + HTML.sectiondivision +
                 "(来源于" + base_link +")" + HTML.linedivision;
             outTextBox.val(outhtml).select();
+            GM_setClipboard(outhtml);
         });
 
         switch (OUTFORMAT){
@@ -117,4 +121,5 @@ $(document).ready(function() {
  * version:
  *   * 20161222 写出了第一个版本的，大体实现了原来想要的所有功能。
  *   * 20170105 发现没有开启点击遮罩层关闭窗口的功能，补上。其他没变~
+ *   * 20170722 使用GM_setClipboard在输出时直接复制到剪贴板中。
  */
