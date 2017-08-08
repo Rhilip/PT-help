@@ -9,7 +9,7 @@
 // @require      http://code.jquery.com/jquery-2.2.4.min.js
 // @icon         http://bt.neu6.edu.cn/favicon.ico
 // @supportURL   http://bt.neu6.edu.cn/thread-1555682-1-1.html
-// @version      20170531
+// @version      20170803
 // ==/UserScript==
 
 // jQuery链接(为避免流量，请将第10行juqery源换为下面2的链接)
@@ -29,6 +29,7 @@ var AutoAdd = true; //自动增加集数，可选true,false
 var AutoImgRemove = true; //自动移除最后一张图片，可选true,false
 var OpenSearchEnhance = true; //开启搜索加强工具，可选true,false
 var SearchEnhanceDefaultShow = false; //搜索默认显示/隐藏，可选true,false
+var SeedTitleBigFont = false; //标题框放大，可选true,false
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // 脚本预处理阶段
@@ -72,15 +73,16 @@ var jq = jQuery.noConflict();
                             window.open(downlink);
                         });
                     });
-                    tr_img1.mouseenter(function() {
+                    tr_img1.hover(function() {
+                        td_img1.attr('title', "点击克隆种子信息");
                         td_img1.css("background-color", "#DDA0DD");
                         tr_img1.animate({
                             opacity: '0.5',
                             height: '-=2px',
                             width: '-=2px'
                         });
-                    });
-                    tr_img1.mouseleave(function() {
+                    }, function() {
+                        td_img1.attr('title', "");
                         td_img1.css("background-color", "rgba(0,0,0,0)");
                         tr_img1.animate({
                             opacity: '1',
@@ -88,10 +90,11 @@ var jq = jQuery.noConflict();
                             width: '+=2px'
                         });
                     });
-                    downloadtorrent1.mouseenter(function() {
+                    downloadtorrent1.hover(function() {
+                        downloadtorrent1.attr('title', "点击下载种子");
                         downloadtorrent1.css("background-color", "#DDA0DD");
-                    });
-                    downloadtorrent1.mouseleave(function() {
+                    }, function() {
+                        downloadtorrent1.attr('title', "");
                         downloadtorrent1.css("background-color", "rgba(0,0,0,0)");
                     });
                 } else if (tbody.find('tr td:eq(2) img').length) {
@@ -110,15 +113,16 @@ var jq = jQuery.noConflict();
                             window.open(downlink);
                         });
                     });
-                    tr_img2.mouseenter(function() {
+                    tr_img2.hover(function() {
+                        td_img2.attr('title', "点击克隆种子信息");
                         td_img2.css("background-color", "#DDA0DD");
                         tr_img2.animate({
                             opacity: '0.5',
                             height: '-=2px',
                             width: '-=2px'
                         });
-                    });
-                    tr_img2.mouseleave(function() {
+                    }, function() {
+                        td_img2.attr('title', "");
                         td_img2.css("background-color", "rgba(0,0,0,0)");
                         tr_img2.animate({
                             opacity: '1',
@@ -126,10 +130,11 @@ var jq = jQuery.noConflict();
                             width: '+=2px'
                         });
                     });
-                    downloadtorrent.mouseenter(function() {
+                    downloadtorrent.hover(function() {
+                        downloadtorrent.attr('title', "点击下载种子");
                         downloadtorrent.css("background-color", "#DDA0DD");
-                    });
-                    downloadtorrent.mouseleave(function() {
+                    }, function() {
+                        downloadtorrent.attr('title', "");
                         downloadtorrent.css("background-color", "rgba(0,0,0,0)");
                     });
                 }
@@ -161,15 +166,16 @@ var jq = jQuery.noConflict();
                         window.open(downlink);
                     });
                 });
-                tr_img.mouseenter(function() {
+                tr_img.hover(function() {
+                    td1.attr('title', "点击克隆种子信息");
                     td1.css("background-color", "#DDA0DD");
                     tr_img.animate({
                         opacity: '0.5',
                         height: '-=2px',
                         width: '-=2px'
                     });
-                });
-                tr_img.mouseleave(function() {
+                }, function() {
+                    td1.attr('title', "");
                     td1.css("background-color", "rgba(0,0,0,0)");
                     tr_img.animate({
                         opacity: '1',
@@ -177,10 +183,11 @@ var jq = jQuery.noConflict();
                         width: '+=2px'
                     });
                 });
-                downloadtorrent.mouseenter(function() {
+                downloadtorrent.hover(function() {
+                    downloadtorrent.attr('title', "点击下载种子");
                     downloadtorrent.css("background-color", "#DDA0DD");
-                });
-                downloadtorrent.mouseleave(function() {
+                }, function() {
+                    downloadtorrent.attr('title', "");
                     downloadtorrent.css("background-color", "rgba(0,0,0,0)");
                 });
             }
@@ -298,9 +305,13 @@ var jq = jQuery.noConflict();
     });
     // 对发种界面的修改
     if (location.href.match(/action=newthread/) || location.href.match(/action=edit/)) {
+        jq('span#custominfo').remove();
         jq('div.specialpost.s_clear div.pbt.cl input').attr('style', 'width: 52em');
-        jq('#subject').attr('style', 'width: 70em'); //更改发种界面的输入框宽度
-        //jq('#custominfo_pmenu').hide();
+        if (SeedTitleBigFont) {
+            jq('span#subjectchk').remove();
+            jq('#subject').attr('style', 'width: 70em;height: 1.5em;font-size: 1.45em');
+        } else
+            jq('#subject').attr('style', 'width: 70em'); //更改发种界面的输入框宽度
         jq('div#postbox').before('<div class="pbt cl"><div class="ftid"><span width="80">种子信息克隆：</span></div><div class="z"><span><input type="text" style="width:300px;" id="clone_from" class="px" placeholder="要克隆的种子编号链接" onkeypress="if(event.keyCode==13){clone_btn.click();}"></span><input type="button" id="clone_btn" style="size:100px;" value=" 克   隆 ">&nbsp;&nbsp;&nbsp;&nbsp;<span>[克隆状态：</span><span id="clone_info">请输入要克隆的种子链接</span><span>]</span></div></div><div id="seedfilename" hidden="true" class="pbt cl"><div class="ftid"><span width="80">种子文件名称：</span></div><div class="z"><input  type="text" style="width:71.5em;" class="px" id="uploadseedname"></div></div>');
         //展开标签栏，预备填写
         jq('#extra_tag_b').addClass('a');
@@ -435,9 +446,72 @@ var jq = jQuery.noConflict();
 
                     jq('input[name=subject]').attr('value', title); //填写标题
                     //填写分类
+                    var oldtype = page.find('a#newspecial').attr("onclick").match(/fid=(\d+)/)[1];
+                    var newtype = location.href.match(/fid=(\d+)/)[1];
                     if (page.find("h1.ts a").length) {
                         var movietype = page.find("h1.ts a").text().replace(/^\[|\]$/g, '');
                         var typeid = page.find("h1.ts a").attr("href").match(/typeid=(\d+)/)[1];
+                        if (oldtype != newtype) {
+                            var type_id_name = {
+                                "48": {
+                                    "247": "大陆",
+                                    "248": "港台",
+                                    "249": "其他1",
+                                    "250": "其他2",
+                                    "251": "其他",
+                                    "252": "版务公告"
+                                },
+                                "77": {
+                                    "178": "大陆",
+                                    "179": "港台",
+                                    "180": "其他1",
+                                    "181": "其他2",
+                                    "182": "其他"
+                                },
+                                "14": {
+                                    "101": "大陆",
+                                    "102": "港台",
+                                    "103": "其他1",
+                                    "104": "其他2",
+                                    "105": "其他",
+                                    "106": "版务公告"
+                                },
+                                "73": {
+                                    "298": "大陆",
+                                    "299": "港台",
+                                    "300": "其他1",
+                                    "301": "其他2",
+                                    "302": "其他",
+                                    "303": "版务公告"
+                                },
+                                "45": {
+                                    "231": "大陆",
+                                    "232": "港台",
+                                    "233": "日韩",
+                                    "234": "欧美",
+                                    "235": "其他",
+                                    "236": "版务公告"
+                                },
+                                "13": {
+                                    "94": "大陆",
+                                    "95": "港台",
+                                    "96": "日韩",
+                                    "97": "欧美",
+                                    "98": "其他",
+                                    "99": "版务公告",
+                                    "100": "移动视频"
+                                }
+                            };
+                            var matched = false;
+                            for (var k in type_id_name[newtype]) {
+                                if (movietype == type_id_name[newtype][k]) {
+                                    typeid = k;
+                                    matched = true;
+                                    break;
+                                }
+                            }
+                            typeid = (matched) ? typeid : 0;
+                        }
                         if (movietype && typeid) {
                             jq('#typeid_ctrl_menu li').removeClass('current');
                             jq('#typeid_ctrl').html(movietype);
