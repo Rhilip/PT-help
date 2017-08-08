@@ -1,14 +1,19 @@
 // ==UserScript==
 // @name Hide the got ship in ntwiki
 // @namespace http://blog.rhilip.info
-// @version 20170126
+// @version 20170722
 // @description 在舰少数据库中隐藏已经打捞到的船只
 // @author Rhilip
-// @match http://js.ntwikis.com/jsp/apps/cancollezh/maps/detailnew.jsp?detailid=*
+// @match http://js.ntwikis.com/*
 // ==/UserScript==
 
-have_raw = ["1-14",16,"18-77","80-100",102,"104-115",117,119,"122-144",147,"149-155",157,158,"160-162","164-169","171-183","185-188","192-195","197-200",
-            203,206,209,211,214,219,223,225,227,228,"233-236",238,239,241,248,"253-254","259-260",265,"268-270","275-276","278-279","289-290",294,298,301,"303-304","306-307",309,312,315,316,318];
+have_raw = ["1-14",16,"18-77","80-100",102,"104-115","117-120","122-144","147-155",157,158,"160-162","164-169","171-183","185-188","192-195","197-200",
+            203,206,209,211,214,"219-220",223,"225-228","233-236",238,239,241,248,"253-254","259-260",264,265,"268-270","275-276","278-279","289-290",294,298,
+            301,"303-304","306-307",309,312,"314-316",318,322,325,
+            1001,"1004-1013","1018-1019",1022,"1026-1030","1032-1042","1045-1049","1054-1056","1058-1066","1068-1075","1080-1085",1089,1093,"1097-1099",
+            "1105-1106","1108-1109","1112-1113",1117,"1123-1124",1126,1130,"1135-1136","1141-1143",1162,"1164-1165",1183,"1194-1195",1197,1219,"1227-1228",1265,1269,
+            8007,8009,8011,8038,8111,
+            116,8116];
 
 
 have = [];
@@ -43,8 +48,12 @@ function wrapship() {
     }
 }
 
-function hideship() {
-    $("ul#map-detail-dropinfos > li.ui-li-divider.ui-bar-inherit.ui-first-child")
+var tag = 0;
+
+
+function check() {
+    if (!$("div#hidehave").html()) {
+        $("ul#map-detail-dropinfos > li.ui-li-divider.ui-bar-inherit.ui-first-child")
         .append("<div style=\"display:inline-block;float:right\" id='hidehave'>隐藏已捞出船只</div>");
     $("div#hidehave").click(function () {
         if ($(this).text().match(/隐藏已捞出船只/)){
@@ -59,13 +68,25 @@ function hideship() {
             $(this).text("隐藏已捞出船只");
         }
     }).click();
-}
+    }
+    if (tag === 0){
+    var ship_list = $("#page_charactorquery_listview > li.ui-li-has-alt");
 
-function check() {
-    if (!$("div#hidehave").html()) {
-        hideship();
+    for (var i=0;i<ship_list.length;i++){
+        var this_ship = $(ship_list[i]);
+        var this_ship_number = this_ship.attr("data-filtertext").match(/(\d+)/)[1];
+        this_ship.addClass("ship_" + this_ship_number);
+        this_ship.addClass("nothave");
+    }
+
+    for (var j=0;j<have.length;j++){
+        $("li.ship_"+have[j]+"").removeClass("nothave").addClass("have");
+    }
+    $("li.have").hide();
+    tag = 1;
     }
 }
+
 
 $(document).ready(function(){
     setInterval(check,1000);
