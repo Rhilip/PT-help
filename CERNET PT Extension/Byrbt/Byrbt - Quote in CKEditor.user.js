@@ -1,20 +1,19 @@
 // ==UserScript==
 // @name         Byrbt : Quote in CKEditor
 // @namespace    http://blog.rhilip.info
-// @version      20170808
+// @version      20170912
 // @description  为BYRBT的编辑器添加代码（code）引用框
 // @author       Rhilip
 // @match        http*://bt.byr.cn/edit.php*
 // @match        http*://bt.byr.cn/upload.php*
 // @icon         http://bt.byr.cn/favicon.ico
-// @require      https://gist.github.com/raw/2625891/waitForKeyElements.js
 // @require      https://cdn.bootcss.com/simplemodal/1.4.4/jquery.simplemodal.min.js
 // ==/UserScript==
 
 const DEFAULT_STYLE = [
     {
         "name": "类似其他PT站的代码格式",
-        "style": "<div><div class=\"codetop\" style=\"padding: 3px; font-weight: bold; margin: 0 auto;\">{0}</div><div class=\"codemain\" style=\"font-family: Consolas; border-width: 1px; border-style: solid; padding: 6px; margin: 0 auto;\">{1}</div></div>",
+        "style": "<div class=\"codetop\" style=\"padding: 3px; font-weight: bold; margin: 0 auto;\">{0}</div><div class=\"codemain\" style=\"font-family: Consolas; border-width: 1px; border-style: solid; padding: 6px; margin: 0 auto;\">{1}</div>",
         "checked": 0
     },{
         "name": "类似其他PT站的引用格式",
@@ -26,7 +25,7 @@ const DEFAULT_STYLE = [
         "checked": 1
     },{
         "name": "类似TTG的引用格式",
-        "style": "<div><div class=\"sub\"><b>{0}</b></div><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"background-color:#5a5;\"><td style=\"font-family: Consolas; border: 1px black dotted\">{1}</td></table></div>",
+        "style": "<div class=\"sub\"><b>{0}</b></div><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"background-color:#5a5;\"><td style=\"font-family: Consolas; border: 1px black dotted\">{1}</td></table>",
         "checked": 0
     }
 ];
@@ -46,8 +45,7 @@ if (!String.prototype.format) {
     };
 }
 
-waitForKeyElements("#cke_descr", function () {
-    // Add Btn of Quote | Code
+CKEDITOR.on('instanceReady', function (evt) {
     $("#cke_52").after('<span id="cke_55"class="cke_toolbar"role="toolbar"><span class="cke_toolbar_start"></span><span class="cke_toolgroup"role="presentation"><span class="cke_button"><a id="cke_28"class="cke_button_code cke_off"><img src="{0}"/></a></span></span><span class="cke_toolbar_end"></span></span>'.format(CODE_IMG));
     var code_btn = $("#cke_55");
     code_btn.click(function () {
@@ -86,6 +84,7 @@ waitForKeyElements("#cke_descr", function () {
             var info_str = $("#modal_textarea").val();
 
             var insert_data_raw = DEFAULT_STYLE[quote_style_id].style.format(menu_str, info_str.split("\n").join("<br>"));  // info_str.replace("/\n/g","<br>"));
+
             if ($("#modal_skip_clone").attr("checked") === "checked") {
                 insert_data_raw = "<div class='byrbt_info_clone_ignore'>" + insert_data_raw + "</div>";
             }
@@ -96,9 +95,9 @@ waitForKeyElements("#cke_descr", function () {
     });
 });
 
-
 /**
- * Created by Rhili on 6/30/2017.
+ * Created by Rhilip on 6/30/2017.
+ * 20170912: Use CKEDITOR.on('instanceReady', function(){}) instead of waitForKeyElements("#cke_descr", function () {})
+ * 20170808: USE the dict list to manage the code style
  * 20170630: Test Version~
- * 20170808: USE the dict list to manage the code style,And REMOVE function update_editor()
  */
