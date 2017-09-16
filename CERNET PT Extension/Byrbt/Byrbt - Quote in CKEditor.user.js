@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Byrbt : Quote in CKEditor
 // @namespace    http://blog.rhilip.info
-// @version      20170912
+// @version      20170916
 // @description  为BYRBT的编辑器添加代码（code）引用框
 // @author       Rhilip
 // @match        http*://bt.byr.cn/edit.php*
@@ -14,19 +14,19 @@ const DEFAULT_STYLE = [
     {
         "name": "类似其他PT站的代码格式",
         "style": "<div class=\"codetop\" style=\"padding: 3px; font-weight: bold; margin: 0 auto;\">{0}</div><div class=\"codemain\" style=\"font-family: Consolas; border-width: 1px; border-style: solid; padding: 6px; margin: 0 auto;\">{1}</div>",
-        "checked": 0
     },{
         "name": "类似其他PT站的引用格式",
         "style": "<fieldset><legend><b>{0}</b></legend><div style=\"font-family: Consolas;\">{1}</div></fieldset>",
-        "checked": 0
     },{
         "name": "@DoxHead个人美化版",
         "style": "<fieldset style=\"font-family: Consolas;\"><legend><span style=\"color:#ffffff;background-color:#000000;\">&nbsp;{0}&nbsp;</span></legend>{1}</fieldset>",
-        "checked": 1
+        "checked": true
     },{
         "name": "类似TTG的引用格式",
         "style": "<div class=\"sub\"><b>{0}</b></div><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"background-color:#5a5;\"><td style=\"font-family: Consolas; border: 1px black dotted\">{1}</td></table>",
-        "checked": 0
+    },{
+        "name": "本站块引用增强",
+        "style": "<blockquote style=\"box-sizing: border-box; padding: 8px; margin: 5px; font-size: small; border-width: 1px 1px 1px 5px; border-style: solid;\"><p style=\"box-sizing: border-box; margin: 0px 0px 10px;\">{0}</p><div style=\"font-family: Consolas;\">{1}</div></blockquote>",
     }
 ];
 
@@ -53,7 +53,7 @@ CKEDITOR.on('instanceReady', function (evt) {
         var code = '<div id="modal_out_window"><div id="modal_out_title">Code Properties</div><div id="modal_data"><div id="modal_choose"><div><span>Style: (具体展示见<a href="/forums.php?action=viewtopic&forumid=9&topicid=11235" target="_blank">新手学园-->资源简介美化——引用nfo格式</a>)</span><div class="row"><div class="col-md-12">';
         for (var i= 0 ;i < DEFAULT_STYLE.length;i++){
             var choose = "";
-            if (DEFAULT_STYLE[i].checked === 1) {
+            if ((DEFAULT_STYLE[i].checked || (DEFAULT_STYLE[i].checked = false)) === true) {
                 choose = ' checked=""';
             }
             code += '<label class="radio-inline"><input type="radio" name="code_style" value="{0}" {1}> {2}</label>'.format(i,choose,DEFAULT_STYLE[i].name);
