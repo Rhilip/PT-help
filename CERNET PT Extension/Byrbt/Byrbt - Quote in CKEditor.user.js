@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Byrbt : Quote in CKEditor
 // @namespace    http://blog.rhilip.info
-// @version      20170916
+// @version      20170917
 // @description  为BYRBT的编辑器添加代码（code）引用框
 // @author       Rhilip
 // @match        http*://bt.byr.cn/edit.php*
@@ -50,18 +50,18 @@ CKEDITOR.on('instanceReady', function (evt) {
     var code_btn = $("#cke_55");
     code_btn.click(function () {
         // Generate the modal code
-        var code = '<div id="modal_out_window"><div id="modal_out_title">Code Properties</div><div id="modal_data"><div id="modal_choose"><div><span>Style: (具体展示见<a href="/forums.php?action=viewtopic&forumid=9&topicid=11235" target="_blank">新手学园-->资源简介美化——引用nfo格式</a>)</span><div class="row"><div class="col-md-12">';
+        var code = '<div id="modal_out_window"><div id="modal_out_title">Code Properties</div><div id="modal_data"><div id="modal_choose"><div><span>Style: (具体展示见 <a href="/forums.php?action=viewtopic&forumid=9&topicid=11235" target="_blank">新手学园-->资源简介美化——引用nfo格式</a> )</span><a id="modal_more_style_btn" style="float:right;" href="javascript:void(0);">↓ Show</a><div id="modal_style"><div style="display: flex;">';
         for (var i= 0 ;i < DEFAULT_STYLE.length;i++){
             var choose = "";
             if ((DEFAULT_STYLE[i].checked || (DEFAULT_STYLE[i].checked = false)) === true) {
                 choose = ' checked=""';
             }
-            code += '<label class="radio-inline"><input type="radio" name="code_style" value="{0}" {1}> {2}</label>'.format(i,choose,DEFAULT_STYLE[i].name);
+            code += '<label style="width:50%;"><input type="radio" name="code_style" value="{0}" {1}> {2}</label>'.format(i,choose,DEFAULT_STYLE[i].name);
             if ((i+1)%2 === 0){
-                code += '</div><div class="col-md-12">';
+                code += '</div><div style="display: flex;">';
             }
         }
-        code += '</div></div><hr><form class="form-horizontal"><div class="form-group"><label for="modal_title">Title:</label><input id="modal_title" type="text" value="Quote:" class="form-control" style="width:100%"></div><div class="form-group"><label for="modal_textarea">CODE iNFO:</label><textarea id="modal_textarea" class="form-control" rows="6" style="width:100%"></textarea></div><div class="checkbox"><label><input id="modal_skip_clone" type="checkbox" checked=""> Skip When Next Clone Time~</label></div></form></div><div id="modal_btn" align="right"><button type="button" id="modal_update">OK</button> <button type="button" class="simplemodal-close" id="modal_exit">Cancel</button></div></div></div>';
+        code += '</div></div><hr><form><div><label for="modal_title">Title:</label><input id="modal_title" type="text" value="Quote:" class="form-control" style="width:100%"></div><div><label for="modal_textarea">CODE iNFO:</label><textarea id="modal_textarea" rows="6" style="width:100%"></textarea></div><div><label><input id="modal_skip_clone" type="checkbox" checked=""> Skip When Next Clone Time~</label></div></form></div><div id="modal_btn" align="right"><button type="button" id="modal_update">OK</button> <button type="button" class="simplemodal-close" id="modal_exit">Cancel</button></div></div></div>';
 
         $(code).modal({            // !-- SimpleModal插件属性
                 autoPosition: true,         // 自动定位
@@ -77,6 +77,20 @@ CKEDITOR.on('instanceReady', function (evt) {
         $("#modal_out_window").css({"border":"solid 1px #ddd","padding":"5px","background-color":"#fff","border-radius":"5px"});
         $("#modal_out_title").css({"font-weight":" bold","font-size": "14px","padding": "3px 3px 8px","border-bottom": "1px solid #eee"});
         $("#modal_data").css({"background-color": "#ebebeb","border": "solid 1px #fff","border-bottom": "none","overflow": "auto","padding": "17px 10px 5px 10px","border-top-left-radius": "5px","border-top-right-radius": "5px",});
+
+        var more_style = $("#modal_style > div:gt(1)");
+        more_style.hide();
+
+        var more_style_btn = $("#modal_more_style_btn");
+        more_style_btn.click(function(){
+            more_style.toggle();
+           if (more_style.is(":visible")){
+               more_style_btn.text("↑ Hide");
+           }else{
+               more_style_btn.text("↓ Show");
+           }
+        });
+
 
         $("#modal_update").click(function () {
             var quote_style_id = parseInt($("input[name='code_style']:checked").val());
@@ -97,6 +111,7 @@ CKEDITOR.on('instanceReady', function (evt) {
 
 /**
  * Created by Rhilip on 6/30/2017.
+ * 20170917: Fix When number of Style gt(4)
  * 20170912: Use CKEDITOR.on('instanceReady', function(){}) instead of waitForKeyElements("#cke_descr", function () {})
  * 20170808: USE the dict list to manage the code style
  * 20170630: Test Version~
