@@ -3,6 +3,7 @@
 # Copyright (c) 2017-2020 Rhilip <rhilipruan@gmail.com>
 
 from flask import Blueprint, request, jsonify
+from flask_cors import cross_origin
 from geo.utils import IpQuery
 
 geo_blueprint = Blueprint('geo', __name__)
@@ -13,8 +14,11 @@ no_args_waring = """
     使用方法:/geo?ip={ip}，返回json格式报文<br>
     """
 
+ip_query = IpQuery()
+
 
 @geo_blueprint.route("/geo")
+@cross_origin()
 def geo():
     if not request.args:
         return no_args_waring
@@ -27,6 +31,6 @@ def geo():
             "loc": "Not Find IP address." if ip is None else None
         }
 
-        ret_dict.update(IpQuery().searchIp(ip))
+        ret_dict.update(ip_query.searchIp(ip))
 
         return jsonify(ret_dict)

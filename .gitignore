@@ -104,3 +104,5 @@ ENV/
 .idea
 
 # This project
+userconfig.py
+backup/
