@@ -3,8 +3,8 @@
 # Copyright (c) 2017-2020 Rhilip <rhilipruan@gmail.com>
 
 from app import app
-from geo import geo_blueprint
-from ptboard import ptboard_blueprint
+from modules.geo import geo_blueprint
+from modules.ptboard import ptboard_blueprint
 
 app.register_blueprint(geo_blueprint)
 app.register_blueprint(ptboard_blueprint)

@@ -4,10 +4,13 @@
 
 from flask import Flask
 from utils.database import Database
+from flask_cors import CORS
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object('config')
 app.config.from_pyfile('config.py')
+
+CORS(app)
 
 mysql = Database()
 mysql.init_app(app)
