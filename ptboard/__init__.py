@@ -3,22 +3,34 @@
 # Copyright (c) 2017-2020 Rhilip <rhilipruan@gmail.com>
 
 import re
-from pymysql.cursors import DictCursor
+import time
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
-
-from app import mysql
+from utils.database import Database
 
 ptboard_blueprint = Blueprint('ptboard', __name__)
+ptboard_blueprint.config = {}
+
+
+@ptboard_blueprint.record
+def record_params(setup_state):
+    app = setup_state.app
+    ptboard_blueprint.config = dict([(key, value) for (key, value) in app.config.items()])
+
+
+mysql = Database()
+mysql.init_app(ptboard_blueprint)
 
 
 @ptboard_blueprint.route("/ptboard")
 @cross_origin()
 def ptboard():
-    search_raw = request.args.get("search")
+    search_raw = request.args.get("search") or ""
     order_raw = request.args.get("order") or "desc"
     limit_raw = request.args.get("limit") or 50
     offset_raw = request.args.get("offset") or 0
+
+    t0 = time.clock()
 
     search = re.sub(r"[ _\-,.]", " ", search_raw)
     search = re.sub(r"\'", r"''", search)
@@ -40,12 +52,15 @@ def ptboard():
     except ValueError or TypeError:
         offset = 0
 
-    cursor = mysql.get_db().cursor(DictCursor)
-    # SELECT * FROM `rss_pt_site` WHERE title LIKE "%E01%" and title LIKE "%720P%" ORDER BY `pubDate` DESC LIMIT 50, 25
     sql = "SELECT * FROM `rss_pt_site` WHERE {opt} ORDER BY `pubDate` {_da} LIMIT {_offset}, {_limit}".format(
         opt=opt, _da=order.upper(), _offset=offset, _limit=limit
     )
-    row = cursor.execute(sql)
-    raw_data = cursor.fetchall()
+    rows_data = mysql.exec(sql=sql, r_dict=True, fetch_all=True)
+    total_data = mysql.exec("SELECT `TABLE_ROWS` FROM `information_schema`.`TABLES` "
+                            "WHERE `TABLE_NAME`='rss_pt_site'")[0]
 
-    return jsonify(raw_data)
+    return jsonify({
+        "cost": time.clock() - t0,
+        "rows": rows_data,
+        "total": total_data
+    })
