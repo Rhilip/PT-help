@@ -43,9 +43,10 @@ def ptboard():
     except ValueError or TypeError:
         offset = 0
 
-    sql = "SELECT * FROM `rss_pt_site` WHERE {opt} ORDER BY `pubDate` {_da} LIMIT {_offset}, {_limit}".format(
-        opt=opt, _da=order.upper(), _offset=offset, _limit=limit
-    )
+    sql = ("SELECT `site`,`sid`,`title`,`link`,`pubDate` FROM `rss_pt_site` "
+           "WHERE {opt} ORDER BY `pubDate` {_da} LIMIT {_offset}, {_limit}".format(opt=opt, _da=order.upper(),
+                                                                                   _offset=offset, _limit=limit)
+           )
     rows_data = mysql.exec(sql=sql, r_dict=True, fetch_all=True)
     total_data = mysql.exec("SELECT `TABLE_ROWS` FROM `information_schema`.`TABLES` "
                             "WHERE `TABLE_NAME`='rss_pt_site'")[0]
