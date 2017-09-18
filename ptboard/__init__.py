@@ -6,20 +6,9 @@ import re
 import time
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
-from utils.database import Database
+from app import mysql
 
 ptboard_blueprint = Blueprint('ptboard', __name__)
-ptboard_blueprint.config = {}
-
-
-@ptboard_blueprint.record
-def record_params(setup_state):
-    app = setup_state.app
-    ptboard_blueprint.config = dict([(key, value) for (key, value) in app.config.items()])
-
-
-mysql = Database()
-mysql.init_app(ptboard_blueprint)
 
 
 @ptboard_blueprint.route("/ptboard")
@@ -45,6 +34,8 @@ def ptboard():
     order = "desc" if order_raw not in ["desc", "asc"] else order_raw
     try:
         limit = int(limit_raw)
+        if limit > 200:
+            limit = 200
     except ValueError or TypeError:
         limit = 50
     try:
