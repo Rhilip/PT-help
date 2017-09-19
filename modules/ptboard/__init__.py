@@ -26,7 +26,7 @@ def ptboard():
     if search:
         key = ["`title` LIKE '%{key}%'".format(key=i) for i in search]
         opt = " AND ".join(key)
-        total_data = mysql.exec("SELECT COUNT(*) FORM `rss_pt_site` WHERE {opt}".format(opt=opt))
+        total_data = mysql.exec("SELECT COUNT(*) FROM `rss_pt_site` WHERE {opt}".format(opt=opt))
     else:
         opt = "1=1"
         total_data = mysql.exec("SELECT `TABLE_ROWS` FROM `information_schema`.`TABLES` "
