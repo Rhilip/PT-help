@@ -26,8 +26,11 @@ def ptboard():
     if search:
         key = ["`title` LIKE '%{key}%'".format(key=i) for i in search]
         opt = " AND ".join(key)
+        total_data = mysql.exec("SELECT COUNT(*) FORM `rss_pt_site` WHERE {opt}".format(opt=opt))
     else:
         opt = "1=1"
+        total_data = mysql.exec("SELECT `TABLE_ROWS` FROM `information_schema`.`TABLES` "
+                                "WHERE `TABLE_NAME`='rss_pt_site'")[0]
 
     order = "desc" if order_raw not in ["desc", "asc"] else order_raw
     try:
@@ -46,8 +49,6 @@ def ptboard():
                                                                                    _offset=offset, _limit=limit)
            )
     rows_data = mysql.exec(sql=sql, r_dict=True, fetch_all=True)
-    total_data = mysql.exec("SELECT `TABLE_ROWS` FROM `information_schema`.`TABLES` "
-                            "WHERE `TABLE_NAME`='rss_pt_site'")[0]
 
     return jsonify({
         "cost": time.clock() - t0,
