@@ -35,6 +35,7 @@ Pt站点高级搜索
           sid: 275274,                                         // 种子序号
           site: "HDChina",                                     // 发布站点
           title: "The.Strain.S04.720p.HDTV.x264-Scene",        // 种子名称
+          uid: 42844                                           // 数据库记录顺序
       },
       {
           link: "http://nanyangpt.com/details.php?id=42969",
@@ -42,10 +43,11 @@ Pt站点高级搜索
           sid: 42969,
           site: "NYPT",
           title: "[血族/嗜血菌株][The.Strain.S04E10.720p.HDTV.x264-FLEET][S04E10]",
+          uid: 40994
       },
     .......
   ], 
-  "total": 54286                       // 记录总条数（粗略）
+  "total": 54286                       // 记录总条数（搜索时为具体条数，其他情况为粗略条数）
 }
 
 ```

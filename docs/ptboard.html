@@ -5,10 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description" content="Dashboard for PT Site">
+    <meta name="author" content="Rhilip">
 
-    <title>Dashboard Template for Bootstrap</title>
+    <title>Dashboard for PT Site</title>
 
     <!-- Bootstrap core CSS -->
     <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
@@ -30,12 +30,11 @@
         .navbar-fixed-top {
           border: 0;
         }
-        /*
-         * Main content
-         */
 
+        /* Main content */
         .main {
           padding: 20px;
+          margin-top: 0;
         }
         @media (min-width: 768px) {
           .main {
@@ -43,9 +42,13 @@
             padding-left: 40px;
           }
         }
-        .main .page-header {
-          margin-top: 0;
+
+        /* To keep data show in one line */
+        td.data-inline{
+            word-break:keep-all;
+            white-space:nowrap;
         }
+
     </style>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -80,29 +83,16 @@
       <div class="row">
         <div class="col-sm-8 col-sm-offset-2 col-md-10 col-md-offset-1 main">
           <div class="table-responsive">
-            <table id="table"
-                   data-classes="table table-hover table-striped"
-                   data-search="true"
-                   data-show-refresh="true"
-                   data-striped = "true"
-                   data-escape = "true"
-                   data-sort-order = "desc"
-                   data-pagination="true"
-                   data-page-size = 50
-                   data-page-list="[10, 25, 50, 100, 200]"
-                   data-show-footer="false"
-                   data-side-pagination="server"
-                   data-url="https://api.rhilip.info/tool/ptboard"
-                   >
-            </table>
+            <table id="table"></table>
           </div>
-            <!--
             <hr>
             <h2>Notices: </h2>
-            <ul>
-              <li>...</li>
-            </ul>
-            -->
+            <ol>
+                <li>This site is just like the "Bulletin Board" to announce the latest torrents of some PT sites. Or you can use as the "Advanced Search tools".</li>
+                <li>We do not offer any download service. You need an account to access and download on the appropriate website.</li>
+                <li>The records may lag behind the corresponding website about 2-15 minutes later, depending on their feeding service.</li>
+                <li>The recorded title will be retained and will no longer be updated (even if the corresponding torrent edit, disable or delete).</li>
+            </ol>
         </div>
       </div>
     </div>
@@ -118,15 +108,20 @@
 
     <!-- Latest compiled and minified Locales for bootstrap-table -->
     <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/locale/bootstrap-table-zh-CN.min.js"></script>
+
     <script>
         var $table = $('#table');
         function initTable() {
             $table.bootstrapTable({
+                classes: "table table-hover table-striped",
+                striped: true,
+                sortOrder: "desc",
                 columns: [
                         {
                             field: 'site',
                             title: 'Site',
-                            align: 'center'
+                            align: 'center',
+                            valign: 'middle'
                         }, {
                             field: 'title',
                             title: 'Title',
@@ -136,11 +131,20 @@
                             field: 'pubDate',
                             title: 'Publish Date',
                             align: 'center',
+                            valign: 'middle',
+                            class: 'data-inline',
                             sortable: 'true',
-                        	width: '15%',
                             formatter: TimeStampFormatter
                         }
-                ]
+                ],
+                url: "https://api.rhilip.info/tool/ptboard",
+                pagination: true,
+                sidePagination: "server",
+                pageSize: 50,
+                pageList: [10, 25, 50, 100, 200],
+                escape: true,
+                search: true,
+                showRefresh: true
             });
             // sometimes footer render error.
             setTimeout(function () {
@@ -155,15 +159,12 @@
         var unixTimestamp = new Date(data * 1000);
         return unixTimestamp.toLocaleString()
     }
+
     /**
     * @return {string}
     */
-    function LinkFormatter(value,index){
-        return '<a target="_blank" href=' + index.link + '>'+ index.title +'</a>'
-    }
-
-    function getHeight() {
-        return $(window).height() - $('h1').outerHeight(true);
+    function LinkFormatter(value, index){
+        return '<a href=' + index.link + ' target="_blank">'+ index.title +'</a>'
     }
 
     initTable()
