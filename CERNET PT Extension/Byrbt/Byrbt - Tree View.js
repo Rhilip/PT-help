@@ -185,13 +185,14 @@ var TreeNode = (function () {
 
 
     var hidefl_btn = $("#hidefl");
-    hidefl_btn.append("<a id='change_tree' href=\"javascript: void()\">[树状化]</a>");
+    hidefl_btn.append("<a id='change_tree' href=\"javascript: void(0)\">[树状化]</a>");
     $("#filelist").after("<div id=\"jstree_demo_div\" style='background-color: aliceblue'></div>");
 
+    var jstree_demo_div = $('#jstree_demo_div');
     $("#change_tree").click(function () {
         var change_tree_btn = $(this);
+        jstree_demo_div.show();
         if (change_tree_btn.text() === "[树状化]"){
-            var jstree_demo_div = $('#jstree_demo_div');
             if (jstree_demo_div.html() === ""){
                 var data = new TreeNode($("a.index[href^=download]").text().match(/\[BYRBT]\.(.+)\.torrent/)[1]);
                 $('#filelist > table tr:gt(0)').each(function (index) {
@@ -203,8 +204,6 @@ var TreeNode = (function () {
                 jstree_demo_div.jstree({
                     core: { data: data.toObject() }
                 });
-            } else {
-                jstree_demo_div.show();
             }
             $("#filelist").hide();
             change_tree_btn.text("[恢复]");
@@ -214,6 +213,14 @@ var TreeNode = (function () {
             change_tree_btn.text("[树状化]");
         }
     });
+
+    $("#hidefl > a:nth-child(1)").click(function () {
+        $('#jstree_demo_div').hide();
+    });
+    $("#showfl > a:nth-child(1)").click(function () {
+        $('#jstree_demo_div').show();
+    });
+
 })();
 
 /**
