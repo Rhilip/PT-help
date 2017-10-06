@@ -7,7 +7,7 @@ from modules.geo import geo_blueprint
 from modules.ptboard import ptboard_blueprint
 
 app.register_blueprint(geo_blueprint)
-app.register_blueprint(ptboard_blueprint, url_prefix="/ptboard")
+app.register_blueprint(ptboard_blueprint)
 
 
 @app.route('/')

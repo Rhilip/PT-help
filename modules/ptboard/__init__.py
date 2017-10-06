@@ -11,14 +11,14 @@ from pymysql import escape_string
 ptboard_blueprint = Blueprint('ptboard', __name__)
 
 
-@ptboard_blueprint.route("/")
+@ptboard_blueprint.route("/ptboard")
 def ptboard():
+    t0 = time.time()
+
     search_raw = request.args.get("search") or ""
     order_raw = request.args.get("order") or "desc"
     limit_raw = request.args.get("limit") or 50
     offset_raw = request.args.get("offset") or 0
-
-    t0 = time.time()
 
     search = re.sub(r"[ _\-,.]", " ", search_raw)
     search = search.split()
