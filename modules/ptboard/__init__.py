@@ -6,27 +6,26 @@ import re
 import time
 from flask import Blueprint, request, jsonify
 from app import mysql
+from pymysql import escape_string
 
 ptboard_blueprint = Blueprint('ptboard', __name__)
 
 
-@ptboard_blueprint.route("/ptboard")
+@ptboard_blueprint.route("/")
 def ptboard():
     search_raw = request.args.get("search") or ""
     order_raw = request.args.get("order") or "desc"
     limit_raw = request.args.get("limit") or 50
     offset_raw = request.args.get("offset") or 0
 
-    t0 = time.clock()
+    t0 = time.time()
 
     search = re.sub(r"[ _\-,.]", " ", search_raw)
-    search = re.sub(r"\'", r"''", search)
     search = search.split()
     search = search[:10]
     if search:
-        key = ["`title` LIKE '%{key}%'".format(key=i) for i in search]
-        opt = " AND ".join(key)
-        total_data = mysql.exec("SELECT COUNT(*) FROM `rss_pt_site` WHERE {opt}".format(opt=opt))
+        opt = " AND ".join(["`title` LIKE '%{key}%'".format(key=escape_string(i)) for i in search])
+        total_data = mysql.exec("SELECT COUNT(*) FROM `rss_pt_site` WHERE {opt}".format(opt=opt))[0]
     else:
         opt = "1=1"
         total_data = mysql.exec("SELECT `TABLE_ROWS` FROM `information_schema`.`TABLES` "
@@ -45,11 +44,12 @@ def ptboard():
         offset = 0
 
     sql = ("SELECT * FROM `rss_pt_site` WHERE {opt} ORDER BY `pubDate` {_da} LIMIT {_offset}, {_limit}".format(
-        opt=opt, _da=order.upper(), _offset=offset, _limit=limit))
+        opt=opt, _da=order.upper(), _offset=offset, _limit=limit)
+    )
     rows_data = mysql.exec(sql=sql, r_dict=True, fetch_all=True)
 
     return jsonify({
-        "cost": time.clock() - t0,
+        "cost": time.time() - t0,
         "rows": rows_data,
         "total": total_data
     })
