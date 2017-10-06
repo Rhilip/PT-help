@@ -45,10 +45,9 @@
 
         /* To keep data show in one line */
         td.data-inline{
-            word-break:keep-all;
-            white-space:nowrap;
+            word-break: keep-all;
+            white-space: nowrap;
         }
-
     </style>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -109,7 +108,7 @@
     <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
 
     <!-- Latest compiled and minified Locales for bootstrap-table -->
-    <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/locale/bootstrap-table-zh-CN.min.js"></script>
+    <!-- <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/locale/bootstrap-table-zh-CN.min.js"></script> -->
 
     <script>
         var $table = $('#table');
@@ -155,7 +154,7 @@
             }, 200);
     }
 
-    /**
+    /** Format Timestamp to locale time string
     * @return {string}
     */
     function TimeStampFormatter(data){
@@ -163,11 +162,11 @@
         return unixTimestamp.toLocaleString()
     }
 
-    /**
+    /** Format Title with it's Link
     * @return {string}
     */
     function LinkFormatter(value, index){
-        return '<a href=' + index.link + ' target="_blank">'+ index.title +'</a>'
+        return '<a href="' + index.link + '" target="_blank">'+ index.title +'</a>'
     }
 
     initTable()
