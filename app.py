@@ -12,5 +12,5 @@ app.config.from_pyfile('config.py')
 
 CORS(app)
 
-mysql = Database()
+mysql = Database(autocommit=True)
 mysql.init_app(app)
