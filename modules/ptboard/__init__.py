@@ -20,7 +20,7 @@ def ptboard():
     limit_raw = request.args.get("limit") or 50
     offset_raw = request.args.get("offset") or 0
 
-    search = re.sub(r"[ _\-,.]", " ", search_raw)
+    search = re.sub(r"[ _\-,.+]", " ", search_raw)
     search = search.split()
     search = search[:10]
     if search:
