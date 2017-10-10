@@ -11,6 +11,11 @@ from modules.token import get_token_record, token_use
 
 ptboard_blueprint = Blueprint('ptboard', __name__)
 
+search_default = ""
+order_default = "desc"
+limit_default = 100
+offset_default = 0
+
 
 @ptboard_blueprint.route("/ptboard")
 def ptboard():
@@ -26,17 +31,16 @@ def ptboard():
     if ret.setdefault("success", False):
         token_quote = int(ret.setdefault("quote", 0))
         if token_quote is not 0:
-            search_raw = request.args.get("search") or ""
-            order_raw = request.args.get("order") or "desc"
-            limit_raw = request.args.get("limit") or 50
-            offset_raw = request.args.get("offset") or 0
+            search_raw = request.args.get("search") or search_default
+            order_raw = request.args.get("order") or order_default
+            limit_raw = request.args.get("limit") or limit_default
+            offset_raw = request.args.get("offset") or offset_default
 
             search = re.sub(r"[ _\-,.+]", " ", search_raw)
             search = search.split()
             search = search[:10]
             if search:
                 opt = " AND ".join(["`title` LIKE '%{key}%'".format(key=escape_string(i)) for i in search])
-                token_use(token)
             else:
                 opt = "1=1"
 
@@ -46,11 +50,14 @@ def ptboard():
                 if limit > 200:
                     limit = 200
             except (ValueError, TypeError):
-                limit = 50
+                limit = limit_default
             try:
                 offset = int(offset_raw)
             except (ValueError, TypeError):
-                offset = 0
+                offset = offset_default
+
+            if search or order != order_default or limit != limit_default or offset != offset_default:
+                ret.update(token_use(token))
 
             sql = ("SELECT * FROM `api`.`rss_pt_site` WHERE {opt} ORDER BY `pubDate` {_da} "
                    "LIMIT {_offset}, {_limit}".format(opt=opt, _da=order.upper(), _offset=offset, _limit=limit)

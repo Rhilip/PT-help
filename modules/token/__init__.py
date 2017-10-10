@@ -8,7 +8,7 @@ from app import mysql, poi
 token_blueprint = Blueprint('token', __name__, url_prefix="/token")
 
 
-def get_token_record(token=None):
+def get_token_record(token=None) -> dict:
     error_msg = None
     ret = {
         "success": False,
@@ -33,7 +33,7 @@ def get_token_record(token=None):
     return ret
 
 
-def token_use(token=None):
+def token_use(token=None) -> dict:
     record = get_token_record(token)
     token_quote = record.setdefault("quote", 0)
 
