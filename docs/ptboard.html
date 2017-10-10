@@ -230,6 +230,8 @@
             if (table_div.is(":visible")){
                 table_div.hide()
             }
+            localStorage.removeItem("token");
+            localStorage.removeItem("quote");
         }
         return res
     }
