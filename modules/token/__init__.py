@@ -14,15 +14,15 @@ def get_token_record(token=None):
         "success": False,
     }
     if token:
-        get_useage = "SELECT `useage_remain` FROM `ptboard_token` WHERE `token`='{}'".format(token)
-        rows_count, rows_data = mysql.exec(sql=get_useage, ret_row=True)
-        if rows_count is 0:
+        record = mysql.exec("SELECT `useage_remain` FROM `api`.`ptboard_token` WHERE `token`='{}'".format(token))
+        try:
+            token_quote = int(record[0])
+        except TypeError:
             token_quote = 0
             error_msg = "This token is not exist in database."
         else:
-            token_quote = int(rows_data[0])
             if token_quote <= 0:
-                mysql.exec("DELETE * FROM `ptboard_token` WHERE `token`='{}'".format(token))
+                mysql.exec("DELETE * FROM `api`.`ptboard_token` WHERE `token`='{}'".format(token))
                 error_msg = "The quote of this token is exhaustion"
             else:
                 ret.update({"success": True})
@@ -39,7 +39,7 @@ def token_use(token=None):
 
     if token_quote > 0:
         token_quote -= 1
-        mysql.exec("UPDATE `ptboard_token` SET `useage_remain`={} WHERE `token`='{}'".format(token_quote, token))
+        mysql.exec("UPDATE `api`.`ptboard_token` SET `useage_remain`={} WHERE `token`='{}'".format(token_quote, token))
         record.update({"quote": token_quote})
 
     return record
@@ -53,8 +53,8 @@ def sign():
     if token and hashes:
         token_verify = poi.token_verify(token=token, hashes=hashes)
         if token_verify["success"]:
-            mysql.exec("INSERT INTO `ptboard_token` (`token`) VALUES ('{}')".format(token))
-            ret.update(get_token_record(token))
+            mysql.exec("INSERT INTO `api`.`ptboard_token` (`token`) VALUES ('{}')".format(token))
+        ret.update(get_token_record(token))
     return jsonify(ret)
 
 

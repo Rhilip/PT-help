@@ -52,7 +52,7 @@ def ptboard():
             except (ValueError, TypeError):
                 offset = 0
 
-            sql = ("SELECT * FROM `rss_pt_site` WHERE {opt} ORDER BY `pubDate` {_da} "
+            sql = ("SELECT * FROM `api`.`rss_pt_site` WHERE {opt} ORDER BY `pubDate` {_da} "
                    "LIMIT {_offset}, {_limit}".format(opt=opt, _da=order.upper(), _offset=offset, _limit=limit)
                    )
 
