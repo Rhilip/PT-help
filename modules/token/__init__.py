@@ -22,7 +22,7 @@ def get_token_record(token=None):
             error_msg = "This token is not exist in database."
         else:
             if token_quote <= 0:
-                mysql.exec("DELETE * FROM `api`.`ptboard_token` WHERE `token`='{}'".format(token))
+                mysql.exec("DELETE FROM `api`.`ptboard_token` WHERE `token`='{}'".format(token))
                 error_msg = "The quote of this token is exhaustion"
             else:
                 ret.update({"success": True})
