@@ -4,6 +4,7 @@
 
 from flask import Flask
 from utils.database import Database
+from utils.projectpoi import ProjectPoi
 from flask_cors import CORS
 
 app = Flask(__name__, instance_relative_config=True)
@@ -12,5 +13,5 @@ app.config.from_pyfile('config.py')
 
 CORS(app)
 
-mysql = Database(autocommit=True)
-mysql.init_app(app)
+mysql = Database(app=app, autocommit=True)
+poi = ProjectPoi(app=app)
