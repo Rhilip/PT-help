@@ -97,7 +97,7 @@
                     </ul>
                 </div>
                 <div class="projectpoi-captcha"
-                     data-hashes="1024"
+                     data-hashes="512"
                      data-key="9iFrNpCH6wZY1Q1FRNIU5Bf4"
                      data-callback="CaptchaCallback">
                     <hr>
@@ -200,8 +200,8 @@
             dataType: "json",
             success: function (data) {
                 if (data.success){
-                    localStorage.token = data.token;
-                    localStorage.quote = data.quote;
+                    localStorage.setItem('token',data.token);
+                    localStorage.setItem('quote',data.quote);
                     init();
                 }
             }
@@ -209,7 +209,7 @@
     }
 
     function Updateparams(params){
-        params.token = localStorage.token;
+        params.token = localStorage.getItem("token");
         return params
     }
 
@@ -217,10 +217,10 @@
         var ale = $("div#alert_div");
         var ale_text = $("p#alert_text");
         if (res.success){
-            localStorage.token = res.token;
-            localStorage.quote = res.quote;
+            localStorage.setItem('token',res.token);
+            localStorage.setItem('quote',res.quote);
             ale.show().addClass("alert-success");
-            ale_text.html("<strong>Success!</strong> The left userage of this token: "+ res.quote + ".And thank you for you support.");
+            ale_text.html("<strong>Success!</strong> The left userage of this token: "+ res.quote + ". And thank you for you support.");
         } else {
             ale.show().addClass("alert-danger");
             ale_text.html("<strong>Warning!</strong> "+ res.error);
