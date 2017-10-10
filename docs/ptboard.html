@@ -83,6 +83,8 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-8 col-sm-offset-2 col-md-10 col-md-offset-1 main">
+            <div id="alert_div" class="alert" style="display: none">
+            </div>
             <div class="table-responsive">
                 <table id="table"></table>
             </div>
@@ -103,10 +105,6 @@
                     <hr>
                     <em>Loading Captcha...<br>
                         If it doesn't load, please disable Adblock!</em>
-                </div>
-                <div id="alert_div" class="alert" style="display: none">
-                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                    <p id="alert_text"></p>
                 </div>
             </div>
             <hr>
@@ -215,15 +213,23 @@
 
     function responseHandler(res){
         var ale = $("div#alert_div");
-        var ale_text = $("p#alert_text");
+        var table_div = $(".table-responsive");
+        localStorage.setItem('token',res.token);
+        localStorage.setItem('quote',res.quote);
         if (res.success){
-            localStorage.setItem('token',res.token);
-            localStorage.setItem('quote',res.quote);
             ale.show().addClass("alert-success");
-            ale_text.html("<strong>Success!</strong> The left userage of this token: "+ res.quote + ". And thank you for you support.");
+            ale.html("<strong>Success!</strong> The left userage of this token: "+ res.quote + ". And thank you for your support.");
+            if (table_div.is(":hidden")){
+            } else {
+                table_div.show()
+            }
+
         } else {
             ale.show().addClass("alert-danger");
-            ale_text.html("<strong>Warning!</strong> "+ res.error);
+            ale.html("<strong>Warning!</strong> "+ res.error + " Please refresh the page.");
+            if (table_div.is(":visible")){
+                table_div.hide()
+            }
         }
         return res
     }
