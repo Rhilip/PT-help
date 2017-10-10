@@ -56,9 +56,6 @@ def ptboard():
             except (ValueError, TypeError):
                 offset = offset_default
 
-            if search or order != order_default or limit != limit_default or offset != offset_default:
-                ret.update(token_use(token))
-
             sql = ("SELECT * FROM `api`.`rss_pt_site` WHERE {opt} ORDER BY `pubDate` {_da} "
                    "LIMIT {_offset}, {_limit}".format(opt=opt, _da=order.upper(), _offset=offset, _limit=limit)
                    )
@@ -74,6 +71,7 @@ def ptboard():
                 "rows": rows_data,
                 "total": record_count if search else total_data
             })
+            ret.update(token_use(token))
 
     ret.update(
         {
