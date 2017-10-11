@@ -12,9 +12,20 @@ from modules.token import get_token_record, token_use
 ptboard_blueprint = Blueprint('ptboard', __name__)
 
 search_default = ""
+site_default = ""
 order_default = "desc"
 limit_default = 100
 offset_default = 0
+start_time_default = 0
+end_time_default = "CURRENT_TIMESTAMP"
+
+
+def recover_int_to_default(value, default):
+    try:
+        ret = int(value)
+    except(ValueError, TypeError):
+        ret = default
+    return ret
 
 
 @ptboard_blueprint.route("/ptboard")
@@ -31,31 +42,42 @@ def ptboard():
     if ret.setdefault("success", False):
         token_quote = int(ret.setdefault("quote", 0))
         if token_quote is not 0:
+
+            # Get
             search_raw = request.args.get("search") or search_default
             order_raw = request.args.get("order") or order_default
-            limit_raw = request.args.get("limit") or limit_default
-            offset_raw = request.args.get("offset") or offset_default
+            site_raw = request.args.get("site") or site_default
+            limit = request.args.get("limit") or limit_default
+            offset = request.args.get("offset") or offset_default
+            start_time = request.args.get("start_time") or start_time_default
+            end_time = request.args.get("end_time") or end_time_default
 
             search = re.sub(r"[ _\-,.+]", " ", search_raw)
             search = search.split()
             search = search[:10]
             if search:
-                opt = " AND ".join(["`title` LIKE '%{key}%'".format(key=escape_string(i)) for i in search])
+                search_opt = " AND ".join(["`title` LIKE '%{key}%'".format(key=escape_string(i)) for i in search])
             else:
-                opt = "1=1"
+                search_opt = "1=1"
+
+            start_time = recover_int_to_default(start_time, start_time_default)
+            end_time = recover_int_to_default(end_time, end_time_default)
+            time_opt = "`pubDate` BETWEEN {start} AND {end}".format(start=start_time, end=end_time)
+
+            if site_raw:
+                site = site_raw.split(",")
+                site_opt = "(" + " OR ".join(["`site` = '{site}'".format(site=escape_string(s)) for s in site]) + ")"
+            else:
+                site_opt = "1=1"
+            limit = recover_int_to_default(limit, limit_default)
+            offset = recover_int_to_default(offset, offset_default)
+
+            if limit > 200:
+                limit = 200
 
             order = "desc" if order_raw not in ["desc", "asc"] else order_raw
-            try:
-                limit = int(limit_raw)
-                if limit > 200:
-                    limit = 200
-            except (ValueError, TypeError):
-                limit = limit_default
-            try:
-                offset = int(offset_raw)
-            except (ValueError, TypeError):
-                offset = offset_default
 
+            opt = " AND ".join([search_opt, time_opt, site_opt])
             sql = ("SELECT * FROM `api`.`rss_pt_site` WHERE {opt} ORDER BY `pubDate` {_da} "
                    "LIMIT {_offset}, {_limit}".format(opt=opt, _da=order.upper(), _offset=offset, _limit=limit)
                    )
@@ -73,9 +95,5 @@ def ptboard():
             })
             ret.update(token_use(token))
 
-    ret.update(
-        {
-            "cost": time.time() - t0,
-        }
-    )
+    ret.update({"cost": time.time() - t0})
     return jsonify(ret)
