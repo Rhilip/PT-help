@@ -20,12 +20,20 @@ Pt站点高级搜索
 | -------------|:--------------:|:--------------:|:--------------:|:------|
 | token | 认证令牌 | string | Y | 由认证生成 |
 | search | 查询字段 | string | N | 为空时获取当前最新列表，其他情况为搜索相关字段 |
-| order | 排序类型 | string | N | 仅接收desc或asc，其他情况默认为desc |
-| site | 查询站点 | string | N | 查询站点名称，必须为列表中的值，多个站点联合查询请用 `,` 分割 |
+| order | 排序类型 | string ("desc" or "asc") | N | 仅接收desc或asc，其他情况默认为desc |
+| site | 查询站点 | string | N | 查询站点名称，必须为`Site列表`中的值或留空，留空时获取全部站点，多个站点联合查询请用 `,` 分割 |
 | start_time | 时间段开始时间 | int(timestamp) | N | 默认为0 |
 | ent_time | 时间段结束时间 | int(timestamp) | N | 默认为查询时Unix时间戳 |
 | offset | 起始偏移量 | int | N | 默认为0 |
 | limit | 获取数 | int | N | 默认为50，最大为200 |
+
+#### Site列表
+| 站点类型 | 允许字段 |
+|-------------|:--------------|
+| 国内教育网站 | BYR, NPU, WHU, NWSUAF6, XAUAT6, ZX, NYPT, SJTU, CUGB, Antsoul, HUDBT|
+| 国内公网站点| HDSKY, Hyperay, HDChina, HDHome, HDTime, HDU, JoyHD, CHDBits, Ourbits, OpenCD, Airpt, TTHD, KeepFrds, TCCF, U2, CMCT, M-Team, GZTown, TTG, HDCity, CCFBits, HD4FANS|
+| 国外站点| - |
+| PreDB| PreDB |
 
 ### 5) 请求返回结果:
 
