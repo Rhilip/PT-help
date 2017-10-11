@@ -23,7 +23,7 @@ Pt站点高级搜索
 | order | 排序类型 | string | N | 仅接收desc或asc，其他情况默认为desc |
 | site | 查询站点 | string | N | 查询站点名称，必须为列表中的值，多个站点联合查询请用 `,` 分割 |
 | start_time | 时间段开始时间 | int(timestamp) | N | 默认为0 |
-| ent_time | 时间段结束时间 | int(timestamp) | N | 查询时时间戳 |
+| ent_time | 时间段结束时间 | int(timestamp) | N | 默认为查询时Unix时间戳 |
 | offset | 起始偏移量 | int | N | 默认为0 |
 | limit | 获取数 | int | N | 默认为50，最大为200 |
 
