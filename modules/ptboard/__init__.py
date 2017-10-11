@@ -13,6 +13,7 @@ ptboard_blueprint = Blueprint('ptboard', __name__)
 
 search_default = ""
 site_default = ""
+no_site_default = ""
 order_default = "desc"
 limit_default = 100
 offset_default = 0
@@ -26,6 +27,10 @@ def recover_int_to_default(value, default):
     except(ValueError, TypeError):
         ret = default
     return ret
+
+
+def warp_str(string):
+    return "({})".format(string)
 
 
 @ptboard_blueprint.route("/ptboard")
@@ -43,10 +48,10 @@ def ptboard():
         token_quote = int(ret.setdefault("quote", 0))
         if token_quote is not 0:
 
-            # Get
             search_raw = request.args.get("search") or search_default
             order_raw = request.args.get("order") or order_default
             site_raw = request.args.get("site") or site_default
+            no_site_raw = request.args.get("no_site") or no_site_default
             limit = request.args.get("limit") or limit_default
             offset = request.args.get("offset") or offset_default
             start_time = request.args.get("start_time") or start_time_default
@@ -55,20 +60,29 @@ def ptboard():
             search = re.sub(r"[ _\-,.+]", " ", search_raw)
             search = search.split()
             search = search[:10]
+
+            search_opt = site_opt = no_site_opt = "1=1"
             if search:
-                search_opt = " AND ".join(["`title` LIKE '%{key}%'".format(key=escape_string(i)) for i in search])
-            else:
-                search_opt = "1=1"
+                search_opt = warp_str(
+                    " AND ".join(["`title` LIKE '%{key}%'".format(key=escape_string(i)) for i in search])
+                )
 
             start_time = recover_int_to_default(start_time, start_time_default)
             end_time = recover_int_to_default(end_time, end_time_default)
-            time_opt = "`pubDate` BETWEEN {start} AND {end}".format(start=start_time, end=end_time)
+            time_opt = warp_str("`pubDate` BETWEEN {start} AND {end}".format(start=start_time, end=end_time))
 
             if site_raw:
                 site = site_raw.split(",")
-                site_opt = "(" + " OR ".join(["`site` = '{site}'".format(site=escape_string(s)) for s in site]) + ")"
-            else:
-                site_opt = "1=1"
+                site_opt = warp_str(
+                    " OR ".join(["`site` = '{site}'".format(site=escape_string(s)) for s in site])
+                )
+
+            if no_site_raw:
+                no_site = no_site_raw.split(",")
+                no_site_opt = warp_str(
+                    " AND ".join(["`site` != '{site}'".format(site=escape_string(s)) for s in no_site])
+                )
+
             limit = recover_int_to_default(limit, limit_default)
             offset = recover_int_to_default(offset, offset_default)
 
@@ -77,7 +91,7 @@ def ptboard():
 
             order = "desc" if order_raw not in ["desc", "asc"] else order_raw
 
-            opt = " AND ".join([search_opt, time_opt, site_opt])
+            opt = " AND ".join([search_opt, time_opt, site_opt, no_site_opt])
             sql = ("SELECT * FROM `api`.`rss_pt_site` WHERE {opt} ORDER BY `pubDate` {_da} "
                    "LIMIT {_offset}, {_limit}".format(opt=opt, _da=order.upper(), _offset=offset, _limit=limit)
                    )
@@ -91,7 +105,7 @@ def ptboard():
                 "success": True,
                 "quote": token_quote,
                 "rows": rows_data,
-                "total": record_count if search else total_data
+                "total": record_count if search else total_data,
             })
             ret.update(token_use(token))
 

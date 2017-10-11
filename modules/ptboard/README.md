@@ -18,10 +18,11 @@ Pt站点高级搜索
 #### GET参数:
 |字段名称       |字段说明         |类型            |必填            |说明     |
 | -------------|:--------------:|:--------------:|:--------------:|:------|
-| token | 认证令牌 | string | Y | 由认证生成 |
+| token | 认证令牌 | string | Y | 由认证生成，并具有一定的生存期和查询总量 |
 | search | 查询字段 | string | N | 为空时获取当前最新列表，其他情况为搜索相关字段 |
 | order | 排序类型 | string ("desc" or "asc") | N | 仅接收desc或asc，其他情况默认为desc |
-| site | 查询站点 | string | N | 查询站点名称，必须为`Site列表`中的值或留空，留空时获取全部站点，多个站点联合查询请用 `,` 分割 |
+| site | 查询站点 | string | N | 查询站点名称，留空或为`Site列表`中的值。留空时获取全部站点；多个站点联合查询请用 `,` 分割，关系为`OR` |
+| no_site | 排除站点 | string | N | 排除站点名称，留空或为`Site列表`中的值。留空时不排除；多个站点联合查询请用 `,` 分割，关系为`AND` |
 | start_time | 时间段开始时间 | int(timestamp) | N | 默认为0 |
 | ent_time | 时间段结束时间 | int(timestamp) | N | 默认为查询时Unix时间戳 |
 | offset | 起始偏移量 | int | N | 默认为0 |
@@ -31,13 +32,13 @@ Pt站点高级搜索
 | 站点类型 | 允许字段 |
 |-------------|:--------------|
 | 国内教育网站 | BYR, NPU, WHU, NWSUAF6, XAUAT6, ZX, NYPT, SJTU, CUGB, Antsoul, HUDBT|
-| 国内公网站点| HDSKY, Hyperay, HDChina, HDHome, HDTime, HDU, JoyHD, CHDBits, Ourbits, OpenCD, Airpt, TTHD, KeepFrds, TCCF, U2, CMCT, M-Team, GZTown, TTG, HDCity, CCFBits, HD4FANS|
+| 国内公网站点| HDSKY, Hyperay, HDChina, HDHome, HDTime, HDU, JoyHD, CHDBits, Ourbits, OpenCD, Airpt, TTHD, KeepFrds, TCCF, U2, CMCT, MTeam, GZTown, TTG, HDCity, CCFBits, HD4FANS|
 | 国外站点| - |
 | PreDB| PreDB |
 
 ### 5) 请求返回结果:
 
-#### 回应报文
+#### 回应报文示例
 
 ```json
 {
