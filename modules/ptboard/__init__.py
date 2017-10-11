@@ -92,14 +92,14 @@ def ptboard():
             order = "desc" if order_raw not in ["desc", "asc"] else order_raw
 
             opt = " AND ".join([search_opt, time_opt, site_opt, no_site_opt])
-            sql = ("SELECT * FROM `api`.`rss_pt_site` WHERE {opt} ORDER BY `pubDate` {_da} "
+            sql = ("SELECT * FROM `api`.`ptboard_record` WHERE {opt} ORDER BY `pubDate` {_da} "
                    "LIMIT {_offset}, {_limit}".format(opt=opt, _da=order.upper(), _offset=offset, _limit=limit)
                    )
 
             record_count, rows_data = mysql.exec(sql=sql, r_dict=True, fetch_all=True, ret_row=True)
 
             total_data = mysql.exec("SELECT `TABLE_ROWS` FROM `information_schema`.`TABLES` "
-                                    "WHERE `TABLE_NAME`='rss_pt_site'")[0]
+                                    "WHERE `TABLE_NAME`='ptboard_record'")[0]
 
             ret.update({
                 "success": True,
