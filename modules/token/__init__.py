@@ -28,7 +28,7 @@ def get_token_record(token=None) -> dict:
                 ret.update({"success": True})
         ret.update({"token": token, "quote": token_quote})
     else:
-        error_msg = "No token"
+        error_msg = "No token."
     ret.update({"error": error_msg})
     return ret
 

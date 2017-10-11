@@ -26,35 +26,42 @@ Pt站点高级搜索
 
 ### 5) 请求返回结果:
 
-```
+#### 回应报文
+
+```json
 {
   "cost": 0.0036730000000000373,       //  查询花费时间
-  "error": null,                       //  错误信息
+  "error": null,                       //  错误信息(请求成功时为空，否则为具体理由)
   "quote": 24,                         //  该token剩余请求次数
   "rows": [                            //  查询字段（字典列表）
       {
-          link: "https://hdchina.org/details.php?id=275274",   // 种子链接
-          pubDate: 1505709168,                                 // 发布时间(timestamp)
-          sid: 275274,                                         // 种子序号
-          site: "HDChina",                                     // 发布站点
-          title: "The.Strain.S04.720p.HDTV.x264-Scene",        // 种子名称
-          uid: 42844                                           // 数据库记录顺序
+          "link": "https://hdchina.org/details.php?id=275274",   // 种子链接
+          "pubDate": 1505709168,                                 // 发布时间(timestamp)
+          "sid": 275274,                                         // 种子序号
+          "site": "HDChina",                                     // 发布站点
+          "title": "The.Strain.S04.720p.HDTV.x264-Scene",        // 种子名称
+          "uid": 42844                                           // 数据库记录顺序
       },
       {
-          link: "http://nanyangpt.com/details.php?id=42969",
-          pubDate: 1505706340,
-          sid: 42969,
-          site: "NYPT",
-          title: "[血族/嗜血菌株][The.Strain.S04E10.720p.HDTV.x264-FLEET][S04E10]",
-          uid: 40994
-      },
-    .......
+          "link": "http://nanyangpt.com/details.php?id=42969",
+          "pubDate": 1505706340,
+          "sid": 42969,
+          "site": "NYPT",
+          "title": "[血族/嗜血菌株][The.Strain.S04E10.720p.HDTV.x264-FLEET][S04E10]",
+          "uid": 40994
+      }
   ], 
-  "success": true|false,               // 请求状态（是否成功）
-  "token": <string>,                   // 返回请求token
+  "success": true,                     // 请求状态（请求成功时为true，否则为false并在error字段中返回具体失败理由）
+  "token": "<string>",                 // 返回请求token
   "total": 54286                       // 记录总条数（仅供参考）
-                                       // 1. 无搜索值时返回粗略的总记录行数
-                                       // 2. 有搜索值时返回受影响的记录行数( <=limit )
 }
-
 ```
+#### error字段可能值
+
+ > 该部分由 `module.token.get_token_record` 提供，并可能返回以下信息。
+ 
+| 返回信息 | 字段说明 |
+|-------------|:--------------|
+| No token. | 请求字段中不存在token信息 |
+| This token is not exist in database. | 数据库中无该token记录 |
+| The quote of this token is exhaustion | 对应token使用尽配额 |
