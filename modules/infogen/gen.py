@@ -66,7 +66,7 @@ class Base(object):
                 ret = page.json() if json else (BeautifulSoup(page.text, "lxml") if bs else page.text)
             except OSError:
                 err += 1
-                time.sleep(1)
+                time.sleep(0.4)
             else:
                 break
 
