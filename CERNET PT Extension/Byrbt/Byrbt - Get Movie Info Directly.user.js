@@ -5,6 +5,9 @@
 // @include      /^https?:\/\/bt\.byr\.cn\/upload\.php\?type=40(8|1|4)/
 // @icon        http://bt.byr.cn/favicon.ico
 // @run-at      document-end
+// @connect     api.rhilip.info
+// @connect     api.douban.com
+// @connect     api.bgm.tv
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setClipboard
 // @version     20171014
@@ -106,7 +109,7 @@ $(document).ready(function() {
                     }
                 },
                 onerror: function () {
-                    ben_info.text("不知道为什么就是失败了嘛23333");
+                        ben_info.text("不知道为什么就是失败了嘛23333");
                 }
             });
         } else {
