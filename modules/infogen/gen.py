@@ -7,6 +7,8 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
+__version__ = "0.1.0"
+
 api_douban = "https://api.douban.com/v2/movie/subject/{}"
 api_imdb = "http://app.imdb.com/title/maindetails?tconst={}"
 api_bangumi = "https://api.bgm.tv/subject/{}?responseGroup=large"
@@ -48,8 +50,8 @@ support_list = [
 ]
 
 headers = {
-    'User-Agent':  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                   'Chrome/61.0.3163.100 Safari/537.36 '
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                  'Chrome/61.0.3163.100 Safari/537.36 '
 }
 
 
@@ -77,7 +79,8 @@ class Gen(Base):
     site = sid = url = None
     ret = {
         "success": False,
-        "error": None
+        "error": None,
+        "copyright": "Powered by @Rhilip.With Gen Version is `{}`".format(__version__)
     }
 
     def __init__(self, url):
@@ -155,8 +158,10 @@ class Gen(Base):
             if self.ret.get("imdb_id"):  # 该影片在豆瓣上存在IMDb链接
                 imdb_json = self.get_source(api_imdb.format(self.ret["imdb_id"]), json=True)  # 通过IMDb的API获取信息
                 imdb_data = imdb_json.get("data")
-                img_list.append(imdb_data.get("image").get("url"))  # 添加来自imdb的封面图
-                _imdb_rate = "{}/10 from {} users".format(imdb_data.get("rating"), imdb_data.get("num_votes"))
+                if imdb_data.get("image"):  # 添加来自imdb的封面图
+                    img_list.append(imdb_data.get("image").get("url"))
+                if imdb_data.get("rating") and imdb_data.get("num_votes"):
+                    _imdb_rate = "{}/10 from {} users".format(imdb_data.get("rating"), imdb_data.get("num_votes"))
                 _imdb_link = "http://www.imdb.com/title/{}/".format(self.ret["imdb_id"])
 
             self.ret.update({"imdb_rate": _imdb_rate, "imdb_link": _imdb_link})
