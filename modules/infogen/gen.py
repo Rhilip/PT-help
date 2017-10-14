@@ -76,14 +76,10 @@ class Base(object):
 
 
 class Gen(Base):
-    site = sid = url = None
-    ret = {
-        "success": False,
-        "error": None,
-        "copyright": "Powered by @Rhilip. With Gen Version `{}`".format(__version__)
-    }
+    site = sid = url = ret =  None
 
     def __init__(self, url):
+        self.clear()
         for site, pat in support_list:
             search = pat.search(url)
             if search:
@@ -91,6 +87,13 @@ class Gen(Base):
                 self.site = site
         if not self.site:
             self.ret.update({"error": "No support link."})
+
+    def clear(self):
+        self.ret = {
+            "success": False,
+            "error": None,
+            "copyright": "Powered by @Rhilip. With Gen Version `{}`".format(__version__)
+        }
 
     def get(self):
         if self.site == "douban":
