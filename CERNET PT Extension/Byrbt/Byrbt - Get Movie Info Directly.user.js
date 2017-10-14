@@ -66,13 +66,13 @@ $(document).ready(function() {
                                 if (ben_format_btn.prop('checked')) {
                                     descr = '<br />\n' +
                                         '<fieldset style="font-family: Consolas;">\n' +
-                                        '\t<legend><span style="color:#ffffff;background-color:#000000;">&nbsp;海报&nbsp;</span></legend><span style="color:#ff0000;">请在此处上传图片。</span></fieldset>\n' +
+                                        '\t<legend><span style="color:#ffffff;background-color:#000000;">&nbsp;海报&nbsp;</span></legend>请在此处<span style="color:#ff0000;">上传图片</span>。</fieldset>\n' +
                                         '<br />\n' +
                                         '<fieldset style="font-family: Consolas;">\n' +
                                         '\t<legend><span style="color:#ffffff;background-color:#000000;">&nbsp;简介&nbsp;</span></legend>' + descr + '</fieldset>\n' +
                                         '<br />\n' +
                                         '<fieldset style="font-family: Consolas;">\n' +
-                                        '\t<legend><span style="color:#ffffff;background-color:#000000;">&nbsp;iNFO&nbsp;</span></legend><span style="color:#ff0000;">请在此处替换为电影的Mediainfo信息</span></fieldset>\n' +
+                                        '\t<legend><span style="color:#ffffff;background-color:#000000;">&nbsp;iNFO&nbsp;</span></legend>请在此处<span style="color:#ff0000;">替换为电影的Mediainfo信息</span>。  </fieldset>\n' +
                                         '<br />\n';
                                 }
                             } else if (cat === 401) {  // 剧集区
