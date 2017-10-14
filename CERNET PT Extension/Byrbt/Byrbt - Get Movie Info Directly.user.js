@@ -26,7 +26,7 @@ function limit_item(raw_str,limit){
 
 $(document).ready(function() {
     // 构造本脚本和用户交互行
-    $('#compose').find('> table > tbody > tr:eq(2)').after('<tr id="ben_help"><td class="rowhead nowrap">快速填写信息</td><td class="rowfollow" valign="top" align="left"><input type="text" id="ben_url" placeholder="相应网站上资源信息页的 URL" size="80"> 简介美化：<input type="checkbox" id="ben_format" checked="checked"> <input type="button" id="ben_btn" value="搜索/导入">&nbsp;&nbsp;<span id="ben_info"></span><br> 此功能可以从 豆瓣 / Bangumi 上抓取信息，并生成标题tag信息（在正确类型下）及简介。目前仅支持电影 / 剧集 / 动漫区。<br><span id="ben_extra" style="display:none"></span></td></tr>');
+    $('#compose').find('> table > tbody > tr:eq(2)').after('<tr id="ben_help"><td class="rowhead nowrap">快速填写信息</td><td class="rowfollow" valign="top" align="left"><input type="text" id="ben_url" placeholder="相应网站上资源信息页的 URL" size="80"> 简介美化：<input type="checkbox" id="ben_format" checked="checked"> <input type="button" id="ben_btn" value="搜索/导入">&nbsp;&nbsp;<span id="ben_info"></span><br> 此功能可以从 豆瓣 / Bangumi 上抓取信息，并生成标题tag信息（在正确类型下）及简介。目前仅支持电影 / 剧集 / 动漫区。（如有问题，请带上链接和错误信息及时<a href="https://bt.byr.cn/sendmessage.php?receiver=222616" target="_blank"><img class="button_pm" src="data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA=="></a>）<br><span id="ben_extra" style="display:none"></span></td></tr>');
 
     var ben_info = $("#ben_info");
     var ben_format_btn  = $("#ben_format");
@@ -108,14 +108,14 @@ $(document).ready(function() {
                             // GM_setClipboard(raw);
                             ben_info.text("已完成填写，你也可以使用`Ctrl + V`粘贴简介部分内容原始源码。");
                         } else {
-                            ben_info.text("不知道为什么失败了，原因为：" + resj.error);
+                            ben_info.text("失败了欸，原因：" + resj.error);
                         }
                     } else {
-                        ben_info.text("不知道为什么失败了，原因为：" + res.status);
+                        ben_info.text("似乎咩从服务器返回到正确的数据，错误号：" + res.status);
                     }
                 },
                 onerror: function () {
-                        ben_info.text("不知道为什么就是失败了嘛23333");
+                    ben_info.text("你在外太空吗？连服务器娘都不搭理你。");
                 }
             });
         } else {
