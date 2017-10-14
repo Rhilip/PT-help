@@ -12,7 +12,7 @@
 
 $(document).ready(function() {
     // 构造本脚本和用户交互行
-    $('#compose').find('> table > tbody > tr:eq(2)').after('<tr id="ben_help"><td class="rowhead nowrap">快速填写信息</td><td class="rowfollow" valign="top" align="left"><input type="text" id="ben_url" placeholder="相应网站上资源信息页的 URL" size="80"> 简介美化：<input type="checkbox" id="ben_format"> <input type="button" id="ben_btn" value="搜索/导入">&nbsp;&nbsp;<span id="ben_info"></span><br> 此功能可以从 豆瓣 / Bangumi 上抓取信息，并生成标题tag信息（在正确类型下）及简介。目前仅支持电影 / 剧集 / 动漫区。<br><span id="ben_extra" style="display:none"></span></td></tr>');
+    $('#compose').find('> table > tbody > tr:eq(2)').after('<tr id="ben_help"><td class="rowhead nowrap">快速填写信息</td><td class="rowfollow" valign="top" align="left"><input type="text" id="ben_url" placeholder="相应网站上资源信息页的 URL" size="80"> 简介美化：<input type="checkbox" id="ben_format" checked="checked"> <input type="button" id="ben_btn" value="搜索/导入">&nbsp;&nbsp;<span id="ben_info"></span><br> 此功能可以从 豆瓣 / Bangumi 上抓取信息，并生成标题tag信息（在正确类型下）及简介。目前仅支持电影 / 剧集 / 动漫区。<br><span id="ben_extra" style="display:none"></span></td></tr>');
 
     var ben_info = $("#ben_info");
     var ben_format_btn  = $("#ben_format");
