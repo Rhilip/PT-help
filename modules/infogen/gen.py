@@ -76,7 +76,7 @@ class Base(object):
 
 
 class Gen(Base):
-    site = sid = url = ret =  None
+    site = sid = url = ret = None
 
     def __init__(self, url):
         self.clear()
@@ -221,7 +221,7 @@ class Gen(Base):
                     if isinstance(data, list):
                         _temp = data[0]
                         for d in data[1:]:
-                            _temp += "\n　　　　　　" + d
+                            _temp += "\n　　　　　　{}".format(d) if d else ""
                         data = _temp
                     descr += ft.format(data)
             self.ret.update({"img": img_list, "format": descr, "success": True})
