@@ -105,7 +105,6 @@ $(document).ready(function() {
                         ben_info.text("不知道为什么失败了，原因为：" + res.status);
                     }
                 },
-
                 onerror: function () {
                     ben_info.text("不知道为什么就是失败了嘛23333");
                 }
@@ -113,7 +112,7 @@ $(document).ready(function() {
         } else {
             ben_info.text("识别输入内容为文字格式，尝试搜索");
 
-            if ($.inArray(cat, ['408', '401']) !== -1){    // 电影区，剧集区
+            if ($.inArray(cat, [408, 401]) !== -1){    // 电影区，剧集区
                 GM_xmlhttpRequest({
                     method: "GET",
                     url: "https://api.douban.com/v2/movie/search?q=" + subject_url, // 通过接口调用
@@ -138,10 +137,15 @@ $(document).ready(function() {
                             } else {
                                 ben_info.text("无搜索结果");
                             }
+                        } else {
+                            ben_info.text("不知道为什么失败了，原因为：" + res.status);
                         }
+                    },
+                    onerror: function () {
+                        ben_info.text("向豆瓣API请求数据失败，可能是你的网络问题吧2333");
                     }
                 });
-            } else if (cat === "404") {   // 动漫区
+            } else if (cat === 404) {   // 动漫区
                 GM_xmlhttpRequest({
                     method: "GET",
                     url: "https://api.bgm.tv/search/subject/" + subject_url + "?responseGroup=large&max_results=20&start=0", // 通过接口调用
@@ -174,6 +178,9 @@ $(document).ready(function() {
                                 ben_info.text("无搜索结果");
                             }
                         }
+                    },
+                    onerror: function () {
+                        ben_info.text("向Bangumi请求数据失败，可能是你的网络问题吧2333");
                     }
                 });
             }
