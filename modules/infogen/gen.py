@@ -155,16 +155,19 @@ class Gen(Base):
                 self.ret.update({key: _up_data})
 
             _imdb_rate = _imdb_link = ""
-            if self.ret.get("imdb_id"):  # 该影片在豆瓣上存在IMDb链接
-                imdb_json = self.get_source(api_imdb.format(self.ret["imdb_id"]), json=True)  # 通过IMDb的API获取信息
-                imdb_data = imdb_json.get("data")
-                if imdb_data.get("image"):  # 添加来自imdb的封面图
-                    img_list.append(imdb_data.get("image").get("url"))
-                if imdb_data.get("rating") and imdb_data.get("num_votes"):
-                    _imdb_rate = "{}/10 from {} users".format(imdb_data.get("rating"), imdb_data.get("num_votes"))
-                _imdb_link = "http://www.imdb.com/title/{}/".format(self.ret["imdb_id"])
-
-            self.ret.update({"imdb_rate": _imdb_rate, "imdb_link": _imdb_link})
+            try:
+                if self.ret.get("imdb_id"):  # 该影片在豆瓣上存在IMDb链接
+                    imdb_json = self.get_source(api_imdb.format(self.ret["imdb_id"]), json=True)  # 通过IMDb的API获取信息
+                    imdb_data = imdb_json.get("data")
+                    if imdb_data.get("image"):  # 添加来自imdb的封面图
+                        img_list.append(imdb_data.get("image").get("url"))
+                    if imdb_data.get("rating") and imdb_data.get("num_votes"):
+                        _imdb_rate = "{}/10 from {} users".format(imdb_data.get("rating"), imdb_data.get("num_votes"))
+                    _imdb_link = "http://www.imdb.com/title/{}/".format(self.ret["imdb_id"])
+            except AttributeError:
+                pass
+            else:
+                self.ret.update({"imdb_rate": _imdb_rate, "imdb_link": _imdb_link})
 
             douban_rate = db_rate_count = ""
             try:  # 获取豆瓣评分信息
