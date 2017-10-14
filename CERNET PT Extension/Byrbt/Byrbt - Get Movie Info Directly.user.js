@@ -10,7 +10,7 @@
 // @connect     api.bgm.tv
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setClipboard
-// @version     20171014
+// @version     20171015
 // ==/UserScript==
 
 var script_version = '';
@@ -18,6 +18,11 @@ if (GM_info && GM_info.script) {
     script_version = GM_info.script.version || script_version;
 }
 
+
+function limit_item(raw_str,limit){
+    var _str = raw_str.split(" / ");
+    return _str.slice(0,limit).join("/");
+}
 
 $(document).ready(function() {
     // 构造本脚本和用户交互行
@@ -49,12 +54,13 @@ $(document).ready(function() {
                             raw = raw.replace(/\n/g, "<br />");   // 将原始字符串（为BBCode格式）中的`\n` 替换为 `<br>`
                             var descr = raw;
 
-                            $("input[name$=cname]").val(resj.title.replace(/ \/ /g, "\/"));  // 填写中文名
-                            $("input[name=url]").val(resj.imdb_url);
-                            $("input[name=dburl]").val(resj.douban_url);
+                            $("input[name$=cname]").val(limit_item(resj.title,3));  // 填写中文名(限制最多三个)
+                            $("input[name=url]").val(resj.imdb_link);  // 豆瓣链接
+                            $("input[name=dburl]").val(resj.douban_link);  // IMDb链接
                             if (cat === 408){   // 电影区
                                 // 填写标题项
-                                $("#movie_type").val(resj.genres.replace(/ /g, ""));
+                                $("#movie_type").val(limit_item(resj.genres,3));  // 电影类别(限制最多三个)
+                                $("#movie_country").val(resj.countries);   // 制片国家/地区
 
                                 // 剧集区格式化选项
                                 if (ben_format_btn.prop('checked')) {
