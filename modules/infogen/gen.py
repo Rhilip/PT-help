@@ -123,7 +123,7 @@ class Gen(Base):
             _title = [_raw_title]
             # 排除aka中的非中文字段
             for t in _aka:
-                if re.search("[\u4E00-\u9FA5]", t) and t != _original_title:
+                if re.search("[\u4E00-\u9FA5]", t) and t != _raw_title:
                     _title.append(t)
 
             self.ret.update({
