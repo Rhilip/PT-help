@@ -133,7 +133,40 @@ $(document).ready(function() {
                     }
                 });
             } else if (cat === "404") {   // 动漫区
+                GM_xmlhttpRequest({
+                    method: "GET",
+                    url: "https://api.bgm.tv/search/subject/" + subject_url + "?responseGroup=large&max_results=20&start=0", // 通过接口调用
+                    onload: function (res) {
+                        if (res.status >= 200 && res.status < 400) {
+                            ben_info.text("请求成功，请在下方选择对应链接。");
+                            var resj = JSON.parse(res.responseText);  // 解析成Json格式
+                            if (resj.results !== 0) {
+                                var search_html = "<hr>下面为可能的搜索结果，请确认<table id=\"ben_search_table\" style='width: 100%' align='center'><tr><td class=\"colhead\" align='center'>放送开始</td><td class=\"colhead\" align='center'>类别</td><td class=\"colhead\" align='center'>名称</td><td class=\"colhead\" align='center'>Bangumi链接</td><td class=\"colhead\" align='center'>行为</td></tr>";
+                                for (var i_bgm = 0; i_bgm < resj.list.length; i_bgm++) {
+                                    var i_item = resj.list[i_bgm];
+                                    var tp = i_item.type;
+                                    if (tp === 1) tp="漫画/小说";
+                                    else if (tp === 2) tp="动画/二次元番";
+                                    else if (tp === 3) tp="音乐";
+                                    else if (tp === 4) tp="游戏";
+                                    else if (tp === 6) tp="三次元番";
 
+                                    search_html += "<tr><td class='rowfollow' align='center'>" + i_item.air_date + "</td><td class='rowfollow' align='center'>" + tp + "</td><td class='rowfollow'>" + i_item.name_cn + " | " + i_item.name + "</td><td class='rowfollow'><a href='" + i_item.url + "' target='_blank'>" + i_item.url + "</a></td><td class='rowfollow' align='center'><a href='javascript:void(0);' class='gen_search_choose' data-url='" + i_item.url + "'>选择</a></td></tr>";
+                                }
+                                search_html += "</table>";
+                                $("#ben_extra").html(search_html).show();
+
+                                $("a.gen_search_choose").click(function () {
+                                    var tag = $(this);
+                                    $('#ben_url').val(tag.attr("data-url"));
+                                    $('#ben_btn').click();
+                                });
+                            } else {
+                                ben_info.text("无搜索结果");
+                            }
+                        }
+                    }
+                });
             }
         }
     });
@@ -142,7 +175,7 @@ $(document).ready(function() {
 
 /**
  * Created by Rhilip on 10/12/2017.
- * 20171014: 改用自己API来进行导入。
+ * 20171014: 改用自己API来进行导入。增加搜索方法。
  * 20171012: Test Version~ , Thanks those Userscript:
  *           1. Bangumi - Info Export.user.js: https://github.com/Rhilip/My-Userscript/blob/master/Bangumi%20-%20Info%20Export.user.js
  *           2. 豆瓣评分pt字幕: https://github.com/Exhen/douban/blob/master/20171012.js
