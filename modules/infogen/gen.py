@@ -13,7 +13,7 @@ api_bangumi = "https://api.bgm.tv/subject/{}?responseGroup=large"
 
 douban_format = [
     # (key name in dict. the format of key, string format) with order
-    ("cover_img", "{}\n\n"),
+    # ("cover_img", "{}\n\n"),
     ("title", "◎译　　名　{}\n"),
     ("original_title", "◎片　　名　{}\n"),
     ("year", "◎年　　代　{}\n"),
@@ -104,12 +104,18 @@ class Gen(Base):
             self.ret.update({"id": sid, "alt": alt})
 
             # 可以从raw_json中直接转移到返回数据中的信息
-            _title = raw_data_json.get("title")
+            _raw_title = raw_data_json.get("title")
             _aka = raw_data_json.get("aka")
             _original_title = raw_data_json.get("original_title")
 
+            _title = [_raw_title]
+            # 排除aka中的非中文字段
+            for t in _aka:
+                if re.search("[\u4E00-\u9FA5]", t) and t != _original_title:
+                    _title.append(t)
+
             self.ret.update({
-                "title": " / ".join([_title] + [i for i in _aka if i != _title and i != _original_title]),
+                "title": " / ".join(_title),
                 "original_title": _original_title,
                 "year": raw_data_json.get("year"),
                 "countries": " / ".join(raw_data_json.get("countries")),
@@ -170,7 +176,7 @@ class Gen(Base):
                     role_json = self.get_source(api_douban_celebrity.format(role_id), json=True)
                     role_name = role_json.get("name")
                     if role_json.get("name_en"):
-                        role_name += " / " + role_json.get("name_en")
+                        role_name += "  " + role_json.get("name_en")
                     _temp_list.append(role_name)
                 self.ret.update({tp: _temp_list})
 
