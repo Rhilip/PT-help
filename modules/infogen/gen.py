@@ -109,7 +109,7 @@ class Gen(Base):
             # -*- 清洗数据 -*-
             self.ret.update({"id": sid, "alt": alt})
 
-            # 可以从raw_json中直接转移到返回数据中的信息
+            # 可以从raw_json中直接（或简单处理就）转移到返回数据中的信息
             _raw_title = raw_data_json.get("title")
             _aka = raw_data_json.get("aka")
             _original_title = raw_data_json.get("original_title")
@@ -125,7 +125,7 @@ class Gen(Base):
                 "original_title": _original_title,
                 "year": raw_data_json.get("year"),
                 "countries": " / ".join(raw_data_json.get("countries")),
-                "summary": raw_data_json.get("summary"),
+                "summary": raw_data_json.get("summary").replace("\n", "\n　　"),
                 "genres": " / ".join(raw_data_json.get("genres"))  # 在API中最多提供三个，会被再次获取值覆盖
             })
 
@@ -282,5 +282,7 @@ class Gen(Base):
 if __name__ == '__main__':
     from pprint import pprint
 
-    pprint(Gen("https://movie.douban.com/subject/3008672/").get())
-    pprint(Gen("https://bgm.tv/subject/203526").get())
+    douban = Gen("https://movie.douban.com/subject/3008672/").get()
+    # pprint(Gen("https://movie.douban.com/subject/3008672/").get())
+    print(douban.get("format"))
+    # pprint(Gen("https://bgm.tv/subject/203526").get())
