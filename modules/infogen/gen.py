@@ -256,7 +256,9 @@ class Gen(Base):
             _cast = []
             for cast in raw_data_json.get("crt"):
                 cast_name = cast.get("name_cn") or cast.get("name")
-                cast_actors = "\, ".join([actors.get("name") for actors in cast.get("actors")])
+                cast_actors = ""
+                if cast.get("actors"):
+                    cast_actors = "\, ".join([actors.get("name") for actors in cast.get("actors")])
                 _cast.append("{}: {}".format(cast_name, cast_actors))
                 self.ret.update({"cast": _cast})
 
