@@ -47,6 +47,11 @@ support_list = [
     ("bangumi", re.compile("(https?://)?(bgm\.tv|bangumi\.tv|chii\.in)/subject/(?P<sid>\d+)/?")),
 ]
 
+headers = {
+    'User-Agent':  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                   'Chrome/61.0.3163.100 Safari/537.36 '
+}
+
 
 class Base(object):
     @staticmethod
@@ -55,6 +60,7 @@ class Base(object):
         ret = ""
         while err < 4:
             try:
+                kwargs.setdefault("headers", headers)
                 page = requests.get(url, **kwargs)
                 page.encoding = "utf-8"
                 ret = page.json() if json else (BeautifulSoup(page.text, "lxml") if bs else page.text)
