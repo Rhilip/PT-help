@@ -26,7 +26,7 @@ $(document).ready(function() {
     $('#ben_btn').click(function () {
         var subject_url = $('#ben_url').val().trim();
 
-        var cat = location.href.match(/(\d+)$/)[1]; // 408,电影 ; 401,剧集 ; 404, 动漫
+        var cat = parseInt(location.href.match(/(\d+)$/)[1]); // 408,电影 ; 401,剧集 ; 404, 动漫
 
         if (subject_url.match(/^http/)) {
             ben_info.text("识别输入内容为链接格式，请求源数据中....");
@@ -49,7 +49,7 @@ $(document).ready(function() {
                             $("input[name$=cname]").val(resj.title.replace(/ \/ /g, "\/"));  // 填写中文名
                             $("input[name=url]").val(resj.imdb_url);
                             $("input[name=dburl]").val(resj.douban_url);
-                            if (cat === "408"){   // 电影区
+                            if (cat === 408){   // 电影区
                                 // 填写标题项
                                 $("#movie_type").val(resj.genres.replace(/ /g, ""));
 
@@ -66,9 +66,9 @@ $(document).ready(function() {
                                         '\t<legend><span style="color:#ffffff;background-color:#000000;">&nbsp;iNFO&nbsp;</span></legend><span style="color:#ff0000;">请在此处替换为电影的Mediainfo信息</span></fieldset>\n' +
                                         '<br />\n';
                                 }
-                            } else if (cat === "401") {  // 剧集区
+                            } else if (cat === 401) {  // 剧集区
                                 // 暂无QAQ
-                            } else if (cat === "404") {  // 动漫区
+                            } else if (cat === 404) {  // 动漫区
                                 // 填写标题项
                                 $("input[name=comic_year]").val(resj.air_date);
 

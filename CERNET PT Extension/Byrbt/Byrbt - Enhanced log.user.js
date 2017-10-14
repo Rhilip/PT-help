@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Byrbt : Enhanced log
 // @namespace    http://blog.rhilip.info
-// @version      20170624
+// @version      20171014
 // @description  为log页面增加为有关种子（字幕）添加访问链接和快速搜索关键词，针对管理员设置种子优惠的情况能直接查询优惠类型；在种子页面的热度表中添加种子日志查询入口
 // @author       Rhilip
 // @match        http*://bt.byr.cn/details.php?id=*
@@ -11,7 +11,7 @@
 // ==/UserScript==
 
 $(document).ready(function(){
-    if (location.pathname == "/log.php"){
+    if (location.pathname === "/log.php"){
         $("form").after("<b>常用快捷搜索关键词：</b>" +
             "<a href='/log.php?query=was+added+by&search=all&action=dailylog'><u>(Offer) was added by</u></a>&nbsp;&nbsp;" +
             "<a href='/log.php?query=was+uploaded+by&search=all&action=dailylog'><u>(Torrent) was uploaded by</u></a>&nbsp;&nbsp;" +
@@ -62,13 +62,13 @@ $(document).ready(function(){
         });
     }
 
-    if(location.pathname == "/details.php"){
+    if(location.pathname === "/details.php"){
         $("td.no_border_wide:last").after("<td class=\"no_border_wide\"><b>种子日志：</b><a id='log' href='javascript:void(0)'>[查看日志]</a></td>")
             .parents("td").append("<span id='loglist'></span>");
         $("#log").click(function () {
             var logbtn= $(this);
             var loglist = $("#loglist");
-            if(logbtn.text() == "[查看日志]"){
+            if(logbtn.text() === "[查看日志]"){
                 if(loglist.html()){
                     loglist.show();
                 }else {

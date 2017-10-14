@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Byrbt : Big Img Resize
 // @namespace    http://blog.rhilip.info
-// @version      20170118
+// @version      20171014
 // @description  For the too width img in byrbt
 // @author       Rhilip
 // @match        http*://bt.byr.cn/details.php*
@@ -20,7 +20,7 @@ $(document).ready(function(){
        if (width > ControlWidth) {
            img.attr("style", "max-width: 100%;");
            img.click(function () {
-               if(img.attr("style") == "max-width: 100%;"){
+               if(img.attr("style") === "max-width: 100%;"){
                    img.attr("style",orginstyle);
                }else {
                    img.attr("style", "max-width: 100%;");
