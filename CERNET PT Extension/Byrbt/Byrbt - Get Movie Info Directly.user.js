@@ -23,7 +23,7 @@ $(document).ready(function() {
         var cat = location.href.match(/(\d+)$/)[1]; // 408,电影 ; 401,剧集 ; 404, 动漫
 
         if (subject_url.match(/^http/)) {
-            ben_info.text("识别输入内容为链接： " + subject_url + "请求源数据中....");
+            ben_info.text("识别输入内容为链接格式，请求源数据中....");
 
             var myData = new FormData();
             myData.append("url", subject_url);
@@ -87,6 +87,10 @@ $(document).ready(function() {
                     ben_info.text("不知道为什么就是失败了嘛23333");
                 }
             });
+        } else {
+            ben_info.text("识别输入内容为文字格式，尝试搜索");
+
+            // TODO 搜索
         }
     });
 });
