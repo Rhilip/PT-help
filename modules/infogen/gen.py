@@ -146,17 +146,20 @@ class Gen(Base):
             for pat, key in [("类型", "genres"), ("语言", "lang"),
                              ("上映日期", "pubdate"), ("IMDb链接", "imdb_id"), ("片长", "length")]:
                 _search = re.search(pat + ": (.+)", info_tag_str)
+                _up_data = ""
                 if _search:
-                    self.ret.update({key: _search.group(1).strip()})
+                    _up_data = _search.group(1).strip()
+                self.ret.update({key: _up_data})
 
+            _imdb_rate = _imdb_link = ""
             if self.ret.get("imdb_id"):  # 该影片在豆瓣上存在IMDb链接
                 imdb_json = self.get_source(api_imdb.format(self.ret["imdb_id"]), json=True)  # 通过IMDb的API获取信息
                 imdb_data = imdb_json.get("data")
                 img_list.append(imdb_data.get("image").get("url"))  # 添加来自imdb的封面图
-                self.ret.update(
-                    {"imdb_rate": "{}/10 from {} users".format(imdb_data.get("rating"), imdb_data.get("num_votes")),
-                     "imdb_link": "http://www.imdb.com/title/{}/".format(self.ret["imdb_id"])
-                     })
+                _imdb_rate = "{}/10 from {} users".format(imdb_data.get("rating"), imdb_data.get("num_votes"))
+                _imdb_link = "http://www.imdb.com/title/{}/".format(self.ret["imdb_id"])
+
+            self.ret.update({"imdb_rate": _imdb_rate, "imdb_link": _imdb_link})
 
             douban_rate = db_rate_count = ""
             try:  # 获取豆瓣评分信息
@@ -197,8 +200,7 @@ class Gen(Base):
                     _temp_awards += "　　" + specific.get_text(" ", strip=True) + "\n"
 
                 awards += _temp_awards + "\n"
-            if awards:
-                self.ret.update({"awards": awards})
+            self.ret.update({"awards": awards})
 
             # -*- 组合数据 -*-
             descr = ""
