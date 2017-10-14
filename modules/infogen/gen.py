@@ -80,7 +80,7 @@ class Gen(Base):
     ret = {
         "success": False,
         "error": None,
-        "copyright": "Powered by @Rhilip.With Gen Version is `{}`".format(__version__)
+        "copyright": "Powered by @Rhilip. With Gen Version `{}`".format(__version__)
     }
 
     def __init__(self, url):
