@@ -219,7 +219,7 @@ class Gen(Base):
                 data = self.ret.get(key)
                 if data:
                     if isinstance(data, list):
-                        _temp = data[0]
+                        _temp = data[0] or ""
                         for d in data[1:]:
                             _temp += "\n　　　　　　{}".format(d) if d else ""
                         data = _temp
