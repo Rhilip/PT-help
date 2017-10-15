@@ -3,9 +3,7 @@
 # Copyright (c) 2017-2020 Rhilip <rhilipruan@gmail.com>
 
 import re
-import time
-import requests
-from bs4 import BeautifulSoup
+from utils.netsource import NetBase
 
 __version__ = "0.1.0"
 
@@ -49,33 +47,8 @@ support_list = [
     ("bangumi", re.compile("(https?://)?(bgm\.tv|bangumi\.tv|chii\.in)/subject/(?P<sid>\d+)/?")),
 ]
 
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                  'Chrome/61.0.3163.100 Safari/537.36 '
-}
 
-
-class Base(object):
-    @staticmethod
-    def get_source(url, json=False, bs=False, **kwargs):
-        err = 0
-        ret = ""
-        while err < 4:
-            try:
-                kwargs.setdefault("headers", headers)
-                page = requests.get(url, **kwargs)
-                page.encoding = "utf-8"
-                ret = page.json() if json else (BeautifulSoup(page.text, "lxml") if bs else page.text)
-            except OSError:
-                err += 1
-                time.sleep(0.4)
-            else:
-                break
-
-        return ret
-
-
-class Gen(Base):
+class Gen(NetBase):
     site = sid = url = ret = None
 
     def __init__(self, url):
@@ -97,13 +70,13 @@ class Gen(Base):
 
     def get(self):
         if self.site == "douban":
-            self._gen_douban(self.sid)
+            self._gen_douban()
         elif self.site == "bangumi":
-            self._gen_bangumi(self.sid)
+            self._gen_bangumi()
         return self.ret
 
-    def _gen_douban(self, sid):
-        raw_data_json = self.get_source(api_douban.format(sid), json=True)  # 通过豆瓣公开API获取Json格式的数据
+    def _gen_douban(self):
+        raw_data_json = self.get_source(api_douban.format(self.sid), json=True)  # 通过豆瓣公开API获取Json格式的数据
         if raw_data_json.get("msg"):
             self.ret.update({"error": raw_data_json.get("msg")})
         else:
@@ -113,7 +86,7 @@ class Gen(Base):
             raw_data_page = self.get_source(alt, bs=True)  # 获取相应页面（用来获取API中未提供的信息），并用BeautifulSoup处理
 
             # -*- 清洗数据 -*-
-            self.ret.update({"id": sid, "alt": alt})
+            self.ret.update({"id": self.sid, "alt": alt})
 
             # 可以从raw_json中直接（或简单处理就）转移到返回数据中的信息
             _raw_title = raw_data_json.get("title")
@@ -177,14 +150,14 @@ class Gen(Base):
                 douban_rate = raw_data_json.get("rating").get("average")
                 db_rate_count = raw_data_json.get("ratings_count")
             except AttributeError:  # 如果通过豆瓣API获取不到评分，则抛出Error，并从`/subject/:d/collections` 获取
-                rate_text = self.get_source("https://movie.douban.com/subject/{}/collections".format(sid))
+                rate_text = self.get_source("https://movie.douban.com/subject/{}/collections".format(self.sid))
                 rate_search = re.search("(\d+)人参与评价", rate_text)
                 if rate_search:
                     douban_rate = rate_search.group(1)
                     db_rate_count = re.search(">(\d\.\d)</strong", rate_text).group(1)
             finally:
                 self.ret.update({"douban_rate": "{}/10 from {} users".format(douban_rate, db_rate_count),
-                                 "douban_link": "https://movie.douban.com/subject/{}".format(sid)
+                                 "douban_link": "https://movie.douban.com/subject/{}".format(self.sid)
                                  })
 
             # TODO 获取导演信息及主演信息（此处暂用API提供的信息。主演，最多可获得4个；）
@@ -202,7 +175,7 @@ class Gen(Base):
 
             # 获取获奖情况
             awards_url = "https://movie.douban.com/subject/{}/awards/"
-            awards_page = self.get_source(awards_url.format(sid), bs=True)
+            awards_page = self.get_source(awards_url.format(self.sid), bs=True)
             awards = ""
             for awards_tag in awards_page.find_all("div", class_="awards"):
                 _temp_awards = ""
@@ -223,12 +196,12 @@ class Gen(Base):
                     descr += ft.format(data)
             self.ret.update({"img": img_list, "format": descr, "success": True})
 
-    def _gen_imdb(self, sid):
+    def _gen_imdb(self):
         # TODO 根据tt号先在豆瓣搜索，如果有则直接使用豆瓣解析结果，如果没有，则转而从imdb上解析数据。
         pass
 
-    def _gen_bangumi(self, sid):
-        raw_data_json = self.get_source(api_bangumi.format(sid), json=True)  # 通过API获取Json格式的数据
+    def _gen_bangumi(self):
+        raw_data_json = self.get_source(api_bangumi.format(self.sid), json=True)  # 通过API获取Json格式的数据
 
         if raw_data_json.get("error"):
             self.ret.update({"error": raw_data_json.get("error")})
@@ -239,7 +212,7 @@ class Gen(Base):
             raw_data_page = self.get_source(alt, bs=True)  # 获取相应页面（用来获取API中未提供的信息），并用BeautifulSoup处理
 
             # -*- 清洗数据 -*-
-            self.ret.update({"id": sid, "alt": alt})
+            self.ret.update({"id": self.sid, "alt": alt})
 
             # Bangumi的封面图
             cover_img = ""
@@ -288,9 +261,5 @@ class Gen(Base):
 
 
 if __name__ == '__main__':
-    from pprint import pprint
-
     douban = Gen("https://movie.douban.com/subject/3008672/").get()
-    # pprint(Gen("https://movie.douban.com/subject/3008672/").get())
     print(douban.get("format"))
-    # pprint(Gen("https://bgm.tv/subject/203526").get())

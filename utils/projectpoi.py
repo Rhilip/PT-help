@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2017-2020 Rhilip <rhilipruan@gmail.com>
 
-import requests
+from utils.netsource import NetBase
 
 
-class ProjectPoi(object):
+class ProjectPoi(NetBase):
     key = None
 
     def __init__(self, app=None, key=None):
@@ -22,25 +22,19 @@ class ProjectPoi(object):
 
     def token_verify(self, token, hashes):
         payload = {"secret": self.key, "token": token, "hashes": hashes}
-        r = requests.post("https://api.ppoi.org/token/verify", data=payload)
-        return r.json()
+        return self.post_source("https://api.ppoi.org/token/verify", json=True, data=payload)
 
     def user_balance(self, name, sitekey):
         payload = {"secret": self.key, "name": name, "sitekey": sitekey}
-        r = requests.post("https://api.ppoi.org/user/balance", data=payload)
-        return r.json()
+        return self.post_source("https://api.ppoi.org/user/balance", json=True, data=payload)
 
     def user_withdraw(self, name, sitekey, amount):
         payload = {"secret": self.key, "name": name, "sitekey": sitekey, "amount": amount}
-        r = requests.post("https://api.ppoi.org/user/withdraw", data=payload)
-        return r.json()
+        return self.post_source("https://api.ppoi.org/user/withdraw", json=True, data=payload)
 
-    @staticmethod
-    def stats_payout():
-        r = requests.get("https://api.ppoi.org/stats/payout")
-        return r.json()
+    def stats_payout(self):
+        return self.get_source("https://api.ppoi.org/stats/payout", json=True)
 
     def stats_site(self):
         payload = {"secret": self.key}
-        r = requests.post("https://api.ppoi.org/stats/site", data=payload)
-        return r.json()
+        return self.post_source("https://api.ppoi.org/stats/site", json=True, data=payload)
