@@ -219,10 +219,7 @@ class Gen(Base):
                 data = self.ret.get(key)
                 if data:
                     if isinstance(data, list):
-                        _temp = data[0] or ""
-                        for d in data[1:]:
-                            _temp += "\n　　　　　　{}".format(d) if d else ""
-                        data = _temp
+                        data = "\n　　　　　　".join(data)
                     descr += ft.format(data)
             self.ret.update({"img": img_list, "format": descr, "success": True})
 
