@@ -24,7 +24,7 @@ $(document).ready(function(){
     infoNode.find("img[src*='ckfinder']").addClass("Inbyrimg");   // 为以防万一，使用相对地址的图片
     var outimg = totalimg - infoNode.find("img.Inbyrimg").length;
 
-    infoNode.closest("tr").before('<tr><td class="rowhead" valign="top">图片检查</td><td class="rowfollow" align="left" valign="top">该种子简介共用 <span id="totalimg"><b>' + totalimg + '</b></span> 张图片，其中可能有 <span id="outimg"><b>' + outimg + '</b></span> 张外链图<span id="unupimghide" style="display:none">（其中含本地未上传或以Base64编码的图片 <span id="localimg" style="color:#ff0000;"><b>'+ unupimg +'</b></span> 张）</span><span id="img_check" style="display: none"> <- 这个判断很傻，如存在外链图请根据下表再次核对。<hr><table id="img_check_table"></table></span></td></tr>');
+    infoNode.closest("tr").before('<tr><td class="rowhead" valign="top">图片检查</td><td class="rowfollow" align="left" valign="top">该种子简介共用 <span id="totalimg"><b>' + totalimg + '</b></span> 张图片，其中可能有 <span id="outimg"><b>' + outimg + '</b></span> 张外链图<span id="unupimghide" style="display:none">（其中含本地未上传或以Base64编码的图片 <span id="localimg" style="color:#ff0000;"><b>'+ unupimg +'</b></span> 张）</span><span id="img_check" style="display: none"> <- 这个判断很傻，如存在外链图请根据下表再次核对。<hr><table id="img_check_table" style="table-layout:fixed ; width:100%"></table></span></td></tr>');
     if(outimg) {
         $('span#outimg').attr("style","color:#ff0000;");
         if (unupimg) {
@@ -34,7 +34,7 @@ $(document).ready(function(){
         var table_html = "";
         infoNode.find("img").each(function(){
             var src = $(this).attr("src");
-            table_html += "<tr><td>" + src+ "</td></tr>";
+            table_html += "<tr><td style='overflow:hidden; text-overflow:ellipsis;'>" + src+ "</td></tr>";
         });
         $("table#img_check_table").html(table_html);
         $("span#img_check").show();
