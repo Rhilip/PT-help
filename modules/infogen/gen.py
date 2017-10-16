@@ -69,10 +69,7 @@ class Gen(NetBase):
         }
 
     def get(self):
-        if self.site == "douban":
-            self._gen_douban()
-        elif self.site == "bangumi":
-            self._gen_bangumi()
+        getattr(self, "_gen_{}".format(self.site))()
         return self.ret
 
     def _gen_douban(self):
@@ -91,7 +88,6 @@ class Gen(NetBase):
             # 可以从raw_json中直接（或简单处理就）转移到返回数据中的信息
             _raw_title = raw_data_json.get("title")
             _aka = raw_data_json.get("aka")
-            _original_title = raw_data_json.get("original_title")
 
             _title = [_raw_title]
             # 排除aka中的非中文字段
@@ -101,7 +97,7 @@ class Gen(NetBase):
 
             self.ret.update({
                 "title": " / ".join(_title),
-                "original_title": _original_title,
+                "original_title": raw_data_json.get("original_title"),
                 "year": raw_data_json.get("year"),
                 "countries": " / ".join(raw_data_json.get("countries")),
                 "summary": raw_data_json.get("summary").replace("\n", "\n　　"),
@@ -160,11 +156,25 @@ class Gen(NetBase):
                                  "douban_link": "https://movie.douban.com/subject/{}".format(self.sid)
                                  })
 
-            # TODO 获取导演信息及主演信息（此处暂用API提供的信息。主演，最多可获得4个；）
+            # 获取导演信息及主演信息（当页面显示数多于API，则用页面显示，否则为API数据）
             api_douban_celebrity = "https://api.douban.com/v2/movie/celebrity/{}"
-            for tp in ["directors", "casts"]:
+
+            for tp, rel in [("directors", "v:directedBy"), ("casts", "v:starring")]:
                 _temp_list = []
-                for role in raw_data_json.get(tp):
+                data_from_json = raw_data_json.get(tp)  # API中获取的信息
+                data_from_page = info_tag.find_all("a", rel=rel)  # 页面中获取的信息
+
+                if len(data_from_page) > len(data_from_json):  # 当页面中信息大于API信息时，构建自己的信息字典列表
+                    total_data = []
+                    for tp_tag in data_from_page:
+                        name_info = tp_tag.get_text()
+                        if_id_info = re.search("/celebrity/(\d+)", tp_tag["href"])
+                        id_info = if_id_info.group(1) if if_id_info else None
+                        total_data.append({"name": name_info, "id": id_info})
+                else:  # 否则用API提供的信息字典列表
+                    total_data = data_from_json
+
+                for role in total_data:
                     role_name = role.get("name")
                     role_id = role.get("id")
                     if role_id:
