@@ -13,9 +13,14 @@ from .gen import Gen
 getinfo_blueprint = Blueprint('infogen', __name__, url_prefix="/movieinfo")
 
 
-@getinfo_blueprint.route("/gen", methods=["POST"])
+@getinfo_blueprint.route("/gen")
 def gen():
-    url = request.form["url"]
+    if request.method == "POST":
+        url = request.form["url"]
+    elif request.method == "GET":
+        url = request.args.get("url")
+    else:
+        url = ""
     _gen = Gen(url=url)
 
     row, data = mysql.exec(
