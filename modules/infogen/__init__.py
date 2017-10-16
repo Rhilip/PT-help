@@ -29,7 +29,7 @@ def gen():
     )
 
     if int(row) == 0:
-        data = _gen.gen()
+        data = _gen.get()
         mysql.exec("INSERT INTO `api`.`gen_info` (`site`, `sid`, `data`)"
                    " VALUES ('{}', '{}', '{}')".format(_gen.site, _gen.sid, escape_string(json.dumps(data))))
     else:
