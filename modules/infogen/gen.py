@@ -165,11 +165,12 @@ class Gen(NetBase):
             for tp in ["directors", "casts"]:
                 _temp_list = []
                 for role in raw_data_json.get(tp):
+                    role_name = role.get("name")
                     role_id = role.get("id")
-                    role_json = self.get_source(api_douban_celebrity.format(role_id), json=True)
-                    role_name = role_json.get("name")
-                    if role_json.get("name_en"):
-                        role_name += "  " + role_json.get("name_en")
+                    if role_id:
+                        role_json = self.get_source(api_douban_celebrity.format(role_id), json=True)
+                        if role_json.get("name_en"):
+                            role_name += "  " + role_json.get("name_en")
                     _temp_list.append(role_name)
                 self.ret.update({tp: _temp_list})
 
@@ -261,5 +262,5 @@ class Gen(NetBase):
 
 
 if __name__ == '__main__':
-    douban = Gen("https://movie.douban.com/subject/3008672/").get()
+    douban = Gen("https://movie.douban.com/subject/1308450/").get()
     print(douban.get("format"))
