@@ -68,7 +68,7 @@ class Gen(NetBase):
             "copyright": "Powered by @Rhilip. With Gen Version `{}`".format(__version__)
         }
 
-    def get(self):
+    def gen(self):
         getattr(self, "_gen_{}".format(self.site))()
         return self.ret
 
@@ -272,5 +272,5 @@ class Gen(NetBase):
 
 
 if __name__ == '__main__':
-    douban = Gen("https://movie.douban.com/subject/1308450/").get()
+    douban = Gen("https://movie.douban.com/subject/1308450/").gen()
     print(douban.get("format"))
