@@ -10,7 +10,7 @@
 // @connect     api.bgm.tv
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setClipboard
-// @version     20171015
+// @version     20171016
 // ==/UserScript==
 
 var script_version = '';
@@ -92,9 +92,9 @@ $(document).ready(function() {
 
                             // 添加图片信息
                             if (resj.img) {
-                                var img_html  = "<hr>你可能需要下载下列图片，并上传到本站。（注意，如果图片名中含有特殊字符串或较长，请修改图片文件名）<table id=\"ben_img_table\">";
+                                var img_html  = "<hr>你可能需要下载下列图片，并上传到本站。（注意，如果图片名中含有特殊字符串或较长，请修改图片文件名）<table id=\"ben_img_table\" style=\"table-layout:fixed ; width:100%\">";
                                 for (var i=0;i<resj.img.length;i++) {
-                                    img_html += "<tr><td><a href='" + resj.img[i] +"' target='_blank'>" + resj.img[i] + "</a></td></tr>";
+                                    img_html += "<tr><td style='overflow:hidden; text-overflow:ellipsis;'><a href='" + resj.img[i] +"' target='_blank'>" + resj.img[i] + "</a></td></tr>";
                                 }
                                 img_html += "</table>";
 
