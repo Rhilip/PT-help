@@ -13,7 +13,7 @@ from .gen import Gen
 getinfo_blueprint = Blueprint('infogen', __name__, url_prefix="/movieinfo")
 
 
-@getinfo_blueprint.route("/gen")
+@getinfo_blueprint.route("/gen", methods=["GET", "POST"])
 def gen():
     if request.method == "POST":
         url = request.form["url"]
