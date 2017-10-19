@@ -10,7 +10,7 @@
 // @connect     api.bgm.tv
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setClipboard
-// @version     20171016
+// @version     20171019
 // ==/UserScript==
 
 var script_version = '';
