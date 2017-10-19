@@ -60,7 +60,7 @@ $(document).ready(function() {
                             if (cat === 408){   // 电影区
                                 // 填写标题项
                                 $("#movie_type").val(limit_item(resj.genres,3));  // 电影类别(限制最多三个)
-                                $("#movie_country").val(resj.countries);   // 制片国家/地区
+                                $("#movie_country").val(limit_item(resj.countries,3));   // 制片国家/地区(限制最多三个)
 
                                 // 剧集区格式化选项
                                 if (ben_format_btn.prop('checked')) {
