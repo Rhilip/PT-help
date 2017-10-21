@@ -10,7 +10,7 @@
 // @connect     api.bgm.tv
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setClipboard
-// @version     20171019
+// @version     20171021
 // ==/UserScript==
 
 var script_version = '';
@@ -19,10 +19,11 @@ if (GM_info && GM_info.script) {
 }
 
 
-function limit_item(raw_str,limit){
+function limit_item(raw_str, limit){
     var _str = raw_str.split(" / ");
     return _str.slice(0,limit).join("/");
 }
+
 
 $(document).ready(function() {
     // 构造本脚本和用户交互行
@@ -30,6 +31,11 @@ $(document).ready(function() {
 
     var ben_info = $("#ben_info");
     var ben_format_btn  = $("#ben_format");
+    var ben_extra = $("#ben_extra");
+
+    function meet_error(){
+        ben_extra.html("<hr>在遇到API未正确返回数据的情况下，请使用其他简介生成工具作为替代： <a href='http://movieinfogen.sinaapp.com/' target='_blank'>http://movieinfogen.sinaapp.com/</a>， <a href='http://huancun.org/' target='_blank'>http://huancun.org/</a>").show();
+    }
 
     $('#ben_btn').click(function () {
         var subject_url = $('#ben_url').val().trim();
@@ -98,7 +104,7 @@ $(document).ready(function() {
                                 }
                                 img_html += "</table>";
 
-                                $("#ben_extra").html(img_html).show();
+                                ben_extra.html(img_html).show();
                             }
 
                             // 添加`Gen`信息
@@ -109,13 +115,16 @@ $(document).ready(function() {
                             ben_info.text("已完成填写，你也可以使用`Ctrl + V`粘贴简介部分内容原始源码。");
                         } else {
                             ben_info.text("失败了欸，原因：" + resj.error);
+                            meet_error();
                         }
                     } else {
                         ben_info.text("似乎咩从服务器返回到正确的数据，错误号：" + res.status);
+                        meet_error();
                     }
                 },
                 onerror: function () {
                     ben_info.text("你在外太空吗？连服务器娘都不搭理你。");
+                    meet_error();
                 }
             });
         } else {
@@ -176,7 +185,7 @@ $(document).ready(function() {
                                     search_html += "<tr><td class='rowfollow' align='center'>" + i_item.air_date + "</td><td class='rowfollow' align='center'>" + tp + "</td><td class='rowfollow'>" + i_item.name_cn + " | " + i_item.name + "</td><td class='rowfollow'><a href='" + i_item.url + "' target='_blank'>" + i_item.url + "</a></td><td class='rowfollow' align='center'><a href='javascript:void(0);' class='gen_search_choose' data-url='" + i_item.url + "'>选择</a></td></tr>";
                                 }
                                 search_html += "</table>";
-                                $("#ben_extra").html(search_html).show();
+                                ben_extra.html(search_html).show();
 
                                 $("a.gen_search_choose").click(function () {
                                     var tag = $(this);
@@ -200,6 +209,7 @@ $(document).ready(function() {
 
 /**
  * Created by Rhilip on 10/12/2017.
+ * 20171021: 增加在后端API未返回正确信息({"status": false})的情况下，提示使用另外的简介生成工具。
  * 20171014: 改用自己API来进行导入。增加搜索方法。
  * 20171012: Test Version~ , Thanks those Userscript:
  *           1. Bangumi - Info Export.user.js: https://github.com/Rhilip/My-Userscript/blob/master/Bangumi%20-%20Info%20Export.user.js
