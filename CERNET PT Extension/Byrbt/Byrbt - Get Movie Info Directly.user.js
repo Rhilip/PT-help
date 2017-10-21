@@ -19,11 +19,25 @@ if (GM_info && GM_info.script) {
 }
 
 
+var cat = parseInt(location.href.match(/(\d+)$/)[1]); // 408,电影 ; 401,剧集 ; 404, 动漫
+
 function limit_item(raw_str, limit){
     var _str = raw_str.split(" / ");
     return _str.slice(0,limit).join("/");
 }
 
+function format_movie(raw){
+    return '<br />\n' +
+        '<fieldset style="font-family: Consolas;">\n' +
+        '\t<legend><span style="color:#ffffff;background-color:#000000;">&nbsp;海报&nbsp;</span></legend>请在此处<span style="color:#ff0000;">上传图片</span>。</fieldset>\n' +
+        '<br />\n' +
+        '<fieldset style="font-family: Consolas;">\n' +
+        '\t<legend><span style="color:#ffffff;background-color:#000000;">&nbsp;简介&nbsp;</span></legend>' + raw + '</fieldset>\n' +
+        '<br />\n' +
+        '<fieldset style="font-family: Consolas;">\n' +
+        '\t<legend><span style="color:#ffffff;background-color:#000000;">&nbsp;iNFO&nbsp;</span></legend>请在此处<span style="color:#ff0000;">替换为电影的Mediainfo信息</span>。  </fieldset>\n' +
+        '<br />\n';
+}
 
 $(document).ready(function() {
     // 构造本脚本和用户交互行
@@ -34,13 +48,34 @@ $(document).ready(function() {
     var ben_extra = $("#ben_extra");
 
     function meet_error(){
-        ben_extra.html("<hr>在遇到API未正确返回数据的情况下，请使用其他简介生成工具作为替代： <a href='http://movieinfogen.sinaapp.com/' target='_blank'>http://movieinfogen.sinaapp.com/</a>， <a href='http://huancun.org/' target='_blank'>http://huancun.org/</a>").show();
+        ben_extra.html("<hr>在遇到API未正确返回数据的情况下，请使用其他简介生成工具作为替代，如： <a href='http://movieinfogen.sinaapp.com/' target='_blank'>http://movieinfogen.sinaapp.com/</a>， <a href='http://huancun.org/' target='_blank'>http://huancun.org/</a>。<span id='ben_error_format'>并在填入信息后点击此处 -><a id='ben_error_format_btn'>美化电影简介</a></span>").show();
+        if (cat === 408){
+            $("a#ben_error_format_btn").click(function(){
+                var descr = CKEDITOR.instances.descr.getData();
+                if (descr.match(/译　　名　(.+?)</)) {
+                    $("input[name$=cname]").val(descr.match(/译　　名　(.+?)</)[1]);  // 填写中文名
+                }
+                if (descr.match(/豆瓣链接　(.+?)</)) {
+                    $("input[name=dburl]").val(descr.match(/豆瓣链接　(.+?)</)[1]);  // 豆瓣链接
+                }
+                if (descr.match(/IMDb链接　(.+?)</)) {
+                    $("input[name=url]").val(descr.match(/IMDb链接　(.+?)</)[1]);  // IMDb链接
+                }
+                if (descr.match(/类　　别　(.+?)</)) {
+                    $("#movie_type").val(descr.match(/类　　别　(.+?)</)[1]);  // 电影类别
+                }
+                if (descr.match(/产　　地　(.+?)</)) {
+                    $("#movie_country").val(descr.match(/产　　地　(.+?)</)[1]);  // 制片国家/地区
+                }
+                CKEDITOR.instances.descr.setData(format_movie(descr));
+            });
+        } else {
+            $("span#ben_error_format").hide();
+        }
     }
 
     $('#ben_btn').click(function () {
         var subject_url = $('#ben_url').val().trim();
-
-        var cat = parseInt(location.href.match(/(\d+)$/)[1]); // 408,电影 ; 401,剧集 ; 404, 动漫
 
         if (subject_url.match(/^http/)) {
             ben_info.text("识别输入内容为链接格式，请求源数据中....");
@@ -70,16 +105,7 @@ $(document).ready(function() {
 
                                 // 剧集区格式化选项
                                 if (ben_format_btn.prop('checked')) {
-                                    descr = '<br />\n' +
-                                        '<fieldset style="font-family: Consolas;">\n' +
-                                        '\t<legend><span style="color:#ffffff;background-color:#000000;">&nbsp;海报&nbsp;</span></legend>请在此处<span style="color:#ff0000;">上传图片</span>。</fieldset>\n' +
-                                        '<br />\n' +
-                                        '<fieldset style="font-family: Consolas;">\n' +
-                                        '\t<legend><span style="color:#ffffff;background-color:#000000;">&nbsp;简介&nbsp;</span></legend>' + descr + '</fieldset>\n' +
-                                        '<br />\n' +
-                                        '<fieldset style="font-family: Consolas;">\n' +
-                                        '\t<legend><span style="color:#ffffff;background-color:#000000;">&nbsp;iNFO&nbsp;</span></legend>请在此处<span style="color:#ff0000;">替换为电影的Mediainfo信息</span>。  </fieldset>\n' +
-                                        '<br />\n';
+                                    descr = format_movie(descr);
                                 }
                             } else if (cat === 401) {  // 剧集区
                                 // 暂无QAQ
@@ -111,7 +137,6 @@ $(document).ready(function() {
                             descr += '<div class=\"byrbt_info_gen\" data-url=\"' + subject_url + '\" data-version=\"' + script_version + '\" style=\"display:none\">' + resj.copyright +  '</div>';
 
                             CKEDITOR.instances.descr.setData(descr);
-                            // GM_setClipboard(raw);
                             ben_info.text("已完成填写，你也可以使用`Ctrl + V`粘贴简介部分内容原始源码。");
                         } else {
                             ben_info.text("失败了欸，原因：" + resj.error);
@@ -209,7 +234,7 @@ $(document).ready(function() {
 
 /**
  * Created by Rhilip on 10/12/2017.
- * 20171021: 增加在后端API未返回正确信息({"status": false})的情况下，提示使用另外的简介生成工具。
+ * 20171021: 增加在后端API未返回正确信息({"status": false})的情况下，提示使用另外的简介生成工具。并对于电影版提供简介美化及一键填写功能。
  * 20171014: 改用自己API来进行导入。增加搜索方法。
  * 20171012: Test Version~ , Thanks those Userscript:
  *           1. Bangumi - Info Export.user.js: https://github.com/Rhilip/My-Userscript/blob/master/Bangumi%20-%20Info%20Export.user.js
