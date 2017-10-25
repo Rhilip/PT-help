@@ -62,6 +62,7 @@ class Gen(NetBase):
             self.ret.update({"error": "No support link."})
 
     def clear(self):
+        self.site = self.sid = self.url = None
         self.ret = {
             "success": False,
             "error": None,
@@ -177,7 +178,7 @@ class Gen(NetBase):
                 for role in total_data:
                     role_name = role.get("name")
                     role_id = role.get("id")
-                    if role_id:
+                    if role_id:  # TODO 这里是查询最消耗时间的地方（特别是主演和演员信息多时），是否可以用Queue+Thread优化？
                         role_json = self.get_source(api_douban_celebrity.format(role_id), json=True)
                         if role_json.get("name_en"):
                             role_name += "  " + role_json.get("name_en")
