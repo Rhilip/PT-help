@@ -86,7 +86,7 @@ CKEDITOR.on('instanceReady', function (evt) {
             }
 
             // 对简介中出现的图片字符串进行标红处理
-            descr = descr.replace(/^(http.+?\.jpg)/,"<span style=\"color:#ff0000;\">$1</span>");
+            descr = descr.replace(/(http.+?\.jpg)/,"<span style=\"color:#ff0000;\">$1</span>");
 
             // 添加`Gen`信息，以防止二次格式化
             descr += '<div class=\"byrbt_info_gen\" data-version=\"' + script_version + '\" style=\"display:none\">Info Format Powered By @Rhilip</div>';
