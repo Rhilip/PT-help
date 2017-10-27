@@ -14,10 +14,10 @@ headers = {
 
 class NetBase(object):
     @staticmethod
-    def connect(method: str, url: str, json=False, bs=False, **kwargs):
+    def connect(method: str, url: str, json=False, bs=False, max_try=2, **kwargs):
         err = 0
         ret = ""
-        while err < 4:
+        while err < max_try:
             try:
                 kwargs.setdefault("headers", headers)
                 page = requests.request(method.upper(), url, **kwargs)

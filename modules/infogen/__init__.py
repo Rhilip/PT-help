@@ -32,10 +32,11 @@ def gen():
 
         if int(row) == 0:
             data = _gen.gen()
-            mysql.exec(
-                "INSERT INTO `api`.`gen_info` (`site`, `sid`, `data`)"
-                " VALUES ('{}', '{}', '{}')".format(_gen.site, _gen.sid, escape_string(json.dumps(data)))
-            )
+            if data["success"]:  # 正确获取的情况下缓存请求结果
+                mysql.exec(
+                    "INSERT INTO `api`.`gen_info` (`site`, `sid`, `data`)"
+                    " VALUES ('{}', '{}', '{}')".format(_gen.site, _gen.sid, escape_string(json.dumps(data)))
+                )
         else:
             data_str = data.get("data")
             data = json.loads(data_str)
