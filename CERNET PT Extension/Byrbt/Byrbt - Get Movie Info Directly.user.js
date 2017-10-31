@@ -9,7 +9,7 @@
 // @connect     api.douban.com
 // @connect     api.bgm.tv
 // @grant       GM_xmlhttpRequest
-// @version     20171027
+// @version     20171031
 // ==/UserScript==
 
 var script_version = '';
@@ -28,7 +28,7 @@ function limit_item(raw_str, limit){
 
 CKEDITOR.on('instanceReady', function (evt) {
     // 构造本脚本和用户交互行
-    $('#compose').find('> table > tbody > tr:eq(2)').after('<tr id="ben_help"><td class="rowhead nowrap">快速填写信息</td><td class="rowfollow" valign="top" align="left"><input type="text" id="ben_url" placeholder="相应网站上资源信息页的 URL 或资源名称" size="80"> <input type="button" id="ben_btn" value="搜索/导入">&nbsp;<input type="button" id="ben_format" value="简介美化/辅助填写">&nbsp;&nbsp;<span id="ben_info"></span><br> 此功能可以从 豆瓣 / Bangumi 上抓取信息，并生成标题tag信息（在正确类型下）及简介。目前仅支持电影 / 剧集 / 动漫区。（如有问题，请带上链接和错误信息及时<a href="https://bt.byr.cn/sendmessage.php?receiver=222616" target="_blank"><img class="button_pm" src="data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA=="></a>）<br><span id="ben_extra"><hr><span>你也可以手动从简介生成工具（如： <a href=\'http://movieinfogen.sinaapp.com/\' target=\'_blank\'>http://movieinfogen.sinaapp.com/ (需要豆瓣账号)</a>， <a href=\'http://huancun.org/\' target=\'_blank\'>http://huancun.org/</a> ）获取数据并填入，然后点击`简介美化`。</span></span></td></tr>');
+    $('#compose').find('> table > tbody > tr:eq(2)').after('<tr id="ben_help"><td class="rowhead nowrap">快速填写信息</td><td class="rowfollow" valign="top" align="left"><input type="text" id="ben_url" placeholder="相应网站上资源信息页的 URL 或资源名称" size="80" class="clone_skip"> <input type="button" id="ben_btn" value="搜索/导入">&nbsp;<input type="button" id="ben_format" value="简介美化/辅助填写">&nbsp;&nbsp;<span id="ben_info"></span><br> 此功能可以从 豆瓣 / Bangumi 上抓取信息，并生成标题tag信息（在正确类型下）及简介。目前仅支持电影 / 剧集 / 动漫区。（如有问题，请带上链接和错误信息及时<a href="https://bt.byr.cn/sendmessage.php?receiver=222616" target="_blank"><img class="button_pm" src="data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA=="></a>）<br><span id="ben_extra"><hr><span>你也可以手动从简介生成工具（如： <a href=\'http://movieinfogen.sinaapp.com/\' target=\'_blank\'>http://movieinfogen.sinaapp.com/ (需要豆瓣账号)</a>， <a href=\'http://huancun.org/\' target=\'_blank\'>http://huancun.org/</a> ）获取数据并填入，然后点击`简介美化`。</span></span></td></tr>');
 
     // 注册脚本添加的相关tag
     var ben_info = $("#ben_info");
@@ -235,6 +235,7 @@ CKEDITOR.on('instanceReady', function (evt) {
 
 /**
  * Created by Rhilip on 10/12/2017.
+ * 20171031：修改网址输入框的class，防止与魂酱的自引用脚本冲突。
  * 20171027: 大幅度修改脚本，允许直接使用其他简介生成工具提供的简介，并美化及辅助填写。
  * 20171021: 增加在后端API未返回正确信息({"status": false})的情况下，提示使用另外的简介生成工具。并对于电影版提供简介美化及一键填写功能。
  * 20171014: 改用自己API来进行导入。增加搜索方法。
