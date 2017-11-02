@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Byrbt : Quote in CKEditor
 // @namespace    http://blog.rhilip.info
-// @version      20170917
+// @version      20171102
 // @description  为BYRBT的编辑器添加代码（code）引用框
 // @author       Rhilip
 // @match        http*://bt.byr.cn/edit.php*
@@ -27,6 +27,9 @@ const DEFAULT_STYLE = [
     },{
         "name": "本站块引用增强",
         "style": "<blockquote style=\"box-sizing: border-box; padding: 8px; margin: 5px; font-size: small; border-width: 1px 1px 1px 5px; border-style: solid;\"><p style=\"box-sizing: border-box; margin: 0px 0px 10px;\">{0}</p><div style=\"font-family: Consolas;\">{1}</div></blockquote>",
+    },{
+        "name": "本站表格增强",
+        "style": "<table width=\"100%\"><tbody><tr><td class=\"colhead\">{0}</td></tr><tr><td><div style=\"font-family: Consolas;\">{1}</div></td></tr></tbody></table>",
     }
 ];
 
@@ -90,7 +93,6 @@ CKEDITOR.on('instanceReady', function (evt) {
                more_style_btn.text("↓ Show");
            }
         });
-
 
         $("#modal_update").click(function () {
             var quote_style_id = parseInt($("input[name='code_style']:checked").val());
