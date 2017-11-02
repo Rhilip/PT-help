@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Byrbt : Quote in CKEditor
 // @namespace    http://blog.rhilip.info
-// @version      20171102
+// @version      20171102.1
 // @description  为BYRBT的编辑器添加代码（code）引用框
 // @author       Rhilip
 // @match        http*://bt.byr.cn/edit.php*
@@ -101,6 +101,9 @@ CKEDITOR.on('instanceReady', function (evt) {
 
             var insert_data_raw = DEFAULT_STYLE[quote_style_id].style.format(menu_str, info_str.split("\n").join("<br>"));  // info_str.replace("/\n/g","<br>"));
 
+            // 对用户提交的数据进行部分替换(转义成字符实体)
+            insert_data_raw = insert_data_raw.replace(/0[Xx]/g,"0&times;"); // x -> &times;
+
             if ($("#modal_skip_clone").attr("checked") === "checked") {
                 insert_data_raw = "<div class='byrbt_info_clone_ignore'>" + insert_data_raw + "</div>";
             }
@@ -113,6 +116,7 @@ CKEDITOR.on('instanceReady', function (evt) {
 
 /**
  * Created by Rhilip on 6/30/2017.
+ * 20171102: Fix `0x` lost in descr after publish.
  * 20170917: Fix When number of Style gt(4)
  * 20170912: Use CKEDITOR.on('instanceReady', function(){}) instead of waitForKeyElements("#cke_descr", function () {})
  * 20170808: USE the dict list to manage the code style
