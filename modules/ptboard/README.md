@@ -31,7 +31,7 @@ Pt站点高级搜索
 #### Site列表
 | 站点类型 | 允许字段 |
 |-------------|:--------------|
-| 国内教育网站 | BYR, NPU, WHU, NWSUAF6, XAUAT6, ZX, NYPT, SJTU, CUGB, Antsoul, HUDBT|
+| 国内教育网站 | BYR, 6V (Not Live Update), NPU, WHU, NWSUAF6, XAUAT6, ZX, NYPT, SJTU, CUGB, Antsoul, HUDBT|
 | 国内公网站点| HDSKY, Hyperay, HDChina, HDHome, HDTime, HDU, JoyHD, CHDBits, Ourbits, OpenCD, Airpt, TTHD, KeepFrds, TCCF, U2, CMCT, MTeam, GZTown, TTG, HDCity, CCFBits, HD4FANS|
 | 国外站点| - |
 | PreDB| PreDB |
@@ -43,9 +43,9 @@ Pt站点高级搜索
 ```json
 {
   "cost": 0.0036730000000000373,
-  "error": null,  
-  "quote": 24,            
-  "rows": [              
+  "error": null,
+  "quote": 24,
+  "rows": [
       {
           "link": "https://hdchina.org/details.php?id=275274",
           "pubDate": 1505709168,                          
@@ -78,7 +78,7 @@ Pt站点高级搜索
 | rows | 查询具体信息（字典列表），具体见下表 | list |
 | success | 请求状态（请求成功时为true，否则为false并在error字段中返回具体失败理由） | bool |
 | token | 返回请求token | string |
-| total | 存在搜索字段时，返回受影响的条数，否则返回记录总条数（仅供参考） | int |
+| total | 存在搜索字段时，返回受影响的条数（min{limit, total-record}），否则返回记录总条数（仅供参考） | int |
 
 #### rows字段说明
 | 返回字段 | 字段信息 |   类型    |
