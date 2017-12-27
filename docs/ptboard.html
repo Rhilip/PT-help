@@ -89,6 +89,7 @@
                 <table id="table"></table>
             </div>
             <hr>
+            <!--
             <div>
                 <h2>Resource Limit: </h2>
                 <div>
@@ -108,6 +109,7 @@
                 </div>
             </div>
             <hr>
+            -->
             <div>
                 <h2>Notices: </h2>
                 <ol>
@@ -130,10 +132,10 @@
 <!-- Latest compiled and minified JavaScript for bootstrap-table -->
 <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
 
-
+<!--
 <script src="https://ppoi.org/lib/captcha.min.js" async></script>
 
-<!--
+
 <script src="https://ppoi.org/lib/projectpoi.min.js"></script>
 <script>
     var miner = new ProjectPoi.Anonymous('9iFrNpCH6wZY1Q1FRNIU5Bf4',{
@@ -171,8 +173,8 @@
                 }
             ],
             url: "https://api.rhilip.info/tool/ptboard",
-            queryParams: Updateparams,
-            responseHandler: responseHandler,
+            //queryParams: Updateparams,
+            //responseHandler: responseHandler,
             pagination: true,
             onlyInfoPagination: true,
             sidePagination: "server",
@@ -185,12 +187,13 @@
     }
 
     function init() {
-        if (localStorage.token && localStorage.quote > 0){
-            $(".projectpoi-captcha").hide();
+        //if (localStorage.token && localStorage.quote > 0){
+        //    $(".projectpoi-captcha").hide();
             initTable();
-        }
+        //}
     }
 
+    /*
     function CaptchaCallback(token) {
         $.ajax({
             url: "https://api.rhilip.info/tool/token/sign",
