@@ -96,7 +96,6 @@ def ptboard():
 
     ret.update({
         "success": True,
-        # "quote": token_quote,
         "rows": rows_data,
         "total": record_count if search else total_data,
     })

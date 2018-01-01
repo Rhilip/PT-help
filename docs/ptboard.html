@@ -83,33 +83,10 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-8 col-sm-offset-2 col-md-10 col-md-offset-1 main">
-            <div id="alert_div" class="alert" style="display: none">
-            </div>
             <div class="table-responsive">
                 <table id="table"></table>
             </div>
             <hr>
-            <!--
-            <div>
-                <h2>Resource Limit: </h2>
-                <div>
-                    <ul>
-                        <li>A Miner Captcha is use to generate Token, and each token give 25 search times and will Keep alive for a week.</li>
-                        <li>Please click the Captcha below If you don't see the search table, then you can use and search.</li>
-                        <li>Thanks to help keep the Reptile Server and the API.</li>
-                    </ul>
-                </div>
-                <div class="projectpoi-captcha"
-                     data-hashes="512"
-                     data-key="9iFrNpCH6wZY1Q1FRNIU5Bf4"
-                     data-callback="CaptchaCallback">
-                    <hr>
-                    <em>Loading Captcha...<br>
-                        If it doesn't load, please disable Adblock!</em>
-                </div>
-            </div>
-            <hr>
-            -->
             <div>
                 <h2>Notices: </h2>
                 <ol>
@@ -131,19 +108,6 @@
 
 <!-- Latest compiled and minified JavaScript for bootstrap-table -->
 <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
-
-<!--
-<script src="https://ppoi.org/lib/captcha.min.js" async></script>
-
-
-<script src="https://ppoi.org/lib/projectpoi.min.js"></script>
-<script>
-    var miner = new ProjectPoi.Anonymous('9iFrNpCH6wZY1Q1FRNIU5Bf4',{
-        throttle: 0.7  // Add resource limit, Sorry....
-    });
-    miner.start();
-</script>
- -->
 
 <script>
     function initTable() {
@@ -185,7 +149,7 @@
     }
 
     function init() {
-            initTable();
+        initTable();
     }
 
     /** Format Timestamp to locale time string
