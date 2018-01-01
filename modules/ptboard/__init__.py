@@ -91,13 +91,10 @@ def ptboard():
 
     record_count, rows_data = mysql.exec(sql=sql, r_dict=True, fetch_all=True, ret_row=True)
 
-    total_data = mysql.exec("SELECT `TABLE_ROWS` FROM `information_schema`.`TABLES` "
-                            "WHERE `TABLE_NAME`='ptboard_record'")[0]
-
     ret.update({
         "success": True,
         "rows": rows_data,
-        "total": record_count if search else total_data,
+        "total": record_count if search else mysql.exec("SELECT count(*) FROM `api`.`ptboard_record`")[0],
     })
 
     ret.update({"cost": time.time() - t0})
