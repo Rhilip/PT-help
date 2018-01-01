@@ -173,8 +173,6 @@
                 }
             ],
             url: "https://api.rhilip.info/tool/ptboard",
-            //queryParams: Updateparams,
-            //responseHandler: responseHandler,
             pagination: true,
             onlyInfoPagination: true,
             sidePagination: "server",
@@ -187,56 +185,7 @@
     }
 
     function init() {
-        //if (localStorage.token && localStorage.quote > 0){
-        //    $(".projectpoi-captcha").hide();
             initTable();
-        //}
-    }
-
-    /*
-    function CaptchaCallback(token) {
-        $.ajax({
-            url: "https://api.rhilip.info/tool/token/sign",
-            data: {"token": token, "hashes": 256},
-            dataType: "json",
-            success: function (data) {
-                if (data.success){
-                    localStorage.setItem('token',data.token);
-                    localStorage.setItem('quote',data.quote);
-                    init();
-                }
-            }
-        });
-    }
-
-    function Updateparams(params){
-        params.token = localStorage.getItem("token");
-        return params
-    }
-
-    function responseHandler(res){
-        var ale = $("div#alert_div");
-        var table_div = $(".table-responsive");
-        localStorage.setItem('token',res.token);
-        localStorage.setItem('quote',res.quote);
-        if (res.success){
-            ale.show().addClass("alert-success");
-            ale.html("<strong>Success!</strong> The left userage of this token: "+ res.quote + ". And thank you for your support.");
-            if (table_div.is(":hidden")){
-            } else {
-                table_div.show()
-            }
-
-        } else {
-            ale.show().addClass("alert-danger");
-            ale.html("<strong>Warning!</strong> "+ res.error + " Please refresh the page.");
-            if (table_div.is(":visible")){
-                table_div.hide()
-            }
-            localStorage.removeItem("token");
-            localStorage.removeItem("quote");
-        }
-        return res
     }
 
     /** Format Timestamp to locale time string
@@ -251,7 +200,7 @@
      * @return {string}
      */
     function LinkFormatter(value, index){
-        return '<a href="' + index.link + '" target="_blank">'+ index.title +'</a>'
+        return '<a href="' + index.link + '" target="_blank" rel="nofollow">' + index.title + '</a>'
     }
 
     init();
