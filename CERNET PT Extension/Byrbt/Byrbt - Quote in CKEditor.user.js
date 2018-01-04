@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Byrbt : Quote in CKEditor
 // @namespace    http://blog.rhilip.info
-// @version      20171102.1
+// @version      20180104
 // @description  为BYRBT的编辑器添加代码（code）引用框
 // @author       Rhilip
 // @match        http*://bt.byr.cn/edit.php*
@@ -40,25 +40,19 @@ if (!String.prototype.format) {
     String.prototype.format = function () {
         var args = arguments;
         return this.replace(/{(\d+)}/g, function (match, number) {
-            return typeof args[number] !== 'undefined'
-                ? args[number]
-                : match
-                ;
+            return typeof args[number] !== 'undefined' ? args[number] : match;
         });
     };
 }
 
 CKEDITOR.on('instanceReady', function (evt) {
-    $("#cke_52").after('<span id="cke_55"class="cke_toolbar"role="toolbar"><span class="cke_toolbar_start"></span><span class="cke_toolgroup"role="presentation"><span class="cke_button"><a id="cke_28"class="cke_button_code cke_off"><img src="{0}"/></a></span></span><span class="cke_toolbar_end"></span></span>'.format(CODE_IMG));
+    $("#cke_52").after('<span id="cke_55" class="cke_toolbar" role="toolbar"><span class="cke_toolbar_start"></span><span class="cke_toolgroup" role="presentation"><span class="cke_button"><a id="cke_28"class="cke_button_code cke_off"><img src="{0}"/></a></span></span><span class="cke_toolbar_end"></span></span>'.format(CODE_IMG));
     var code_btn = $("#cke_55");
     code_btn.click(function () {
         // Generate the modal code
         var code = '<div id="modal_out_window"><div id="modal_out_title">Code Properties</div><div id="modal_data"><div id="modal_choose"><div><span>Style: (具体展示见 <a href="/forums.php?action=viewtopic&forumid=9&topicid=11235" target="_blank">新手学园-->资源简介美化——引用nfo格式</a> )</span><a id="modal_more_style_btn" style="float:right;" href="javascript:void(0);">↓ Show</a><div id="modal_style"><div style="display: flex;">';
         for (var i= 0 ;i < DEFAULT_STYLE.length;i++){
-            var choose = "";
-            if ((DEFAULT_STYLE[i].checked || (DEFAULT_STYLE[i].checked = false)) === true) {
-                choose = ' checked=""';
-            }
+            var choose = (DEFAULT_STYLE[i].checked || (DEFAULT_STYLE[i].checked = false)) === true ? ' checked=""' : '';
             code += '<label style="width:50%;"><input type="radio" name="code_style" value="{0}" {1}> {2}</label>'.format(i,choose,DEFAULT_STYLE[i].name);
             if ((i+1)%2 === 0){
                 code += '</div><div style="display: flex;">';
@@ -82,16 +76,12 @@ CKEDITOR.on('instanceReady', function (evt) {
         $("#modal_data").css({"background-color": "#ebebeb","border": "solid 1px #fff","border-bottom": "none","overflow": "auto","padding": "17px 10px 5px 10px","border-top-left-radius": "5px","border-top-right-radius": "5px",});
 
         var more_style = $("#modal_style > div:gt(1)");
-        more_style.hide();
-
         var more_style_btn = $("#modal_more_style_btn");
+
+        more_style.hide();
         more_style_btn.click(function(){
             more_style.toggle();
-           if (more_style.is(":visible")){
-               more_style_btn.text("↑ Hide");
-           }else{
-               more_style_btn.text("↓ Show");
-           }
+            more_style_btn.text(more_style.is(":visible") ? "↑ Hide" : "↓ Show");
         });
 
         $("#modal_update").click(function () {
@@ -116,6 +106,7 @@ CKEDITOR.on('instanceReady', function (evt) {
 
 /**
  * Created by Rhilip on 6/30/2017.
+ * 20180104: Code style Fix.
  * 20171102: Fix `0x` lost in descr after publish.
  * 20170917: Fix When number of Style gt(4)
  * 20170912: Use CKEDITOR.on('instanceReady', function(){}) instead of waitForKeyElements("#cke_descr", function () {})
