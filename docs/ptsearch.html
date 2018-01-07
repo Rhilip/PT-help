@@ -18,9 +18,15 @@
 
     <!-- Custom styles for this template -->
     <style type="text/css">
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+
         /* Move down content because we have a fixed navbar that is 50px tall */
         body {
             padding-top: 50px;
+            margin-bottom: 40px;
         }
 
         /*
@@ -42,6 +48,19 @@
                 padding-right: 40px;
                 padding-left: 40px;
             }
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            /* Set the fixed height of the footer here */
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            width: auto;
+            padding: 0 15px;
         }
 
         /* To keep data show in one line */
@@ -90,15 +109,12 @@
             </div>
             <div id="hide-without-tampermonkey" style="display: none">
                 <div id="toolbar" class="form-inline">
-                    <div class="form-group">
-                        <div class="input-group">
-                            <div id="choose-site" class="input-group-addon"><span
-                                    class="glyphicon glyphicon-cloud"></span></div>
-                            <input id="keyword" type="text" class="form-control" placeholder="Search Text">
-                        </div>
+                    <div class="input-group">
+                        <div class="input-group-addon"><span class="glyphicon glyphicon-cloud"></span></div>
+                        <input id="keyword" type="text" class="form-control" placeholder="Search Text">
                     </div>
-                    <button type="button" id="advsearch" class="btn btn-primary"><span
-                            class="glyphicon glyphicon-search"></span>Search
+                    <button type="button" id="advsearch" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-search"></span>Search
                     </button>
                 </div>
                 <div class="table-responsive">
@@ -116,6 +132,66 @@
     </div>
 </div>
 
+<footer class="footer">
+    <div class="container">
+        <!-- Button trigger modal -->
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#" data-toggle="modal" data-target="#SiteChoose">Search Site Setting</a></li>
+                <li>&nbsp;&nbsp;</li>
+                <li><a href="#" data-toggle="modal" data-target="#SearchLog">Search Log</a></li>
+            </ul>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="SiteChoose" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Choose The Advance Search Site</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div id="check-site">
+                            教育网站点：
+                            <div id="site-jyw"></div>
+                            公网站点：
+                            <div id="site-gw"></div>
+                            外网站点：
+                            <div id="site-wz"></div>
+                        </div>
+                        <hr>
+                        Warning: The search site you must have account, and Has landed.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="save-site" data-dismiss="modal">Save changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="SearchLog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Search Log</h4>
+                    </div>
+                    <div class="modal-body" id="search-log">
+                        No log...............
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
@@ -126,6 +202,34 @@
 <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
 
 <script>
+    /** Format Title with it's Link
+     * @return {string}
+     */
+    function LinkFormatter(value, index) {
+        return '<a href="' + index.link + '" target="_blank" rel="nofollow">' + index.title + '</a>'
+    }
+
+    function SizeFormatter(value) {
+        var ret;
+        var kilobyte = 1024;
+        var megabyte = 1024 * 1024;
+        var gigabyte = 1024 * 1024 * 1024;
+        var terabyte = 1024 * 1024 * 1024 * 1024;
+
+        if ((bytes >= 0) && (bytes < kilobyte)) {
+            ret = bytes + 'B';
+        } else if ((bytes >= kilobyte) && (bytes < megabyte)) {
+            ret = (bytes / kilobyte).toFixed(2) + 'KB';
+        } else if ((bytes >= megabyte) && (bytes < gigabyte)) {
+            ret = (bytes / megabyte).toFixed(2) + 'MB';
+        } else if ((bytes >= gigabyte) && (bytes < terabyte)) {
+            ret = (bytes / gigabyte).toFixed(2) + 'GB';
+        } else if (bytes >= terabyte) {
+            ret = (bytes / terabyte).toFixed(2) + 'TB';
+        }
+        return ret
+    }
+
     $('#table').bootstrapTable({
         classes: "table table-hover table-striped",
         striped: true,
@@ -149,7 +253,7 @@
                 align: 'center',
                 valign: 'middle',
                 class: 'data-inline',
-                sortable: 'true'
+                //sortable: 'true'
             }, {
                 field: 'size',
                 title: 'Size',
@@ -180,33 +284,41 @@
         escape: true
     });
 
-    /** Format Title with it's Link
-     * @return {string}
-     */
-    function LinkFormatter(value, index) {
-        return '<a href="' + index.link + '" target="_blank" rel="nofollow">' + index.title + '</a>'
-    }
+    $.get("./json/site.json", function (data) {
+        var site_list = data.site;
+        var type_list = data.site_type;
+        for (var i = 0; i < type_list.length; i++) {
+            var type_name = type_list[i];
+            var type_data = site_list[type_name];
+            var type_select = "";
 
-    function SizeFormatter(value) {
-        var ret;
-        var kilobyte = 1024;
-        var megabyte = 1024 * 1024;
-        var gigabyte = 1024 * 1024 * 1024;
-        var terabyte = 1024 * 1024 * 1024 * 1024;
-
-        if ((bytes >= 0) && (bytes < kilobyte)) {
-            ret = bytes + 'B';
-        } else if ((bytes >= kilobyte) && (bytes < megabyte)) {
-            ret = (bytes / kilobyte).toFixed(2) + 'KB';
-        } else if ((bytes >= megabyte) && (bytes < gigabyte)) {
-            ret = (bytes / megabyte).toFixed(2) + 'MB';
-        } else if ((bytes >= gigabyte) && (bytes < terabyte)) {
-            ret = (bytes / gigabyte).toFixed(2) + 'GB';
-        } else if (bytes >= terabyte) {
-            ret = (bytes / terabyte).toFixed(2) + 'TB';
+            for (var j = 0; j < type_data.length; j++) {
+                var _data = type_data[j];
+                var _disable = _data["disable"] ? "disabled" : "";
+                type_select += "<label><input type='checkbox' id='site-check' value='" + _data["value"] + "' name='" + _data["name"] + "'" + _disable + ">" + _data["name"] + "&nbsp;&nbsp;&nbsp;</label>"
+            }
+            $("div#site-" + type_name).html(type_select);
         }
-        return ret
-    }
+
+        // 从localStorage中获取存储的搜索网站，并勾选
+        var last_selected_var = localStorage.getItem('selected_var').split(',') || [101];
+        for (var last_selected_var_i = 0; last_selected_var_i < last_selected_var.length; last_selected_var_i++) {
+            $('#check-site input[value="' + last_selected_var[last_selected_var_i] + '"]').prop('checked', true);
+        }
+    });
+
+    $("#save-site").click(function () {
+        // 获取用户选择搜索的网站
+        var selected_name = [], selected_var = [];
+        $('#check-site input:checked').each(function () {
+            selected_name.push($(this).attr('name'));
+            selected_var.push($(this).attr('value'));
+        });
+
+        // 在localStorage中存储，以便下次调用
+        localStorage.setItem('selected_name', selected_name);
+        localStorage.setItem('selected_var', selected_var);
+    });
 </script>
 </body>
 </html>
