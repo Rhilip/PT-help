@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="PT Search">
+    <meta name="author" content="Rhilip">
+
+    <title>PT Search</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Latest compiled and minified CSS for bootstrap-table -->
+    <link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <style type="text/css">
+        /* Move down content because we have a fixed navbar that is 50px tall */
+        body {
+            padding-top: 50px;
+        }
+
+        /*
+         * Top navigation
+         * Hide default border to remove 1px line.
+         */
+        .navbar-fixed-top {
+            border: 0;
+        }
+
+        /* Main content */
+        .main {
+            padding: 20px;
+            margin-top: 0;
+        }
+
+        @media (min-width: 768px) {
+            .main {
+                padding-right: 40px;
+                padding-left: 40px;
+            }
+        }
+
+        /* To keep data show in one line */
+        td.data-inline {
+            word-break: keep-all;
+            white-space: nowrap;
+        }
+    </style>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">PT Search</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="//api.rhilip.info/ptboard.html" target="_blank">PT Board</a></li>
+                <li><a href="//blog.rhilip.info" target="_blank">Powered By @Rhilip</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-8 col-sm-offset-2 col-md-10 col-md-offset-1 main">
+            <div id="use-tampermonkey" class="alert alert-danger">
+                Please Install <a href="https://tampermonkey.net/" target="_blank">Tampermonkey</a>, And the correspond
+                userscript - <a></a> to <strong>USE</strong> this pages.
+            </div>
+            <div id="hide-without-tampermonkey" style="display: none">
+                <div id="toolbar" class="form-inline">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div id="choose-site" class="input-group-addon"><span
+                                    class="glyphicon glyphicon-cloud"></span></div>
+                            <input id="keyword" type="text" class="form-control" placeholder="Search Text">
+                        </div>
+                    </div>
+                    <button type="button" id="advsearch" class="btn btn-primary"><span
+                            class="glyphicon glyphicon-search"></span>Search
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table id="table"></table>
+                </div>
+                <hr>
+                <div>
+                    <h2>Notices: </h2>
+                    <ol>
+                        <li>Some Notices HERE.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!-- Latest compiled and minified JavaScript for bootstrap-table -->
+<script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+
+<script>
+    $('#table').bootstrapTable({
+        classes: "table table-hover table-striped",
+        striped: true,
+        sortOrder: "desc",
+        toolbar: "#toolbar",
+        toolbarAlign: "right",
+        columns: [
+            {
+                field: 'site',
+                title: 'Site',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'name',
+                title: 'Name',
+                align: 'center',
+                formatter: LinkFormatter
+            }, {
+                field: 'pubdate',
+                title: 'Publish Date',
+                align: 'center',
+                valign: 'middle',
+                class: 'data-inline',
+                sortable: 'true'
+            }, {
+                field: 'size',
+                title: 'Size',
+                align: 'center',
+                valign: 'middle',
+                formatter: SizeFormatter
+            }, {
+                field: 'seeders',
+                title: '<span class="glyphicon glyphicon-arrow-up"></span>',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'leechers',
+                title: '<span class="glyphicon glyphicon-arrow-down"></span>',
+                align: 'center',
+                valign: 'middle'
+            }, {
+                field: 'completed',
+                title: '<span class="glyphicon glyphicon-ok"></span>',
+                align: 'center',
+                valign: 'middle'
+            }
+        ],
+        pagination: true,
+        sidePagination: "client",
+        pageSize: 50,
+        pageList: [10, 25, 50, 100, 200],
+        escape: true
+    });
+
+    /** Format Title with it's Link
+     * @return {string}
+     */
+    function LinkFormatter(value, index) {
+        return '<a href="' + index.link + '" target="_blank" rel="nofollow">' + index.title + '</a>'
+    }
+
+    function SizeFormatter(value) {
+        var ret;
+        var kilobyte = 1024;
+        var megabyte = 1024 * 1024;
+        var gigabyte = 1024 * 1024 * 1024;
+        var terabyte = 1024 * 1024 * 1024 * 1024;
+
+        if ((bytes >= 0) && (bytes < kilobyte)) {
+            ret = bytes + 'B';
+        } else if ((bytes >= kilobyte) && (bytes < megabyte)) {
+            ret = (bytes / kilobyte).toFixed(2) + 'KB';
+        } else if ((bytes >= megabyte) && (bytes < gigabyte)) {
+            ret = (bytes / megabyte).toFixed(2) + 'MB';
+        } else if ((bytes >= gigabyte) && (bytes < terabyte)) {
+            ret = (bytes / gigabyte).toFixed(2) + 'GB';
+        } else if (bytes >= terabyte) {
+            ret = (bytes / terabyte).toFixed(2) + 'TB';
+        }
+        return ret
+    }
+</script>
+</body>
+</html>
