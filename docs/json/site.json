@@ -26,28 +26,23 @@
       },
       {
         "value": 105,
-        "name": "NWSUAF6",
-        "disable": true
+        "name": "NWSUAF6"
       },
       {
         "value": 106,
-        "name": "XAUAT6",
-        "disable": true
+        "name": "XAUAT6"
       },
       {
         "value": 107,
-        "name": "ZX",
-        "disable": true
+        "name": "ZX"
       },
       {
         "value": 108,
-        "name": "NYPT",
-        "disable": true
+        "name": "NYPT"
       },
       {
         "value": 109,
-        "name": "SJTU",
-        "disable": true
+        "name": "SJTU"
       },
       {
         "value": 110,
@@ -56,8 +51,7 @@
       },
       {
         "value": 111,
-        "name": "CUGB",
-        "disable": true
+        "name": "CUGB"
       },
       {
         "value": 112,
@@ -66,13 +60,11 @@
       },
       {
         "value": 113,
-        "name": "HUDBT",
-        "disable": true
+        "name": "HUDBT"
       },
       {
         "value": 114,
-        "name": "TJUPT",
-        "disable": true
+        "name": "TJUPT"
       }
     ],
     "gw": [
@@ -82,38 +74,31 @@
       },
       {
         "value": 202,
-        "name": "Hyperay",
-        "disable": true
+        "name": "Hyperay"
       },
       {
         "value": 203,
-        "name": "HDChina",
-        "disable": true
+        "name": "HDChina"
       },
       {
         "value": 204,
-        "name": "HDHome",
-        "disable": true
+        "name": "HDHome"
       },
       {
         "value": 205,
-        "name": "HDTime",
-        "disable": true
+        "name": "HDTime"
       },
       {
         "value": 206,
-        "name": "HDU",
-        "disable": true
+        "name": "HDU"
       },
       {
         "value": 207,
-        "name": "JoyHD",
-        "disable": true
+        "name": "JoyHD"
       },
       {
         "value": 208,
-        "name": "CHDBits",
-        "disable": true
+        "name": "CHDBits"
       },
       {
         "value": 209,
@@ -121,73 +106,63 @@
       },
       {
         "value": 210,
-        "name": "OpenCD",
-        "disable": true
+        "name": "OpenCD"
       },
       {
         "value": 211,
-        "name": "SolaGS",
-        "disable": true
+        "name": "SolaGS"
       },
       {
         "value": 212,
-        "name": "TTHD",
-        "disable": true
+        "name": "TTHD"
       },
       {
         "value": 213,
-        "name": "KeepFrds",
-        "disable": true
+        "name": "KeepFrds"
       },
       {
         "value": 214,
-        "name": "TCCF",
-        "disable": true
+        "name": "TCCF"
       },
       {
         "value": 215,
-        "name": "U2",
-        "disable": true
+        "name": "U2"
       },
       {
         "value": 216,
-        "name": "CMCT",
-        "disable": true
+        "name": "CMCT"
       },
       {
         "value": 217,
-        "name": "MTeam",
-        "disable": true
+        "name": "MTeam"
       },
       {
         "value": 218,
-        "name": "GZTown",
-        "disable": true
+        "name": "GZTown"
       },
       {
         "value": 219,
-        "name": "TTG",
-        "disable": true
+        "name": "TTG(Media)"
+      },
+      {
+        "value": 219,
+        "name": "TTG(Gamez)"
       },
       {
         "value": 220,
-        "name": "HDStreet",
-        "disable": true
+        "name": "HDStreet"
       },
       {
         "value": 221,
-        "name": "HDCity",
-        "disable": true
+        "name": "HDCity"
       },
       {
         "value": 222,
-        "name": "CCFBits",
-        "disable": true
+        "name": "CCFBits"
       },
       {
         "value": 223,
-        "name": "HD4FANS",
-        "disable": true
+        "name": "HD4FANS"
       }
     ],
     "wz": []

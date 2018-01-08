@@ -10,6 +10,8 @@
 // @connect      bt.byr.cn
 // @connect      npupt.com
 // @connect      pt.whu.edu.cn
+// @connect      pt.nwsuaf6.edu.cn
+// @connect      pt.xauat6.edu.cn
 // @connect      ourbits.club
 // @connect      hdsky.me
 // @connect      hdhome.org
@@ -39,7 +41,7 @@ function FileSizetoLength(size) {
             case /Ki?B/.test(_size_type):
                 return _size_num * Math.pow(2, 10);
             default:
-                return _size_num
+                return _size_num;
         }
     }
     return 0;
@@ -69,37 +71,6 @@ $(document).ready(function () {
         search_log.append("<li>" + TimeStampFormatter(Date.now()) + " - " + text + "</li>");
     }
 
-    // 通用处理模板，如果默认解析模板可以解析该站点则请不要自建解析方法
-    // NexusPHP类站点
-    function NexusPHP(site, prefix, tr_list) {
-        for (var i = 0; i < tr_list.length; i++) {
-            var torrent_data_raw = tr_list.eq(i);
-            var _tag_name = torrent_data_raw.find("a[href*='hit']");
-            var _date = torrent_data_raw.find("span[title*='-'][title*=':'][title^='20']").attr("title") || torrent_data_raw.text().match(/(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
-
-            var _tag_size, _size;
-            for (var j = 0; j < size_type_list.length; j++) {
-                _tag_size = torrent_data_raw.find("td:contains('" + size_type_list[j] + "')");
-                if (_tag_size.text()) {
-                    _size = FileSizetoLength(_tag_size.text());
-                    break;
-                }
-            }
-
-            table.bootstrapTable('append', {
-                "site": site,
-                "name": _tag_name.attr("title") || _tag_name.text(),
-                "link": prefix + _tag_name.attr("href"),
-                "pubdate": Date.parse(_date),
-                "size": _size,
-                "seeders": _tag_size.next("td").text().replace(',', ''),
-                "leechers": _tag_size.next("td").next("td").text().replace(',', ''),
-                "completed": _tag_size.next("td").next("td").next("td").text().replace(',', '')
-            });
-        }
-    }
-
-
     // 搜索开始
     $("#advsearch").click(function () {
         // 获取搜索设置
@@ -109,27 +80,65 @@ $(document).ready(function () {
         // 清空已有表格信息
         table.bootstrapTable('removeAll');
 
-        // 开始各站点遍历
-        if ($.inArray("BYR", search_site) > -1) {     // BYRBT
-            writelog("Start Searching in BYRBT.");
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: "https://bt.byr.cn/torrents.php?search=" + search_text,
-                onload: function (responseDetail) {
-                    var resp = responseDetail.responseText;
-                    if (responseDetail.finalUrl.search("login") > -1) {
-                        writelog("Not Login in Site BYRBT.");
-                    } else {
-                        var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
-                        var page = $(body); // 构造 jQuery 对象
-                        var torrent_list_table = page.find(".torrents tr:odd");
-                        writelog("Get " + torrent_list_table.length + " records in Site BYRBT.");
-                        NexusPHP("BYR", "https://bt.byr.cn/", torrent_list_table);
+        // 通用处理模板，如果默认解析模板可以解析该站点则请不要自建解析方法
+        // NexusPHP类站点
+        function NexusPHP(site, url_prefix, search_prefix, torrent_table_selector) {
+            if ($.inArray(site, search_site) > -1) {     // BYRBT
+                writelog("Start Searching in BYRBT.");
+                GM_xmlhttpRequest({
+                    method: 'GET',
+                    url: search_prefix + search_text,
+                    onload: function (responseDetail) {
+                        var resp = responseDetail.responseText;
+                        if (responseDetail.finalUrl.search("login") > -1) {
+                            writelog("Not Login in Site BYRBT.");
+                        } else {
+                            var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
+                            var page = $(body); // 构造 jQuery 对象
+                            var tr_list = page.find(torrent_table_selector);
+                            writelog("Get " + tr_list.length + " records in Site " + site + ".");
+                            for (var i = 0; i < tr_list.length; i++) {
+                                var torrent_data_raw = tr_list.eq(i);
+                                var _tag_name = torrent_data_raw.find("a[href*='hit']");
+                                var _date = torrent_data_raw.find("span[title*='-'][title*=':'][title^='20']").attr("title") || torrent_data_raw.text().match(/(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
+
+                                var _tag_size, _size;
+                                for (var j = 0; j < size_type_list.length; j++) {
+                                    _tag_size = torrent_data_raw.find("td:contains('" + size_type_list[j] + "')");
+                                    if (_tag_size.text()) {
+                                        _size = FileSizetoLength(_tag_size.text());
+                                        break;
+                                    }
+                                }
+
+                                table.bootstrapTable('append', {
+                                    "site": site,
+                                    "name": _tag_name.attr("title") || _tag_name.text(),
+                                    "link": url_prefix + _tag_name.attr("href"),
+                                    "pubdate": Date.parse(_date),
+                                    "size": _size,
+                                    "seeders": _tag_size.next("td").text().replace(',', ''),
+                                    "leechers": _tag_size.next("td").next("td").text().replace(',', ''),
+                                    "completed": _tag_size.next("td").next("td").next("td").text().replace(',', '')
+                                });
+                            }
+                        }
+                        writelog("End of Search Site " + site + ".");
                     }
-                    writelog("End of Search Site BYRBT.");
-                }
-            });
+                });
+            }
         }
+
+
+        // 开始各站点遍历
+
+        // 教育网通用NexusPHP解析
+        NexusPHP("BYR", "https://bt.byr.cn/", "https://bt.byr.cn/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("WHU", "https://pt.whu.edu.cn/", "https://pt.whu.edu.cn/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("NWSUAF6", "https://pt.nwsuaf6.edu.cn/", "https://pt.nwsuaf6.edu.cn/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("XAUAT6", "http://pt.xauat6.edu.cn/", "http://pt.xauat6.edu.cn/torrents.php?search=", ".torrents tr:odd");
+
+        // 教育网不能使用通用NexusPHP解析的站点
         if ($.inArray("NPU", search_site) > -1) {     // NPUPT
             writelog("Start Searching in NPUPT.");
             GM_xmlhttpRequest({
@@ -165,68 +174,53 @@ $(document).ready(function () {
                 }
             });
         }
-        if ($.inArray("WHU", search_site) > -1) {     // WHU
-            writelog("Start Searching in WHU.");
+        if ($.inArray("ZX", search_site) > -1) {     // ZX
+            writelog("Start Searching in ZX.");
             GM_xmlhttpRequest({
                 method: 'GET',
-                url: "https://pt.whu.edu.cn/torrents.php?inclbookmarked=0&search_area=0&incldead=1&indate=0&search=" + search_text,
+                url: "http://pt.zhixing.bjtu.edu.cn/search/x" + search_text,
                 onload: function (responseDetail) {
                     var resp = responseDetail.responseText;
                     if (responseDetail.finalUrl.search("login") > -1) {
-                        writelog("Not Login in Site WHU.");
+                        writelog("Not Login in Site ZX.");
                     } else {
                         var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
                         var page = $(body); // 构造 jQuery 对象
-                        var torrent_list_table = page.find(".torrents tr:odd");
-                        writelog("Get " + torrent_list_table.length + " records in Site WHU.");
-                        NexusPHP("WHU", "https://pt.whu.edu.cn/", torrent_list_table);
+                        var torrent_list_table = page.find(".torrenttable tr");
+                        writelog("Get " + torrent_list_table.length + " records in Site ZX.");
+                        for (var i = 1; i < torrent_list_table.length; i++) {
+                            var torrent_data_raw = torrent_list_table.eq(i);
+                            var _tag_name = torrent_data_raw.find("a[href*='hit']");
+                            var _date = torrent_data_raw.find("span[title*='-'][title*=':'][title^='20']").attr("title") || torrent_data_raw.text().match(/(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
+
+                            var _tag_size, _size;
+                            for (var j = 0; j < size_type_list.length; j++) {
+                                _tag_size = torrent_data_raw.find("td:contains('" + size_type_list[j] + "')");
+                                if (_tag_size.text()) {
+                                    _size = FileSizetoLength(_tag_size.text());
+                                    break;
+                                }
+                            }
+
+                            table.bootstrapTable('append', {
+                                "site": site,
+                                "name": _tag_name.attr("title") || _tag_name.text(),
+                                "link": prefix + _tag_name.attr("href"),
+                                "pubdate": Date.parse(_date),
+                                "size": _size,
+                                "seeders": _tag_size.next("td").text().replace(',', ''),
+                                "leechers": _tag_size.next("td").next("td").text().replace(',', ''),
+                                "completed": _tag_size.next("td").next("td").next("td").text().replace(',', '')
+                            });
+                        }
                     }
-                    writelog("End of Search Site WHU.");
+                    writelog("End of Search Site NWSUAF6.");
                 }
             });
         }
 
-        if ($.inArray("HDSKY", search_site) > -1) {     // HDSKY
-            writelog("Start Searching in HDSKY.");
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: "https://hdsky.me/torrents.php?incldead=1&spstate=0&inclbookmarked=0&search=" + search_text,
-                onload: function (responseDetail) {
-                    var resp = responseDetail.responseText;
-                    if (responseDetail.finalUrl.search("login") > -1) {
-                        writelog("Not Login in Site HDSKY.");
-                    } else {
-                        var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
-                        var page = $(body); // 构造 jQuery 对象
-                        var torrent_list_table = page.find(".torrents tr.progresstr");
-                        writelog("Get " + torrent_list_table.length + " records in Site Ourbits.");
-                        NexusPHP("HDSKY", "https://hdsky.me/", torrent_list_table);
-                    }
-                    writelog("End of Search Site HDSKY.");
-                }
-            });
-
-        }
-        if ($.inArray("Ourbits", search_site) > -1) {     // Ourbits
-            writelog("Start Searching in Ourbits.");
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: "https://ourbits.club/torrents.php?incldead=1&spstate=0&inclbookmarked=0&search=" + search_text,
-                onload: function (responseDetail) {
-                    var resp = responseDetail.responseText;
-                    if (responseDetail.finalUrl.search("login") > -1) {
-                        writelog("Not Login in Site Ourbits.");
-                    } else {
-                        var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
-                        var page = $(body); // 构造 jQuery 对象
-                        var torrent_list_table = page.find(".torrents tr[class^='sticky_']");
-                        writelog("Get " + torrent_list_table.length + " records in Site Ourbits.");
-                        NexusPHP("Ourbits", "https://ourbits.club/", torrent_list_table);
-                    }
-                    writelog("End of Search Site Ourbits.");
-                }
-            });
-
-        }
+        // 公网通用NexusPHP解析站点
+        NexusPHP("HDSKY", "https://hdsky.me/", "https://hdsky.me/torrents.php?search=", ".torrents tr.progresstr");
+        NexusPHP("Ourbits", "https://ourbits.club/", "https://ourbits.club/torrents.php?search=", ".torrents tr[class^='sticky_']");
     });
 });
