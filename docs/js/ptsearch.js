@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180107
+// @version      20180108
 // @description  配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -89,14 +89,24 @@ $(document).ready(function () {
         search_log.append("<li>" + TimeStampFormatter(Date.now()) + " - " + text + "</li>");
     }
 
+    function insertwithlog(data) {
+        table.bootstrapTable('append', data);
+
+        var _data_str = "";
+        for (var i in data) {
+            _data_str += i + ": " + data[i] + "; ";
+        }
+        writelog(_data_str)
+    }
+
     // 搜索开始
     $("#advsearch").click(function () {
         // 获取搜索设置
         var search_text = $("#keyword").val().trim();     // 搜索文本
         var search_site = localStorage.getItem('selected_name').split(',') || [];   // 搜索站点
 
-        // 清空已有表格信息
-        table.bootstrapTable('removeAll');
+        table.bootstrapTable('removeAll');  // 清空已有表格信息
+        search_log.html('');   // 清空原有搜索日志
 
         // 通用处理模板，如果默认解析模板可以解析该站点则请不要自建解析方法
         // NexusPHP类站点
@@ -123,7 +133,7 @@ $(document).ready(function () {
                                 _tag_date = torrent_data_raw.find("span").filter(function () {
                                     return time_regex.test($(this).attr("title"));
                                 }).parent();
-                                if (/[时天月年]/.test(_tag_date.text())) {
+                                if (/[分时天月年]/.test(_tag_date.text())) {
                                     _date = _tag_date.children("span").attr("title");
                                 } else {
                                     _tag_date = torrent_data_raw.find("td").filter(function () {
@@ -137,7 +147,7 @@ $(document).ready(function () {
                                 var _tag_leechers = _tag_seeders.next("td");
                                 var _tag_completed = _tag_leechers.next("td");
 
-                                table.bootstrapTable('append', {
+                                insertwithlog({
                                     "site": site,
                                     "name": _tag_name.attr("title") || _tag_name.text(),
                                     "link": url_prefix + _tag_name.attr("href"),
@@ -155,8 +165,8 @@ $(document).ready(function () {
             }
         }
 
+        writelog("Script Version: " + script_version + ", Choose Site List: " + search_site.toString() + ", With Search Keywords: " + search_text);
         // 开始各站点遍历
-
         // 教育网通用NexusPHP解析
         NexusPHP("BYR", "https://bt.byr.cn/", "https://bt.byr.cn/torrents.php?search=", ".torrents tr:odd");
         NexusPHP("WHU", "", "https://pt.whu.edu.cn/torrents.php?search=", ".torrents tr:gt(0)");
@@ -188,7 +198,7 @@ $(document).ready(function () {
                             var _date = torrent_data_raw.find("span[title*='-'][title*=':'][title^='20']").attr("title") || $.trim(torrent_data_raw.find("div.small").text()) || torrent_data_raw.text().match(/(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
                             var _tag_size = torrent_data_raw.find("center");
 
-                            table.bootstrapTable('append', {
+                            insertwithlog({
                                 "site": "NPU",
                                 "name": _tag_name.attr("title") || _tag_name.text(),
                                 "link": "https://npupt.com/" + _tag_name.attr("href"),
@@ -196,7 +206,7 @@ $(document).ready(function () {
                                 "size": FileSizetoLength(_tag_size.text()),
                                 "seeders": torrent_data_raw.find("span.badge").eq(0).text(),
                                 "leechers": torrent_data_raw.find("span.badge").eq(1).text(),
-                                "completed": parseInt(torrent_data_raw.find("a[href^='viewsnatches.php?id=']").text())
+                                "completed": parseInt(torrent_data_raw.find("a[href^='viewsnatches.php?id=']").text()) || 0
                             });
                         }
                     }
@@ -243,7 +253,7 @@ $(document).ready(function () {
                                     break;
                             }
 
-                            table.bootstrapTable('append', {
+                            insertwithlog({
                                 "site": "ZX",
                                 "name": _tag_name.text(),
                                 "link": "http://pt.zhixing.bjtu.edu.cn" + _tag_name.attr("href"),
@@ -263,7 +273,7 @@ $(document).ready(function () {
         // 公网通用NexusPHP解析站点
         NexusPHP("HDSKY", "https://hdsky.me/", "https://hdsky.me/torrents.php?search=", ".torrents tr.progresstr");
         // TODO Hyperay
-        // TODO HDHome
+        NexusPHP("HDHome", "https://hdhome.org/", "https://hdhome.org/torrents.php?search=", ".torrents tr.progresstr");
         NexusPHP("HDTime", "https://hdtime.org/", "https://hdtime.org/torrents.php?search=", ".torrents tr:odd");
         NexusPHP("HDU", "https://pt.hdupt.com/", "https://pt.hdupt.com/torrents.php?search=", ".torrents tr:odd");
         NexusPHP("JoyHD", "https://www.joyhd.net/", "https://www.joyhd.net/torrents.php?search=", ".torrents tr:odd");
@@ -301,7 +311,7 @@ $(document).ready(function () {
                             var _tag_name = torrent_data_raw.find("a[href*='hit']");
 
                             var _date, _tag_date = torrent_data_raw.find(".t_time");
-                            if (/[时天月年]/.test(_tag_date.text())) {
+                            if (/[分时天月年]/.test(_tag_date.text())) {
                                 _date = _tag_date.children("span").attr("title");
                             } else {
                                 _date = _tag_date.text();
@@ -312,7 +322,7 @@ $(document).ready(function () {
                             var _tag_leechers = torrent_data_raw.find(".t_leech");
                             var _tag_completed = torrent_data_raw.find(".t_completed");
 
-                            table.bootstrapTable('append', {
+                            insertwithlog({
                                 "site": "HDChina",
                                 "name": _tag_name.attr("title") || _tag_name.text(),
                                 "link": "https://hdchina.org/" + _tag_name.attr("href"),
@@ -336,5 +346,7 @@ $(document).ready(function () {
 
 
         // 自定义站点请添加到此处
+
+
     });
 });
