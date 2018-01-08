@@ -28,25 +28,18 @@ function FileSizetoLength(size) {
     var _size_raw_match = size.match(/([\d.]+) ?([TGMK]?i?B)/);
     if (_size_raw_match) {
         var _size_num = parseFloat(_size_raw_match[1]);
-        switch (_size_raw_match[2]) {
-            case "B":
-                return _size_num;
-            case "KB":
-                return _size_num * Math.pow(2, 10);
-            case "KiB":
-                return _size_num * Math.pow(2, 10);
-            case "MB":
-                return _size_num * Math.pow(2, 20);
-            case "MiB":
-                return _size_num * Math.pow(2, 20);
-            case "GB":
-                return _size_num * Math.pow(2, 30);
-            case "GiB":
-                return _size_num * Math.pow(2, 30);
-            case "TB":
+        var _size_type = _size_raw_match[2];
+        switch (true) {
+            case /Ti?B/.test(_size_type):
                 return _size_num * Math.pow(2, 40);
-            case "TiB":
-                return _size_num * Math.pow(2, 40);
+            case /Gi?B/.test(_size_type):
+                return _size_num * Math.pow(2, 30);
+            case /Mi?B/.test(_size_type):
+                return _size_num * Math.pow(2, 20);
+            case /Ki?B/.test(_size_type):
+                return _size_num * Math.pow(2, 10);
+            default:
+                return _size_num
         }
     }
     return 0;
@@ -76,13 +69,13 @@ $(document).ready(function () {
         search_log.append("<li>" + TimeStampFormatter(Date.now()) + " - " + text + "</li>");
     }
 
-    // 通用处理模板
+    // 通用处理模板，如果默认解析模板可以解析该站点则请不要自建解析方法
     // NexusPHP类站点
     function NexusPHP(site, prefix, tr_list) {
         for (var i = 0; i < tr_list.length; i++) {
             var torrent_data_raw = tr_list.eq(i);
             var _tag_name = torrent_data_raw.find("a[href*='hit']");
-            var _date = torrent_data_raw.text().match(/(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:") || torrent_data_raw.find("span[title*='-'][title*=':']").attr("title");
+            var _date = torrent_data_raw.find("span[title*='-'][title*=':'][title^='20']").attr("title") || torrent_data_raw.text().match(/(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
 
             var _tag_size, _size;
             for (var j = 0; j < size_type_list.length; j++) {
@@ -99,9 +92,9 @@ $(document).ready(function () {
                 "link": prefix + _tag_name.attr("href"),
                 "pubdate": Date.parse(_date),
                 "size": _size,
-                "seeders": _tag_size.next("td").text(),
-                "leechers": _tag_size.next("td").next("td").text(),
-                "completed": _tag_size.next("td").next("td").next("td").text()
+                "seeders": _tag_size.next("td").text().replace(',', ''),
+                "leechers": _tag_size.next("td").next("td").text().replace(',', ''),
+                "completed": _tag_size.next("td").next("td").next("td").text().replace(',', '')
             });
         }
     }
@@ -153,7 +146,7 @@ $(document).ready(function () {
                         for (var i = 1; i < tr_list.length; i += 3) {
                             var torrent_data_raw = tr_list.eq(i);
                             var _tag_name = torrent_data_raw.find("a[href*='hit']");
-                            var _date = $.trim(torrent_data_raw.find("div.small").text()) || torrent_data_raw.text().match(/(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:") || torrent_data_raw.find("span[title*='-'][title*=':']").attr("title");
+                            var _date = torrent_data_raw.find("span[title*='-'][title*=':'][title^='20']").attr("title") || $.trim(torrent_data_raw.find("div.small").text()) || torrent_data_raw.text().match(/(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
                             var _tag_size = torrent_data_raw.find("center");
 
                             table.bootstrapTable('append', {
@@ -168,7 +161,7 @@ $(document).ready(function () {
                             });
                         }
                     }
-                    writelog("End of Search Site BYRBT.");
+                    writelog("End of Search Site NPUPT.");
                 }
             });
         }
