@@ -23,6 +23,9 @@ if (GM_info && GM_info.script) {
     script_version = GM_info.script.version || script_version;
 }
 
+var time_regex = /(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/;
+const size_type_list = ["GiB", "GB", "MiB", "MB", "Kib", "KB", "TiB", "TB", "B"];
+
 /**
  * @return {number}
  */
@@ -46,8 +49,6 @@ function FileSizetoLength(size) {
     }
     return 0;
 }
-
-const size_type_list = ["GB", "GiB", "MB", "MiB", "KB", "TB", "TiB", "B"];
 
 /**
  * @return {string}
@@ -83,15 +84,15 @@ $(document).ready(function () {
         // 通用处理模板，如果默认解析模板可以解析该站点则请不要自建解析方法
         // NexusPHP类站点
         function NexusPHP(site, url_prefix, search_prefix, torrent_table_selector) {
-            if ($.inArray(site, search_site) > -1) {     // BYRBT
-                writelog("Start Searching in BYRBT.");
+            if ($.inArray(site, search_site) > -1) {
+                writelog("Start Searching in Site " + site + ".");
                 GM_xmlhttpRequest({
                     method: 'GET',
                     url: search_prefix + search_text,
                     onload: function (responseDetail) {
                         var resp = responseDetail.responseText;
                         if (responseDetail.finalUrl.search("login") > -1) {
-                            writelog("Not Login in Site BYRBT.");
+                            writelog("Not Login in Site " + site + ".");
                         } else {
                             var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
                             var page = $(body); // 构造 jQuery 对象
@@ -100,26 +101,34 @@ $(document).ready(function () {
                             for (var i = 0; i < tr_list.length; i++) {
                                 var torrent_data_raw = tr_list.eq(i);
                                 var _tag_name = torrent_data_raw.find("a[href*='hit']");
-                                var _date = torrent_data_raw.find("span[title*='-'][title*=':'][title^='20']").attr("title") || torrent_data_raw.text().match(/(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
 
-                                var _tag_size, _size;
-                                for (var j = 0; j < size_type_list.length; j++) {
-                                    _tag_size = torrent_data_raw.find("td:contains('" + size_type_list[j] + "')");
-                                    if (_tag_size.text()) {
-                                        _size = FileSizetoLength(_tag_size.text());
-                                        break;
-                                    }
+                                var _tag_date, _date;
+                                _tag_date = torrent_data_raw.find("span").filter(function () {
+                                    return time_regex.test($(this).attr("title"));
+                                }).parent();
+                                if (/时/.test(_tag_date.text())) {
+                                    _date = _tag_date.children("span").attr("title");
+                                } else {
+                                    _tag_date = torrent_data_raw.find("td").filter(function () {
+                                        return time_regex.test($(this).text());
+                                    });
+                                    _date = _tag_date.text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
                                 }
+
+                                var _tag_size = _tag_date.next("td");
+                                var _tag_seeders = _tag_size.next("td");
+                                var _tag_leechers = _tag_seeders.next("td");
+                                var _tag_completed = _tag_leechers.next("td");
 
                                 table.bootstrapTable('append', {
                                     "site": site,
                                     "name": _tag_name.attr("title") || _tag_name.text(),
                                     "link": url_prefix + _tag_name.attr("href"),
                                     "pubdate": Date.parse(_date),
-                                    "size": _size,
-                                    "seeders": _tag_size.next("td").text().replace(',', ''),
-                                    "leechers": _tag_size.next("td").next("td").text().replace(',', ''),
-                                    "completed": _tag_size.next("td").next("td").next("td").text().replace(',', '')
+                                    "size": FileSizetoLength(_tag_size.text()),
+                                    "seeders": _tag_seeders.text().replace(',', ''),
+                                    "leechers": _tag_leechers.text().replace(',', ''),
+                                    "completed": _tag_completed.text().replace(',', '')
                                 });
                             }
                         }
@@ -134,7 +143,7 @@ $(document).ready(function () {
 
         // 教育网通用NexusPHP解析
         NexusPHP("BYR", "https://bt.byr.cn/", "https://bt.byr.cn/torrents.php?search=", ".torrents tr:odd");
-        NexusPHP("WHU", "https://pt.whu.edu.cn/", "https://pt.whu.edu.cn/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("WHU", "", "https://pt.whu.edu.cn/torrents.php?search=", ".torrents tr:gt(0)");
         NexusPHP("NWSUAF6", "https://pt.nwsuaf6.edu.cn/", "https://pt.nwsuaf6.edu.cn/torrents.php?search=", ".torrents tr:odd");
         NexusPHP("XAUAT6", "http://pt.xauat6.edu.cn/", "http://pt.xauat6.edu.cn/torrents.php?search=", ".torrents tr:odd");
 
