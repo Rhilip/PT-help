@@ -25,6 +25,14 @@
 // @connect      www.joyhd.net
 // @connect      chdbits.co
 // @connect      ourbits.club
+// @connect      www.open.cd
+// @connect      solags.org
+// @connect      tthd.org
+// @connect      pt.keepfrds.com
+// @connect      et8.org
+// @connect      u2.dmhy.org
+// @connect      hdcmct.org
+// @connect      tp.m-team.cc
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
@@ -34,13 +42,12 @@ if (GM_info && GM_info.script) {
 }
 
 var time_regex = /(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/;
-const size_type_list = ["GiB", "GB", "MiB", "MB", "Kib", "KB", "TiB", "TB", "B"];
 
 /**
  * @return {number}
  */
 function FileSizetoLength(size) {
-    var _size_raw_match = size.match(/([\d.]+) ?([TGMK]?i?B)/);
+    var _size_raw_match = size.match(/([\d.]+)[  ]?([TGMK]?i?B)/);
     if (_size_raw_match) {
         var _size_num = parseFloat(_size_raw_match[1]);
         var _size_type = _size_raw_match[2];
@@ -147,7 +154,6 @@ $(document).ready(function () {
                 });
             }
         }
-
 
         // 开始各站点遍历
 
@@ -256,13 +262,73 @@ $(document).ready(function () {
 
         // 公网通用NexusPHP解析站点
         NexusPHP("HDSKY", "https://hdsky.me/", "https://hdsky.me/torrents.php?search=", ".torrents tr.progresstr");
-        // Hyperay
-        NexusPHP("HDChina", "https://hdchina.org/", "https://hdchina.org/torrents.php?search=", ".torrent_list tr:odd");
-        // HDHome
+        // TODO Hyperay
+        // TODO HDHome
         NexusPHP("HDTime", "https://hdtime.org/", "https://hdtime.org/torrents.php?search=", ".torrents tr:odd");
         NexusPHP("HDU", "https://pt.hdupt.com/", "https://pt.hdupt.com/torrents.php?search=", ".torrents tr:odd");
         NexusPHP("JoyHD", "https://www.joyhd.net/", "https://www.joyhd.net/torrents.php?search=", ".torrents tr:odd");
         NexusPHP("CHDBits", "https://chdbits.co/", "https://chdbits.co/torrents.php?search=", ".torrents tr:odd");
         NexusPHP("Ourbits", "https://ourbits.club/", "https://ourbits.club/torrents.php?search=", ".torrents tr[class^='sticky_']");
+        NexusPHP("OpenCD", "https://www.open.cd/", "https://www.open.cd/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("SolaGS", "https://solags.org/", "https://solags.org/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("TTHD", "http://tthd.org/", "http://tthd.org/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("KeepFrds", "https://pt.keepfrds.com/", "https://pt.keepfrds.com/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("TCCF", "https://et8.org/", "https://et8.org/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("U2", "https://u2.dmhy.org/", "https://u2.dmhy.org/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("CMCT", "https://hdcmct.org/", "https://hdcmct.org/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("MTeam", "https://tp.m-team.cc/", "https://tp.m-team.cc/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("MTeam(Adult)", "https://tp.m-team.cc/", "https://tp.m-team.cc/adult.php?search=", ".torrents tr:odd");
+        // TODO GZTown
+        // TODO HD4FANS
+
+        // 公网不能使用通用NexusPHP解析的站点
+        if ($.inArray("HDChina", search_site) > -1) {
+            writelog("Start Searching in Site HDChina.");
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: "https://hdchina.org/torrents.php?search=" + search_text,
+                onload: function (responseDetail) {
+                    var resp = responseDetail.responseText;
+                    if (responseDetail.finalUrl.search("login") > -1) {
+                        writelog("Not Login in Site HDChina.");
+                    } else {
+                        var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
+                        var page = $(body); // 构造 jQuery 对象
+                        var tr_list = page.find(".torrent_list tr:odd");
+                        writelog("Get " + tr_list.length + " records in Site HDChina.");
+                        for (var i = 0; i < tr_list.length; i++) {
+                            var torrent_data_raw = tr_list.eq(i);
+                            var _tag_name = torrent_data_raw.find("a[href*='hit']");
+
+                            var _tag_date = torrent_data_raw.find(".t_time");
+                            var _tag_size = torrent_data_raw.find(".t_size");
+                            var _tag_seeders = torrent_data_raw.find(".t_torrents");
+                            var _tag_leechers = torrent_data_raw.find(".t_leech");
+                            var _tag_completed = torrent_data_raw.find(".t_completed");
+
+                            table.bootstrapTable('append', {
+                                "site": "HDChina",
+                                "name": _tag_name.attr("title") || _tag_name.text(),
+                                "link": "https://hdchina.org/" + _tag_name.attr("href"),
+                                "pubdate": Date.parse(_tag_date.text()),
+                                "size": FileSizetoLength(_tag_size.text()),
+                                "seeders": _tag_seeders.text().replace(',', ''),
+                                "leechers": _tag_leechers.text().replace(',', ''),
+                                "completed": _tag_completed.text().replace(',', '')
+                            });
+                        }
+                    }
+                    writelog("End of Search Site " + site + ".");
+                }
+            });
+        }
+        // TODO TTG
+        // TODO HDCity
+        // TODO CCFBits
+
+        // 外网站点
+
+
+        // 自定义站点请添加到此处
     });
 });

@@ -139,32 +139,43 @@
         "name": "MTeam"
       },
       {
+        "value": 217,
+        "name": "MTeam(Adult)"
+      },
+      {
         "value": 218,
-        "name": "GZTown"
+        "name": "GZTown",
+        "disable": true
       },
       {
         "value": 219,
-        "name": "TTG(Media)"
+        "name": "TTG(Media)",
+        "disable": true
       },
       {
         "value": 219,
-        "name": "TTG(Gamez)"
+        "name": "TTG(Gamez)",
+        "disable": true
       },
       {
         "value": 220,
-        "name": "HDStreet"
+        "name": "HDStreet",
+        "disable": true
       },
       {
         "value": 221,
-        "name": "HDCity"
+        "name": "HDCity",
+        "disable": true
       },
       {
         "value": 222,
-        "name": "CCFBits"
+        "name": "CCFBits",
+        "disable": true
       },
       {
         "value": 223,
-        "name": "HD4FANS"
+        "name": "HD4FANS",
+        "disable": true
       }
     ],
     "wz": []
