@@ -218,15 +218,15 @@
         var terabyte = 1024 * 1024 * 1024 * 1024;
 
         if ((bytes >= 0) && (bytes < kilobyte)) {
-            ret = bytes + 'B';
+            ret = bytes + ' B';
         } else if ((bytes >= kilobyte) && (bytes < megabyte)) {
-            ret = (bytes / kilobyte).toFixed(2) + 'KB';
+            ret = (bytes / kilobyte).toFixed(2) + ' KB';
         } else if ((bytes >= megabyte) && (bytes < gigabyte)) {
-            ret = (bytes / megabyte).toFixed(2) + 'MB';
+            ret = (bytes / megabyte).toFixed(2) + ' MB';
         } else if ((bytes >= gigabyte) && (bytes < terabyte)) {
-            ret = (bytes / gigabyte).toFixed(2) + 'GB';
+            ret = (bytes / gigabyte).toFixed(2) + ' GB';
         } else if (bytes >= terabyte) {
-            ret = (bytes / terabyte).toFixed(2) + 'TB';
+            ret = (bytes / terabyte).toFixed(2) + ' TB';
         }
         return ret
     }
@@ -243,6 +243,8 @@
         classes: "table table-hover table-striped",
         striped: true,
         sortOrder: "desc",
+        sortName: "pubdate",
+        //sortStable: true,
         toolbar: "#toolbar",
         toolbarAlign: "right",
         columns: [
