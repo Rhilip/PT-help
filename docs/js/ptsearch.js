@@ -47,7 +47,7 @@ var time_regex = /(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/;
  * @return {number}
  */
 function FileSizetoLength(size) {
-    var _size_raw_match = size.match(/([\d.]+)[  ]?([TGMK]?i?B)/);
+    var _size_raw_match = size.match(/^([\d.]+)[^TGMK]?([TGMK]?i?B)$/);
     if (_size_raw_match) {
         var _size_num = parseFloat(_size_raw_match[1]);
         var _size_type = _size_raw_match[2];
@@ -123,7 +123,7 @@ $(document).ready(function () {
                                 _tag_date = torrent_data_raw.find("span").filter(function () {
                                     return time_regex.test($(this).attr("title"));
                                 }).parent();
-                                if (/时/.test(_tag_date.text())) {
+                                if (/[时天月年]/.test(_tag_date.text())) {
                                     _date = _tag_date.children("span").attr("title");
                                 } else {
                                     _tag_date = torrent_data_raw.find("td").filter(function () {
@@ -300,7 +300,13 @@ $(document).ready(function () {
                             var torrent_data_raw = tr_list.eq(i);
                             var _tag_name = torrent_data_raw.find("a[href*='hit']");
 
-                            var _tag_date = torrent_data_raw.find(".t_time");
+                            var _date, _tag_date = torrent_data_raw.find(".t_time");
+                            if (/[时天月年]/.test(_tag_date.text())) {
+                                _date = _tag_date.children("span").attr("title");
+                            } else {
+                                _date = _tag_date.text();
+                            }
+
                             var _tag_size = torrent_data_raw.find(".t_size");
                             var _tag_seeders = torrent_data_raw.find(".t_torrents");
                             var _tag_leechers = torrent_data_raw.find(".t_leech");
@@ -310,7 +316,7 @@ $(document).ready(function () {
                                 "site": "HDChina",
                                 "name": _tag_name.attr("title") || _tag_name.text(),
                                 "link": "https://hdchina.org/" + _tag_name.attr("href"),
-                                "pubdate": Date.parse(_tag_date.text()),
+                                "pubdate": Date.parse(_date),
                                 "size": FileSizetoLength(_tag_size.text()),
                                 "seeders": _tag_seeders.text().replace(',', ''),
                                 "leechers": _tag_leechers.text().replace(',', ''),
@@ -318,7 +324,7 @@ $(document).ready(function () {
                             });
                         }
                     }
-                    writelog("End of Search Site " + site + ".");
+                    writelog("End of Search Site HDChina.");
                 }
             });
         }

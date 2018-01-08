@@ -3,7 +3,8 @@
   "site_type": [
     "jyw",
     "gw",
-    "wz"
+    "wz",
+    "bt"
   ],
   "site": {
     "jyw": [
@@ -178,6 +179,7 @@
         "disable": true
       }
     ],
-    "wz": []
+    "wz": [],
+    "bt": []
   }
 }
