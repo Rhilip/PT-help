@@ -6,7 +6,7 @@
 // @author       Rhilip
 // @run-at       document-end
 // @include      http://localhost*
-// @include      https://rhilip.github.io/PT-help-server/ptsearch*
+// @include      https://rhilip.github.io/PT-help/ptsearch*
 // @connect      bt.byr.cn
 // @connect      npupt.com
 // @connect      pt.whu.edu.cn
