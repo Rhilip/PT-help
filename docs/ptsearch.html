@@ -93,7 +93,7 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="//api.rhilip.info/ptboard.html" target="_blank">PT Board</a></li>
+                <li><a href="//blog.rhilip.info/archives/712/" target="_blank">About</a></li>
                 <li><a href="//blog.rhilip.info" target="_blank">Powered By @Rhilip</a></li>
             </ul>
         </div>
@@ -154,11 +154,11 @@
                     </div>
                     <div class="modal-body">
                         <div id="check-site">
-                            教育网站点：
+                            Chinese CERNET Sites：
                             <div id="site-jyw"></div>
-                            公网站点：
+                            Other Chinese Sites：
                             <div id="site-gw"></div>
-                            外网站点：
+                            Foreign Sites：
                             <div id="site-wz"></div>
                         </div>
                         <hr>
@@ -180,8 +180,9 @@
                                 aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title" id="myModalLabel">Search Log</h4>
                     </div>
-                    <div class="modal-body" id="search-log">
-                        No log...............
+                    <div class="modal-body">
+                        <ul id="search-log">
+                        </ul>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -206,10 +207,10 @@
      * @return {string}
      */
     function LinkFormatter(value, index) {
-        return '<a href="' + index.link + '" target="_blank" rel="nofollow">' + index.title + '</a>'
+        return '<a href="' + index.link + '" target="_blank" rel="nofollow">' + index.name + '</a>'
     }
 
-    function SizeFormatter(value) {
+    function SizeFormatter(bytes) {
         var ret;
         var kilobyte = 1024;
         var megabyte = 1024 * 1024;
@@ -228,6 +229,14 @@
             ret = (bytes / terabyte).toFixed(2) + 'TB';
         }
         return ret
+    }
+
+    /**
+     * @return {string}
+     */
+    function TimeStampFormatter(data) {
+        var unixTimestamp = new Date(data);
+        return unixTimestamp.toLocaleString();
     }
 
     $('#table').bootstrapTable({
@@ -253,28 +262,33 @@
                 align: 'center',
                 valign: 'middle',
                 class: 'data-inline',
-                //sortable: 'true'
+                formatter: TimeStampFormatter,
+                sortable: 'true'
             }, {
                 field: 'size',
                 title: 'Size',
                 align: 'center',
                 valign: 'middle',
-                formatter: SizeFormatter
+                formatter: SizeFormatter,
+                sortable: 'true'
             }, {
                 field: 'seeders',
                 title: '<span class="glyphicon glyphicon-arrow-up"></span>',
                 align: 'center',
-                valign: 'middle'
+                valign: 'middle',
+                sortable: 'true'
             }, {
                 field: 'leechers',
                 title: '<span class="glyphicon glyphicon-arrow-down"></span>',
                 align: 'center',
-                valign: 'middle'
+                valign: 'middle',
+                sortable: 'true'
             }, {
                 field: 'completed',
                 title: '<span class="glyphicon glyphicon-ok"></span>',
                 align: 'center',
-                valign: 'middle'
+                valign: 'middle',
+                sortable: 'true'
             }
         ],
         pagination: true,
@@ -283,6 +297,7 @@
         pageList: [10, 25, 50, 100, 200],
         escape: true
     });
+
 
     $.get("./json/site.json", function (data) {
         var site_list = data.site;
@@ -301,13 +316,16 @@
         }
 
         // 从localStorage中获取存储的搜索网站，并勾选
-        var last_selected_var = localStorage.getItem('selected_var').split(',') || [101];
+        var last_selected_var_raw = localStorage.getItem('selected_var') || "101";
+        var last_selected_var = last_selected_var_raw.split(',');
         for (var last_selected_var_i = 0; last_selected_var_i < last_selected_var.length; last_selected_var_i++) {
             $('#check-site input[value="' + last_selected_var[last_selected_var_i] + '"]').prop('checked', true);
         }
+        btn_save_site.click();
     });
 
-    $("#save-site").click(function () {
+    var btn_save_site = $("#save-site");
+    btn_save_site.click(function () {
         // 获取用户选择搜索的网站
         var selected_name = [], selected_var = [];
         $('#check-site input:checked').each(function () {
