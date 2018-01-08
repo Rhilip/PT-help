@@ -12,9 +12,19 @@
 // @connect      pt.whu.edu.cn
 // @connect      pt.nwsuaf6.edu.cn
 // @connect      pt.xauat6.edu.cn
-// @connect      ourbits.club
+// @connect      pt.zhixing.bjtu.edu.cn
+// @connect      nanyangpt.com
+// @connect      pt.sjtu.edu.cn
+// @connect      pt.cugb.edu.cn
+// @connect      hudbt.hust.edu.cn
+// @connect      tjupt.org
 // @connect      hdsky.me
-// @connect      hdhome.org
+// @connect      hdchina.org
+// @connect      hdtime.org
+// @connect      pt.hdupt.com
+// @connect      www.joyhd.net
+// @connect      chdbits.co
+// @connect      ourbits.club
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
@@ -146,6 +156,11 @@ $(document).ready(function () {
         NexusPHP("WHU", "", "https://pt.whu.edu.cn/torrents.php?search=", ".torrents tr:gt(0)");
         NexusPHP("NWSUAF6", "https://pt.nwsuaf6.edu.cn/", "https://pt.nwsuaf6.edu.cn/torrents.php?search=", ".torrents tr:odd");
         NexusPHP("XAUAT6", "http://pt.xauat6.edu.cn/", "http://pt.xauat6.edu.cn/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("NYPT", "https://nanyangpt.com/", "http://nanyangpt.com/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("SJTU", "https://pt.sjtu.edu.cn/", "https://pt.sjtu.edu.cn/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("CUGB", "http://pt.cugb.edu.cn/", "http://pt.cugb.edu.cn/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("HUDBT", "", "https://hudbt.hust.edu.cn/torrents.php?search=", ".torrents tr:gt(0)");
+        NexusPHP("TJUPT", "https://tjupt.org/", "https://tjupt.org/torrents.php?search=", ".torrents tr:odd");
 
         // 教育网不能使用通用NexusPHP解析的站点
         if ($.inArray("NPU", search_site) > -1) {     // NPUPT
@@ -199,37 +214,55 @@ $(document).ready(function () {
                         writelog("Get " + torrent_list_table.length + " records in Site ZX.");
                         for (var i = 1; i < torrent_list_table.length; i++) {
                             var torrent_data_raw = torrent_list_table.eq(i);
-                            var _tag_name = torrent_data_raw.find("a[href*='hit']");
-                            var _date = torrent_data_raw.find("span[title*='-'][title*=':'][title^='20']").attr("title") || torrent_data_raw.text().match(/(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
 
-                            var _tag_size, _size;
-                            for (var j = 0; j < size_type_list.length; j++) {
-                                _tag_size = torrent_data_raw.find("td:contains('" + size_type_list[j] + "')");
-                                if (_tag_size.text()) {
-                                    _size = FileSizetoLength(_tag_size.text());
+                            var _tag_name = torrent_data_raw.find("a[name='title']");
+                            var _tag_size = torrent_data_raw.find("td.r");
+                            var _tag_date = _tag_size.next("td").next("td").next("td");
+                            var _tag_seeders = _tag_date.next("td");
+                            var _tag_leechers = _tag_seeders.next("td");
+                            var _tag_completed = _tag_leechers.next("td");
+
+                            // 对这个站点的垃圾时间简写进行标准化
+                            var _date, myDate = new Date();
+                            var _tag_date_text = _tag_date.text();
+                            switch (true) {
+                                case /\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(_tag_date_text):   // "2017-12-29 22:44"（完整，不需要改动）
+                                    _date = Date.parse(_tag_date_text);
                                     break;
-                                }
+                                case /\d{2}-\d{2} \d{2}:\d{2}/.test(_tag_date_text):   // "01-06 10:05"（当年）
+                                    _date = Date.parse(myDate.getFullYear() + "-" + _tag_date_text);
+                                    break;
+                                case /\d{2}:\d{2}/.test(_tag_date_text):   // "18:50"（当日）
+                                    _date = Date.parse(myDate.getFullYear() + "-" + (myDate.getMonth() + 1) + "-" + myDate.getDate() + " " + _tag_date_text);
+                                    break;
                             }
 
                             table.bootstrapTable('append', {
-                                "site": site,
-                                "name": _tag_name.attr("title") || _tag_name.text(),
-                                "link": prefix + _tag_name.attr("href"),
-                                "pubdate": Date.parse(_date),
-                                "size": _size,
-                                "seeders": _tag_size.next("td").text().replace(',', ''),
-                                "leechers": _tag_size.next("td").next("td").text().replace(',', ''),
-                                "completed": _tag_size.next("td").next("td").next("td").text().replace(',', '')
+                                "site": "ZX",
+                                "name": _tag_name.text(),
+                                "link": "http://pt.zhixing.bjtu.edu.cn" + _tag_name.attr("href"),
+                                "pubdate": _date,
+                                "size": FileSizetoLength(_tag_size.text()),
+                                "seeders": _tag_seeders.text().replace(',', ''),
+                                "leechers": _tag_leechers.text().replace(',', ''),
+                                "completed": _tag_completed.text().replace(',', '')
                             });
                         }
                     }
-                    writelog("End of Search Site NWSUAF6.");
+                    writelog("End of Search Site ZX.");
                 }
             });
         }
 
         // 公网通用NexusPHP解析站点
         NexusPHP("HDSKY", "https://hdsky.me/", "https://hdsky.me/torrents.php?search=", ".torrents tr.progresstr");
+        // Hyperay
+        NexusPHP("HDChina", "https://hdchina.org/", "https://hdchina.org/torrents.php?search=", ".torrent_list tr:odd");
+        // HDHome
+        NexusPHP("HDTime", "https://hdtime.org/", "https://hdtime.org/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("HDU", "https://pt.hdupt.com/", "https://pt.hdupt.com/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("JoyHD", "https://www.joyhd.net/", "https://www.joyhd.net/torrents.php?search=", ".torrents tr:odd");
+        NexusPHP("CHDBits", "https://chdbits.co/", "https://chdbits.co/torrents.php?search=", ".torrents tr:odd");
         NexusPHP("Ourbits", "https://ourbits.club/", "https://ourbits.club/torrents.php?search=", ".torrents tr[class^='sticky_']");
     });
 });
