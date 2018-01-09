@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bangumi Info Export
 // @namespace    blog.rhilip.info
-// @version      20170722
+// @version      20180109
 // @description  Export Anime Info form Bangumi as BBCode or Html
 // @author       Rhilip
 // @include      /^https?:\/\/(bgm\.tv|bangumi\.tv|chii\.in)\/subject\//
@@ -96,7 +96,7 @@ $(document).ready(function() {
         });
 
         var toHtmlbtn = $("#OuttoHtml").click(function () {              //Html
-            var outhtml = //"<img href='" + img +"'>" + HTML.sectiondivision +
+            var outhtml = //"<img src='" + img +"'>" + HTML.sectiondivision +
                 HTML.before + MENU[0] + HTML.after + HTML.linedivision +
                 story + HTML.sectiondivision +
                 HTML.before + MENU[1] + HTML.after + HTML.linedivision +
@@ -119,7 +119,8 @@ $(document).ready(function() {
 /**
  * Created by Rhilip on 2016/12/21.
  * version:
- *   * 20161222 写出了第一个版本的，大体实现了原来想要的所有功能。
- *   * 20170105 发现没有开启点击遮罩层关闭窗口的功能，补上。其他没变~
- *   * 20170722 使用GM_setClipboard在输出时直接复制到剪贴板中。
+ *   20161222 写出了第一个版本的，大体实现了原来想要的所有功能。
+ *   20170105 发现没有开启点击遮罩层关闭窗口的功能，补上。其他没变~
+ *   20170722 使用GM_setClipboard在输出时直接复制到剪贴板中。
+ *   20180109 修正一个未启用的功能的typeerror。
  */
