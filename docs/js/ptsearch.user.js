@@ -112,7 +112,7 @@ $(document).ready(function () {
         // NexusPHP类站点
         function NexusPHP(site, url_prefix, search_prefix, torrent_table_selector) {
             if ($.inArray(site, search_site) > -1) {
-                writelog("Start Searching in Site " + site + ".");
+                writelog("Start Searching in Site " + site + ", Using The normal parser for NexusPHP.");
                 GM_xmlhttpRequest({
                     method: 'GET',
                     url: search_prefix + search_text,
@@ -344,6 +344,12 @@ $(document).ready(function () {
 
         // 外网站点
 
+        // BT站点
+
+        // TODO DMHY
+        // TODO RARGB
+        // TODO Nyaa
+        // TODO Nyaa(sukebei)
 
         // 自定义站点请添加到此处
 
