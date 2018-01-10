@@ -276,7 +276,7 @@ $(document).ready(function () {
         // 公网通用NexusPHP解析站点
         NexusPHP("HDSKY", "https://hdsky.me/", "https://hdsky.me/torrents.php?search=", ".torrents tr.progresstr");
         // TODO Hyperay
-        NexusPHP("HDHome", "https://hdhome.org/", "https://hdhome.org/torrents.php?search=", ".torrents tr:odd");  // TODO Fix Need
+        //NexusPHP("HDHome", "https://hdhome.org/", "https://hdhome.org/torrents.php?search=", ".torrents tr:odd");  // TODO Fix Need
         NexusPHP("HDTime", "https://hdtime.org/", "https://hdtime.org/torrents.php?search=", ".torrents tr:odd");
         NexusPHP("HDU", "https://pt.hdupt.com/", "https://pt.hdupt.com/torrents.php?search=", ".torrents tr:odd");
         NexusPHP("JoyHD", "https://www.joyhd.net/", "https://www.joyhd.net/torrents.php?search=", ".torrents tr:odd");
