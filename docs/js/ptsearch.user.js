@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180108
-// @description  配套脚本
+// @version      20180110
+// @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
 // @include      http://localhost*
-// @include      https://rhilip.github.io/PT-help/ptsearch*
+// @include      http*://rhilip.github.io/PT-help/ptsearch*
+// @updateURL    https://github.com/Rhilip/PT-help/raw/master/docs/js/ptsearch.user.js
+// @supportURL   https://github.com/Rhilip/PT-help/issues/2
 // @connect      bt.byr.cn
 // @connect      npupt.com
 // @connect      pt.whu.edu.cn
@@ -20,6 +22,7 @@
 // @connect      tjupt.org
 // @connect      hdsky.me
 // @connect      hdchina.org
+// @connect      hdhome.org
 // @connect      hdtime.org
 // @connect      pt.hdupt.com
 // @connect      www.joyhd.net
