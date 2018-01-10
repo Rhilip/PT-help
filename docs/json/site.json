@@ -84,7 +84,8 @@
       },
       {
         "value": 204,
-        "name": "HDHome"
+        "name": "HDHome",
+        "disable": true
       },
       {
         "value": 205,
