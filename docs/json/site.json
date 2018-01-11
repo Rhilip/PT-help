@@ -83,9 +83,12 @@
         "name": "HDChina"
       },
       {
-        "value": 204,
-        "name": "HDHome",
-        "disable": true
+        "value": "204-1",
+        "name": "HDHome"
+      },
+      {
+        "value": "204-2",
+        "name": "HDHome(Live)"
       },
       {
         "value": 205,

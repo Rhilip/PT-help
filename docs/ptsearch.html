@@ -106,7 +106,9 @@
             <div id="use-tampermonkey" class="alert alert-danger">
                 Please Install <a href="https://tampermonkey.net/" target="_blank">Tampermonkey</a>, And the correspond
                 userscript - <a href="https://github.com/Rhilip/PT-help/blob/master/docs/js/ptsearch.user.js"
-                                target="_blank">Pt-search</a> to <strong>USE</strong> this pages.
+                                target="_blank">Pt-search</a> to <strong>USE</strong> this pages.<br>
+                If you make sure that the Tampermonkey and userscript install correctly, Please refresh the page by
+                press `F5`.
             </div>
             <div id="hide-without-tampermonkey" style="display: none">
                 <div id="toolbar" class="form-inline">
@@ -140,31 +142,70 @@
         <!-- Button trigger modal -->
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="#" data-toggle="modal" data-target="#SiteChoose">Search Site Setting</a></li>
+                <li><a href="#" data-toggle="modal" data-target="#SearchSetting">Search Setting</a></li>
                 <li>&nbsp;&nbsp;</li>
                 <li><a href="#" data-toggle="modal" data-target="#SearchLog">Search Log</a></li>
             </ul>
         </div>
 
         <!-- Modal -->
-        <div class="modal fade" id="SiteChoose" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal fade" id="SearchSetting" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="myModalLabel">Choose The Advance Search Site</h4>
+                        <h4 class="modal-title" id="myModalLabel">Search Setting</h4>
                     </div>
                     <div class="modal-body">
-                        <div id="check-site">
-                            Chinese CERNET Private Tracker：
-                            <div id="site-jyw"></div>
-                            Other Chinese Private Tracker：
-                            <div id="site-gw"></div>
-                            Foreign Private Tracker：
-                            <div id="site-wz"></div>
-                            BitTorrent tracker:
-                            <div id="site-bt"></div>
+                        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                            <div class="panel panel-default">
+                                <div class="panel-heading" role="tab" id="headingOne">
+                                    <h4 class="panel-title">
+                                        <a role="button" data-toggle="collapse" data-parent="#accordion"
+                                           href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                            Choose The Advance Search Site
+                                        </a>
+                                    </h4>
+                                </div>
+                                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel"
+                                     aria-labelledby="headingOne">
+                                    <div class="panel-body">
+                                        <div id="check-site">
+                                            Chinese CERNET Private Tracker：
+                                            <div id="site-jyw"></div>
+                                            Other Chinese Private Tracker：
+                                            <div id="site-gw"></div>
+                                            Foreign Private Tracker：
+                                            <div id="site-wz"></div>
+                                            BitTorrent tracker:
+                                            <div id="site-bt"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-default">
+                                <div class="panel-heading" role="tab" id="headingTwo">
+                                    <h4 class="panel-title">
+                                        <a class="collapsed" role="button" data-toggle="collapse"
+                                           data-parent="#accordion" href="#collapseTwo" aria-expanded="false"
+                                           aria-controls="collapseTwo">
+                                            Other Settings
+                                        </a>
+                                    </h4>
+                                </div>
+                                <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel"
+                                     aria-labelledby="headingTwo">
+                                    <div class="panel-body">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" class="config" id="config-log"> Full Searching
+                                                Log
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
