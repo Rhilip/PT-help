@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180111
+// @version      20180113
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -41,7 +41,7 @@ function FileSizetoLength(size) {
                 return _size_num;
         }
     }
-    return 0;
+    return _size_raw_match;
 }
 
 /**
@@ -71,14 +71,14 @@ $(document).ready(function () {
         // 获取搜索设置
         var search_text = $("#keyword").val().trim();     // 搜索文本
         var search_site = localStorage.getItem('selected_name').split(',') || [];   // 搜索站点
-        var search_log = $("#config-log").prop("checked"); // 搜索日志记录
+        var config_log = $("#config-log").prop("checked"); // 搜索日志记录
 
         table.bootstrapTable('removeAll');  // 清空已有表格信息
         search_log.html('');   // 清空原有搜索日志
 
         function table_append(data) {
             table.bootstrapTable('append', data);
-            if (search_log) {
+            if (config_log) {
                 var _data_str = "";
                 for (var i in data) {
                     _data_str += i + ": " + data[i] + "; ";
@@ -110,15 +110,15 @@ $(document).ready(function () {
                                 var _tag_name = torrent_data_raw.find("a[href*='hit']");
 
                                 var _tag_date, _date;
-                                _tag_date = torrent_data_raw.find("span:last").filter(function () {
+                                _tag_date = torrent_data_raw.find("span").filter(function () {
                                     return time_regex.test($(this).attr("title"));
-                                }).parent("td");
+                                }).last().parent("td");
                                 if (/[分时天月年]/.test(_tag_date.text())) {
                                     _date = _tag_date.children("span").attr("title");
                                 } else {
                                     _tag_date = torrent_data_raw.find("td").filter(function () {
                                         return time_regex.test($(this).text());
-                                    });
+                                    }).last();
                                     _date = _tag_date.text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
                                 }
 
