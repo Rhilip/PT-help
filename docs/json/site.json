@@ -75,8 +75,7 @@
       },
       {
         "value": 202,
-        "name": "Hyperay",
-        "disable": true
+        "name": "Hyperay"
       },
       {
         "value": 203,
@@ -148,28 +147,19 @@
       },
       {
         "value": 218,
-        "name": "GZTown",
-        "disable": true
+        "name": "GZTown"
       },
       {
-        "value": 219,
-        "name": "TTG(Media)",
-        "disable": true
+        "value": "219-1",
+        "name": "TTG(Media)"
       },
       {
-        "value": 219,
-        "name": "TTG(Gamez)",
-        "disable": true
-      },
-      {
-        "value": 220,
-        "name": "HDStreet",
-        "disable": true
+        "value": "219-2",
+        "name": "TTG(Gamez)"
       },
       {
         "value": 221,
-        "name": "HDCity",
-        "disable": true
+        "name": "HDCity"
       },
       {
         "value": 222,
@@ -178,8 +168,7 @@
       },
       {
         "value": 223,
-        "name": "HD4FANS",
-        "disable": true
+        "name": "HD4FANS"
       }
     ],
     "wz": [],

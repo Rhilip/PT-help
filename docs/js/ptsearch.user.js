@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180113.1
+// @version      20180113.2
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -121,6 +121,8 @@ $(document).ready(function () {
                                     _tag_date = torrent_data_raw.find("td").filter(function () {
                                         return time_regex.test($(this).text());
                                     }).last();
+                                    console.log(_tag_date);
+                                    console.log(_tag_date.text());
                                     _date = _tag_date.text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
                                 }
 
@@ -146,6 +148,71 @@ $(document).ready(function () {
                 });
             }
         }
+
+        function TTG(site) {
+            if ($.inArray(site, search_site) > -1) {
+                var cat;
+                switch (site) {
+                    case "TTG(Media)":
+                        cat = "M";
+                        break;
+                    case "TTG(Gamez)":
+                        cat = "G";
+                        break;
+                }
+
+                GM_xmlhttpRequest({
+                    method: 'GET',
+                    url: "https://totheglory.im/browse.php?c=" + cat + "&search_field=" + search_text,
+                    onload: function (responseDetail) {
+                        var resp = responseDetail.responseText;
+                        if (responseDetail.finalUrl.search("login") > -1) {
+                            writelog("Not Login in Site " + site + ".");
+                        } else {
+                            writelog("Get Search Pages Success in Site " + site + ".");
+                            var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
+                            var page = $(body); // 构造 jQuery 对象
+                            var tr_list = page.find("#torrent_table tr.hover_hr");
+                            writelog("Get " + tr_list.length + " records in Site " + site + ".");
+                            for (var i = 0; i < tr_list.length; i++) {
+                                var torrent_data_raw = tr_list.eq(i);
+                                var _tag_name = torrent_data_raw.find("a[href^='/t/']");
+
+                                var _name_match = _tag_name.html().match(/<b>(.+?)<br>/);
+                                var _name = _name_match ? _name_match[1] : _tag_name.text();
+
+                                var _tag_date, _date;
+                                _tag_date = torrent_data_raw.find("td").filter(function () {
+                                    return time_regex.test($(this).text());
+                                });
+                                _date = _tag_date.text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
+
+                                var _tag_size = torrent_data_raw.find("td").filter(function () {
+                                    return /[kMGT]B$/.test($(this).text());
+                                });
+
+                                var _tag_seeders = torrent_data_raw.find("a[href$='toseeders=1']");
+                                var _tag_leechers = torrent_data_raw.find("a[href$='todlers=1']");
+                                var _tag_completed = _tag_size.next("td");
+
+                                table_append({
+                                    "site": site,
+                                    "name": _name,
+                                    "link": "https://totheglory.im" + _tag_name.attr("href"),
+                                    "pubdate": Date.parse(_date),
+                                    "size": FileSizetoLength(_tag_size.text()),
+                                    "seeders": _tag_seeders.text().replace(',', '') || 0,
+                                    "leechers": _tag_leechers.text().replace(',', '') || 0,
+                                    "completed": _tag_completed.text().match(/\d+/)[0].replace(',', '')
+                                });
+                            }
+                        }
+                        writelog("End of Search Site " + site + ".");
+                    }
+                });
+            }
+        }
+
 
         // 开始各站点遍历
         writelog("Script Version: " + script_version + ", Choose Site List: " + search_site.toString() + ", With Search Keywords: " + search_text);
@@ -254,7 +321,7 @@ $(document).ready(function () {
 
         // 公网通用模板解析
         NexusPHP("HDSKY", "https://hdsky.me/", "https://hdsky.me/torrents.php?search=", ".torrents tr.progresstr");
-        // TODO Hyperay
+        NexusPHP("Hyperay", "https://www.hyperay.org/", "https://www.hyperay.org/torrents.php?search=", ".torrents:last > tbody > tr:gt(0)");
         NexusPHP("HDHome", "https://hdhome.org/", "https://hdhome.org/torrents.php?search=");
         NexusPHP("HDHome(Live)", "https://hdhome.org/", "https://hdhome.org/live.php?search=");
         NexusPHP("HDTime", "https://hdtime.org/", "https://hdtime.org/torrents.php?search=");
@@ -271,8 +338,11 @@ $(document).ready(function () {
         NexusPHP("CMCT", "https://hdcmct.org/", "https://hdcmct.org/torrents.php?search=");
         NexusPHP("MTeam", "https://tp.m-team.cc/", "https://tp.m-team.cc/torrents.php?search=");
         NexusPHP("MTeam(Adult)", "https://tp.m-team.cc/", "https://tp.m-team.cc/adult.php?search=");
-        // TODO GZTown
-        // TODO HD4FANS
+        NexusPHP("GZTown", "https://pt.gztown.net/", "https://pt.gztown.net/torrents.php?search=");
+        NexusPHP("HD4FANS", "https://pt.hd4fans.org/", "https://pt.hd4fans.org/torrents.php?search=");
+
+        TTG("TTG(Media)");
+        TTG("TTG(Gamez)");
 
         // 公网不能使用通用NexusPHP解析的站点
         if ($.inArray("HDChina", search_site) > -1) {
@@ -321,9 +391,55 @@ $(document).ready(function () {
                 }
             });
         }
-        // TODO TTG
-        // TODO HDCity
-        // TODO CCFBits
+        if ($.inArray("HDCity", search_site) > -1) {
+            writelog("Start Searching in Site HDCity.");
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: "https://hdcity.work/pt?iwannaseethis=" + search_text,
+                onload: function (responseDetail) {
+                    var resp = responseDetail.responseText;
+                    if (responseDetail.finalUrl.search("login") > -1) {
+                        writelog("Not Login in Site HDCity.For HDCity,you should use `https://hdcity.work/` but not `https://hdcity.leniter.org/`");
+                    } else {
+                        var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
+                        var page = $(body); // 构造 jQuery 对象
+                        var tr_list = page.find("div[class^='text'][style='line-height:1rem;']");
+                        writelog("Get " + tr_list.length + " records in Site HDCity.");
+                        for (var i = 0; i < tr_list.length; i++) {
+                            var torrent_data_raw = tr_list.eq(i);
+                            var _tag_name = torrent_data_raw.find("a[href*='t-']");
+
+                            var _date, _tag_date;
+                            _tag_date = torrent_data_raw.find("div").filter(function () {
+                                return time_regex.test($(this).text());
+                            }).last();
+                            _date = _tag_date.text();
+
+                            var _tag_size = _tag_name.parent("div");
+                            var _tag_seeders = torrent_data_raw.find("a[href$='#seeders']");
+                            var _tag_leechers = torrent_data_raw.find("a[href$='#leechers']");
+                            var _tag_completed = torrent_data_raw.find("a[href^='viewsnatches']");
+
+
+                            var _size = _tag_size.text().match(/\[([.\d]+? [KMGT]B)/)[1];
+
+                            table_append({
+                                "site": "HDCity",
+                                "name": _tag_name.text(),
+                                "link": "https://hdcity.work/" + _tag_name.attr("href"),
+                                "pubdate": Date.parse(_date),
+                                "size": FileSizetoLength(_size),
+                                "seeders": _tag_seeders.text().replace(',', '') || 0,
+                                "leechers": _tag_leechers.text().replace(',', '') || 0,
+                                "completed": _tag_completed.text().replace(',', '') || 0
+                            });
+                        }
+                    }
+                    writelog("End of Search Site HDCity.");
+                }
+            });
+        }
+        // TODO CCFBits, (I May not support this site.)
 
         // 外网站点
 
