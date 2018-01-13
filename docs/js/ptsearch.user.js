@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180113
+// @version      20180113.1
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -41,7 +41,7 @@ function FileSizetoLength(size) {
                 return _size_num;
         }
     }
-    return _size_raw_match;
+    return size;
 }
 
 /**
@@ -109,12 +109,14 @@ $(document).ready(function () {
                                 var torrent_data_raw = tr_list.eq(i);
                                 var _tag_name = torrent_data_raw.find("a[href*='hit']");
 
+                                // 确定日期tag，因用户在站点设置中配置及站点优惠信息的情况的存在，此处dom结构会有不同
+                                // 此外多数站点对于 seeders, leechers, completed 没有额外的定位信息，故要依赖于正确的日期tag
                                 var _tag_date, _date;
-                                _tag_date = torrent_data_raw.find("span").filter(function () {
+                                _tag_date = torrent_data_raw.find((site === "U2") ? "time" : "span").filter(function () {
                                     return time_regex.test($(this).attr("title"));
                                 }).last().parent("td");
                                 if (/[分时天月年]/.test(_tag_date.text())) {
-                                    _date = _tag_date.children("span").attr("title");
+                                    _date = _tag_date.children((site === "U2") ? "time" : "span").attr("title");
                                 } else {
                                     _tag_date = torrent_data_raw.find("td").filter(function () {
                                         return time_regex.test($(this).text());
@@ -145,9 +147,9 @@ $(document).ready(function () {
             }
         }
 
-        writelog("Script Version: " + script_version + ", Choose Site List: " + search_site.toString() + ", With Search Keywords: " + search_text);
         // 开始各站点遍历
-        // 教育网通用NexusPHP解析
+        writelog("Script Version: " + script_version + ", Choose Site List: " + search_site.toString() + ", With Search Keywords: " + search_text);
+        // 教育网通用模板解析
         NexusPHP("BYR", "https://bt.byr.cn/", "https://bt.byr.cn/torrents.php?search=");
         NexusPHP("WHU", "", "https://pt.whu.edu.cn/torrents.php?search=", ".torrents tr:gt(0)");
         NexusPHP("NWSUAF6", "https://pt.nwsuaf6.edu.cn/", "https://pt.nwsuaf6.edu.cn/torrents.php?search=");
@@ -250,7 +252,7 @@ $(document).ready(function () {
             });
         }
 
-        // 公网通用NexusPHP解析站点
+        // 公网通用模板解析
         NexusPHP("HDSKY", "https://hdsky.me/", "https://hdsky.me/torrents.php?search=", ".torrents tr.progresstr");
         // TODO Hyperay
         NexusPHP("HDHome", "https://hdhome.org/", "https://hdhome.org/torrents.php?search=");
