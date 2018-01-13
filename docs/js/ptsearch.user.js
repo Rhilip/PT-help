@@ -121,8 +121,6 @@ $(document).ready(function () {
                                     _tag_date = torrent_data_raw.find("td").filter(function () {
                                         return time_regex.test($(this).text());
                                     }).last();
-                                    console.log(_tag_date);
-                                    console.log(_tag_date.text());
                                     _date = _tag_date.text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
                                 }
 
@@ -223,7 +221,7 @@ $(document).ready(function () {
         NexusPHP("XAUAT6", "http://pt.xauat6.edu.cn/", "http://pt.xauat6.edu.cn/torrents.php?search=");
         NexusPHP("NYPT", "https://nanyangpt.com/", "http://nanyangpt.com/torrents.php?search=");
         NexusPHP("SJTU", "https://pt.sjtu.edu.cn/", "https://pt.sjtu.edu.cn/torrents.php?search=");
-        NexusPHP("CUGB", "http://pt.cugb.edu.cn/", "http://pt.cugb.edu.cn/torrents.php?search=");
+        // NexusPHP("CUGB", "http://pt.cugb.edu.cn/", "http://pt.cugb.edu.cn/torrents.php?search=");
         NexusPHP("HUDBT", "", "https://hudbt.hust.edu.cn/torrents.php?search=", ".torrents tr:gt(0)");
         NexusPHP("TJUPT", "https://tjupt.org/", "https://tjupt.org/torrents.php?search=");
 

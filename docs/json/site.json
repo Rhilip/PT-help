@@ -52,7 +52,8 @@
       },
       {
         "value": 111,
-        "name": "CUGB"
+        "name": "CUGB",
+        "disable": true
       },
       {
         "value": 112,
