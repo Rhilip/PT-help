@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180130.1
+// @version      20180130.2
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -102,7 +102,7 @@ $(document).ready(function () {
                             writelog("Not Login in Site " + site + ".");
                         } else {
                             writelog("Get Search Pages Success in Site " + site + ".");
-                            var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                            var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
                             var body = doc.querySelector("body");
                             var page = $(body); // 构造 jQuery 对象
                             var tr_list = page.find(torrent_table_selector || ".torrents > tbody > tr:gt(0)");
@@ -168,7 +168,7 @@ $(document).ready(function () {
                             writelog("Not Login in Site " + site + ".");
                         } else {
                             writelog("Get Search Pages Success in Site " + site + ".");
-                            var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                            var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
                             var body = doc.querySelector("body");
                             var page = $(body); // 构造 jQuery 对象
                             var tr_list = page.find("#torrent_table tr.hover_hr");
@@ -236,7 +236,7 @@ $(document).ready(function () {
                     if (responseDetail.finalUrl.search("login") > -1) {
                         writelog("Not Login in Site NPUPT.");
                     } else {
-                        var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                        var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
                         var body = doc.querySelector("body");
                         var page = $(body); // 构造 jQuery 对象
                         var tr_list = page.find("#torrents_table tr");
@@ -271,7 +271,7 @@ $(document).ready(function () {
                     if (responseDetail.finalUrl.search("login") > -1) {
                         writelog("Not Login in Site ZX.");
                     } else {
-                        var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                        var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
                         var body = doc.querySelector("body");
                         var page = $(body); // 构造 jQuery 对象
                         var torrent_list_table = page.find(".torrenttable tr");
@@ -327,7 +327,7 @@ $(document).ready(function () {
         NexusPHP("HDU", "https://pt.hdupt.com/", "https://pt.hdupt.com/torrents.php?search=");
         NexusPHP("JoyHD", "https://www.joyhd.net/", "https://www.joyhd.net/torrents.php?search=");
         NexusPHP("CHDBits", "https://chdbits.co/", "https://chdbits.co/torrents.php?search=");
-        NexusPHP("Ourbits", "https://ourbits.club/", "https://ourbits.club/torrents.php?search=", ".torrents tr[class^='sticky_']");
+        NexusPHP("Ourbits", "https://ourbits.club/", "https://ourbits.club/torrents.php?search=");
         NexusPHP("OpenCD", "https://www.open.cd/", "https://www.open.cd/torrents.php?search=");
         NexusPHP("SolaGS", "https://solags.org/", "https://solags.org/torrents.php?search=");
         NexusPHP("TTHD", "http://tthd.org/", "http://tthd.org/torrents.php?search=");
@@ -354,7 +354,7 @@ $(document).ready(function () {
                         writelog("Not Login in Site HDChina.");
                     } else {
                         writelog("Get Search Pages Success in Site HDChina.");
-                        var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                        var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
                         var body = doc.querySelector("body");
                         var page = $(body); // 构造 jQuery 对象
                         var tr_list = page.find(".torrent_list tr:odd");
@@ -401,7 +401,7 @@ $(document).ready(function () {
                         writelog("Not Login in Site HDCity.For HDCity,you should use `https://hdcity.work/` but not `https://hdcity.leniter.org/`");
                     } else {
                         writelog("Get Search Pages Success in Site HDCity.");
-                        var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                        var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
                         var body = doc.querySelector("body");
                         var page = $(body); // 构造 jQuery 对象
                         var tr_list = page.find("div[class^='text'][style='line-height:1rem;']");
@@ -450,7 +450,7 @@ $(document).ready(function () {
                         writelog("Not Login in Site HDStreet.");
                     } else {
                         writelog("Get Search Pages Success in Site HDStreet.");
-                        var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                        var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
                         var body = doc.querySelector("body");
                         var page = $(body); // 构造 jQuery 对象
 
