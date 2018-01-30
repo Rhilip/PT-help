@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180113.2
+// @version      20180130
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -146,7 +146,6 @@ $(document).ready(function () {
                 });
             }
         }
-
         function TTG(site) {
             if ($.inArray(site, search_site) > -1) {
                 var cat;
@@ -434,6 +433,63 @@ $(document).ready(function () {
                         }
                     }
                     writelog("End of Search Site HDCity.");
+                }
+            });
+        }
+        if ($.inArray("HDStreet", search_site) > -1) {
+            writelog("Start Searching in Site HDStreet, Using The normal parser for NexusPHP.");
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: "http://hdstreet.club/torrents.php?search=" + search_text,
+                onload: function (responseDetail) {
+                    var resp = responseDetail.responseText;
+                    if (responseDetail.finalUrl.search("login") > -1) {
+                        writelog("Not Login in Site HDStreet.");
+                    } else {
+                        writelog("Get Search Pages Success in Site HDStreet.");
+                        var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
+                        var page = $(body); // 构造 jQuery 对象
+                        // 继承自蚂蚁的使用大量colspan,rowspan的表格处理
+                        var tr_list = page.find(".torrents > tbody > tr:gt(1)");    // 前两行都是表题栏，不要
+                        writelog("Get " + tr_list.length / 2 + " records in Site HDStreet.");
+                        for (var i = 0; i < tr_list.length; i += 2) {    // 每两行数据组成一个种子资源的完整信息
+                            var torrent_data_raw_1 = tr_list.eq(i);
+                            var torrent_data_raw_2 = tr_list.eq(i + 1);
+                            var _tag_name = torrent_data_raw_1.find("a[href$='hit=1']");
+
+                            // 确定日期tag，因用户在站点设置中配置及站点优惠信息的情况的存在，此处dom结构会有不同
+                            // 此外多数站点对于 seeders, leechers, completed 没有额外的定位信息，故要依赖于正确的日期tag
+                            var _tag_date, _date;
+                            _tag_date = torrent_data_raw_2.find("span").filter(function () {
+                                return time_regex.test($(this).attr("title"));
+                            }).last().parent("td");
+                            if (/[分时天月年]/.test(_tag_date.text())) {
+                                _date = _tag_date.children("span").attr("title");
+                            } else {
+                                _tag_date = torrent_data_raw_2.find("td").filter(function () {
+                                    return time_regex.test($(this).text());
+                                }).last();
+                                _date = _tag_date.text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
+                            }
+
+                            var _tag_size = _tag_date.next("td");
+                            var _tag_seeders = torrent_data_raw_1.find("a[href$='#seeders']");
+                            var _tag_leechers = torrent_data_raw_1.find("a[href$='#leechers']");
+                            var _tag_completed = torrent_data_raw_1.find("a[href^='viewsnatches.php']");
+
+                            table_append({
+                                "site": "HDStreet",
+                                "name": _tag_name.attr("title") || _tag_name.text(),
+                                "link": "http://hdstreet.club/" + _tag_name.attr("href"),
+                                "pubdate": Date.parse(_date),
+                                "size": FileSizetoLength(_tag_size.text()),
+                                "seeders": _tag_seeders.text().replace(',', '') || 0,
+                                "leechers": _tag_leechers.text().replace(',', '') || 0,
+                                "completed": _tag_completed.text().replace(',', '') || 0
+                            });
+                        }
+                    }
+                    writelog("End of Search Site HDStreet.");
                 }
             });
         }
