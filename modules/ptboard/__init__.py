@@ -5,19 +5,19 @@
 import re
 import time
 from flask import Blueprint, request, jsonify
-from app import mysql
+from app import mysql, app
 from pymysql import escape_string
 
 ptboard_blueprint = Blueprint('ptboard', __name__)
 
-search_default = ""
-site_default = ""
-no_site_default = ""
-order_default = "desc"
-limit_default = 100
-offset_default = 0
-start_time_default = 0
-end_time_default = "CURRENT_TIMESTAMP"
+search_default = app.config.get("PTBOARD_SEARCH", "")
+site_default = app.config.get("PTBOARD_SITE", "")
+no_site_default = app.config.get("PTBOARD_NO_SITE", "")
+order_default = app.config.get("PTBOARD_ORDER", "desc")
+limit_default = app.config.get("PTBOARD_LIMIT", 100)
+offset_default = app.config.get("PTBOARD_OFFSET", 0)
+start_time_default = app.config.get("PTBOARD_START_TIME", 0)
+end_time_default = app.config.get("PTBOARD_END_TIME", "CURRENT_TIMESTAMP")
 
 
 def recover_int_to_default(value, default):
@@ -41,6 +41,7 @@ def ptboard():
 
     t0 = time.time()
 
+    # 1. Get user requests
     search_raw = request.args.get("search") or search_default
     order_raw = request.args.get("order") or order_default
     site_raw = request.args.get("site") or site_default
@@ -50,6 +51,7 @@ def ptboard():
     start_time = request.args.get("start_time") or start_time_default
     end_time = request.args.get("end_time") or end_time_default
 
+    # 2. Clear user requests
     search = re.sub(r"[ _\-,.+]", " ", search_raw)
     search = search.split()
     search = search[:10]
@@ -89,6 +91,7 @@ def ptboard():
            "LIMIT {_offset}, {_limit}".format(opt=opt, _da=order.upper(), _offset=offset, _limit=limit)
            )
 
+    # 3. Get response data from Database
     record_count, rows_data = mysql.exec(sql=sql, r_dict=True, fetch_all=True, ret_row=True)
 
     ret.update({
