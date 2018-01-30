@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180130
+// @version      20180130.1
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -73,8 +73,10 @@ $(document).ready(function () {
         var search_site = localStorage.getItem('selected_name').split(',') || [];   // 搜索站点
         var config_log = $("#config-log").prop("checked"); // 搜索日志记录
 
-        table.bootstrapTable('removeAll');  // 清空已有表格信息
-        search_log.html('');   // 清空原有搜索日志
+        if (!$('#config-keep-old').prop('checked')) {
+            table.bootstrapTable('removeAll');  // 清空已有表格信息
+            search_log.html('');   // 清空原有搜索日志
+        }
 
         function table_append(data) {
             table.bootstrapTable('append', data);
@@ -96,12 +98,12 @@ $(document).ready(function () {
                     method: 'GET',
                     url: search_prefix + search_text,
                     onload: function (responseDetail) {
-                        var resp = responseDetail.responseText;
                         if (responseDetail.finalUrl.search("login") > -1) {
                             writelog("Not Login in Site " + site + ".");
                         } else {
                             writelog("Get Search Pages Success in Site " + site + ".");
-                            var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
+                            var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                            var body = doc.querySelector("body");
                             var page = $(body); // 构造 jQuery 对象
                             var tr_list = page.find(torrent_table_selector || ".torrents > tbody > tr:gt(0)");
                             writelog("Get " + tr_list.length + " records in Site " + site + ".");
@@ -162,12 +164,12 @@ $(document).ready(function () {
                     method: 'GET',
                     url: "https://totheglory.im/browse.php?c=" + cat + "&search_field=" + search_text,
                     onload: function (responseDetail) {
-                        var resp = responseDetail.responseText;
                         if (responseDetail.finalUrl.search("login") > -1) {
                             writelog("Not Login in Site " + site + ".");
                         } else {
                             writelog("Get Search Pages Success in Site " + site + ".");
-                            var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
+                            var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                            var body = doc.querySelector("body");
                             var page = $(body); // 构造 jQuery 对象
                             var tr_list = page.find("#torrent_table tr.hover_hr");
                             writelog("Get " + tr_list.length + " records in Site " + site + ".");
@@ -231,11 +233,11 @@ $(document).ready(function () {
                 method: 'GET',
                 url: "https://npupt.com/torrents.php?search=" + search_text,
                 onload: function (responseDetail) {
-                    var resp = responseDetail.responseText;
                     if (responseDetail.finalUrl.search("login") > -1) {
                         writelog("Not Login in Site NPUPT.");
                     } else {
-                        var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
+                        var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                        var body = doc.querySelector("body");
                         var page = $(body); // 构造 jQuery 对象
                         var tr_list = page.find("#torrents_table tr");
                         for (var i = 1; i < tr_list.length; i += 3) {
@@ -266,11 +268,11 @@ $(document).ready(function () {
                 method: 'GET',
                 url: "http://pt.zhixing.bjtu.edu.cn/search/x" + search_text,
                 onload: function (responseDetail) {
-                    var resp = responseDetail.responseText;
                     if (responseDetail.finalUrl.search("login") > -1) {
                         writelog("Not Login in Site ZX.");
                     } else {
-                        var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
+                        var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                        var body = doc.querySelector("body");
                         var page = $(body); // 构造 jQuery 对象
                         var torrent_list_table = page.find(".torrenttable tr");
                         writelog("Get " + torrent_list_table.length + " records in Site ZX.");
@@ -348,11 +350,12 @@ $(document).ready(function () {
                 method: 'GET',
                 url: "https://hdchina.org/torrents.php?search=" + search_text,
                 onload: function (responseDetail) {
-                    var resp = responseDetail.responseText;
                     if (responseDetail.finalUrl.search("login") > -1) {
                         writelog("Not Login in Site HDChina.");
                     } else {
-                        var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
+                        writelog("Get Search Pages Success in Site HDChina.");
+                        var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                        var body = doc.querySelector("body");
                         var page = $(body); // 构造 jQuery 对象
                         var tr_list = page.find(".torrent_list tr:odd");
                         writelog("Get " + tr_list.length + " records in Site HDChina.");
@@ -394,11 +397,12 @@ $(document).ready(function () {
                 method: 'GET',
                 url: "https://hdcity.work/pt?iwannaseethis=" + search_text,
                 onload: function (responseDetail) {
-                    var resp = responseDetail.responseText;
                     if (responseDetail.finalUrl.search("login") > -1) {
                         writelog("Not Login in Site HDCity.For HDCity,you should use `https://hdcity.work/` but not `https://hdcity.leniter.org/`");
                     } else {
-                        var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
+                        writelog("Get Search Pages Success in Site HDCity.");
+                        var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                        var body = doc.querySelector("body");
                         var page = $(body); // 构造 jQuery 对象
                         var tr_list = page.find("div[class^='text'][style='line-height:1rem;']");
                         writelog("Get " + tr_list.length + " records in Site HDCity.");
@@ -437,18 +441,19 @@ $(document).ready(function () {
             });
         }
         if ($.inArray("HDStreet", search_site) > -1) {
-            writelog("Start Searching in Site HDStreet, Using The normal parser for NexusPHP.");
+            writelog("Start Searching in Site HDStreet, The Login Check may Wrong in this site.");
             GM_xmlhttpRequest({
                 method: 'GET',
                 url: "http://hdstreet.club/torrents.php?search=" + search_text,
                 onload: function (responseDetail) {
-                    var resp = responseDetail.responseText;
                     if (responseDetail.finalUrl.search("login") > -1) {
                         writelog("Not Login in Site HDStreet.");
                     } else {
                         writelog("Get Search Pages Success in Site HDStreet.");
-                        var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
+                        var doc = (new DOMParser).parseFromString(responseDetail.responseText, 'text/html');
+                        var body = doc.querySelector("body");
                         var page = $(body); // 构造 jQuery 对象
+
                         // 继承自蚂蚁的使用大量colspan,rowspan的表格处理
                         var tr_list = page.find(".torrents > tbody > tr:gt(1)");    // 前两行都是表题栏，不要
                         writelog("Get " + tr_list.length / 2 + " records in Site HDStreet.");
