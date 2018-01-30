@@ -3,13 +3,12 @@
 # Copyright (c) 2017-2020 Rhilip <rhilipruan@gmail.com>
 
 import re
+import random
 from utils.netsource import NetBase
 
-__version__ = "0.1.0"
+from app import app
 
-api_douban = "https://api.douban.com/v2/movie/subject/{}"
-api_imdb = "http://app.imdb.com/title/maindetails?tconst={}"
-api_bangumi = "https://api.bgm.tv/subject/{}?responseGroup=large"
+__version__ = "0.1.0"
 
 douban_format = [
     # (key name in dict. the format of key, string format) with order
@@ -74,6 +73,7 @@ class Gen(NetBase):
         return self.ret
 
     def _gen_douban(self):
+        api_douban = "https://api.douban.com/v2/movie/subject/{}"
         raw_data_json = self.get_source(api_douban.format(self.sid), json=True)  # 通过豆瓣公开API获取Json格式的数据
         if raw_data_json.get("msg"):
             self.ret.update({"error": raw_data_json.get("msg")})
@@ -130,14 +130,22 @@ class Gen(NetBase):
             _imdb_rate = _imdb_link = ""
             try:
                 if self.ret.get("imdb_id"):  # 该影片在豆瓣上存在IMDb链接
-                    imdb_json = self.get_source(api_imdb.format(self.ret["imdb_id"]), json=True)  # 通过IMDb的API获取信息
-                    imdb_data = imdb_json.get("data")
-                    if imdb_data.get("image"):  # 添加来自imdb的封面图
-                        img_list.append(imdb_data.get("image").get("url"))
-                    if imdb_data.get("rating") and imdb_data.get("num_votes"):
-                        _imdb_rate = "{}/10 from {} users".format(imdb_data.get("rating"), imdb_data.get("num_votes"))
+                    raw_api_key = app.config.get("OMDB_API_KEY")
+                    if isinstance(raw_api_key, list):
+                        apikey = raw_api_key[random.randrange(0, len(raw_api_key))]
+                    elif isinstance(raw_api_key, str):
+                        apikey = raw_api_key
+                    else:
+                        raise NotImplementedError
+                    omdb_source = "https://www.omdbapi.com/?apikey={}&i={}".format(apikey, self.ret["imdb_id"])
+                    omdb_json = self.get_source(omdb_source, json=True)  # 通过IMDb的API获取信息
+                    if omdb_json.get("Poster"):
+                        img_list.append(omdb_json.get("Poster"))
+                    if omdb_json.get("imdbRating") and omdb_json.get("imdbVotes"):
+                        _imdb_rate = "{}/10 from {} users".format(omdb_json.get("imdbRating"),
+                                                                  omdb_json.get("imdbVotes"))
                     _imdb_link = "http://www.imdb.com/title/{}/".format(self.ret["imdb_id"])
-            except AttributeError:
+            except (AttributeError, NotImplementedError):
                 pass
             else:
                 self.ret.update({"imdb_rate": _imdb_rate, "imdb_link": _imdb_link})
@@ -213,6 +221,7 @@ class Gen(NetBase):
         pass
 
     def _gen_bangumi(self):
+        api_bangumi = "https://api.bgm.tv/subject/{}?responseGroup=large"
         raw_data_json = self.get_source(api_bangumi.format(self.sid), json=True)  # 通过API获取Json格式的数据
 
         if raw_data_json.get("error"):
