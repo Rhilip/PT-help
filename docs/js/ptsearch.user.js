@@ -137,9 +137,9 @@ $(document).ready(function () {
                                     "link": url_prefix + _tag_name.attr("href"),
                                     "pubdate": Date.parse(_date),
                                     "size": FileSizetoLength(_tag_size.text()),
-                                    "seeders": _tag_seeders.text().replace(',', ''),
-                                    "leechers": _tag_leechers.text().replace(',', ''),
-                                    "completed": _tag_completed.text().replace(',', '')
+                                    "seeders": _tag_seeders.text().replace(',', '') || 0,  // 获取不到正常信息的时候置0
+                                    "leechers": _tag_leechers.text().replace(',', '') || 0,
+                                    "completed": _tag_completed.text().replace(',', '') || 0
                                 });
                             }
                         }

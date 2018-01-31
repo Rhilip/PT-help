@@ -210,6 +210,39 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="panel panel-default">
+                                <div class="panel-heading" role="tab" id="headingThree">
+                                    <h4 class="panel-title">
+                                        <a class="collapsed" role="button" data-toggle="collapse"
+                                           data-parent="#accordion" href="#collapseThree" aria-expanded="false"
+                                           aria-controls="collapseThree">
+                                            Donation
+                                        </a>
+                                    </h4>
+                                </div>
+                                <div id="collapseThree" class="panel-collapse collapse" role="tabpanel"
+                                     aria-labelledby="headingThree">
+                                    <div class="panel-body">
+                                        <p class="text-info">This project is costing my FREE time to maintain. If the
+                                            funds allow, welcome to donate by Alipay and Wechat.</p>
+                                        <div id="QR" style="display: block;" class="row">
+                                            <div id="wechat" style="display: inline-block;    padding-right: 7px;"
+                                                 class="col-md-6">
+                                                <img id="wechat_qr"
+                                                     src="https://blog.rhilip.info/usr/uploads/my/wechat.jpg"
+                                                     alt="WeChat Pay" class="img-responsive">
+                                                <p class="text-center">微信打赏</p></div>
+                                            <div id="alipay" style="display: inline-block;    padding-left: 7px;"
+                                                 class="col-md-6">
+                                                <img id="alipay_qr"
+                                                     src="https://blog.rhilip.info/usr/uploads/my/alipay.jpg"
+                                                     alt="Alipay" class="img-responsive">
+                                                <p class="text-center">支付宝打赏</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -373,6 +406,15 @@
         for (var last_selected_var_i = 0; last_selected_var_i < last_selected_var.length; last_selected_var_i++) {
             $('#check-site input[value="' + last_selected_var[last_selected_var_i] + '"]').prop('checked', true);
         }
+
+        // 从localStorage中获取存储的设置
+        var config = JSON.parse(window.localStorage.getItem("config"));
+        if (config) {
+            for (var c in config) {
+                $("input#" + c).prop("checked", config[c]);
+            }
+        }
+
         btn_save_site.click();
     });
 
@@ -385,9 +427,16 @@
             selected_var.push($(this).attr('value'));
         });
 
+        // 获取用户其他设置
+        var config = {};
+        $("input.config").each(function () {
+            config[$(this).attr("id")] = $(this).prop("checked")
+        });
+
         // 在localStorage中存储，以便下次调用
         localStorage.setItem('selected_name', selected_name);
         localStorage.setItem('selected_var', selected_var);
+        localStorage.setItem('config', JSON.stringify(config));
     });
 </script>
 </body>
