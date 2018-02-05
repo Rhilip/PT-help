@@ -339,6 +339,8 @@ $(document).ready(function () {
         NexusPHP("MTeam(Adult)", "https://tp.m-team.cc/", "https://tp.m-team.cc/adult.php?search=");
         NexusPHP("GZTown", "https://pt.gztown.net/", "https://pt.gztown.net/torrents.php?search=");
         NexusPHP("HD4FANS", "https://pt.hd4fans.org/", "https://pt.hd4fans.org/torrents.php?search=");
+        NexusPHP("TLFBits", "http://pt.eastgame.org/", "http://pt.eastgame.org/torrents.php?search=");
+        NexusPHP("BTSCHOOL", "http://pt.btschool.net/", "http://pt.btschool.net/torrents.php?search=");
 
         TTG("TTG(Media)");
         TTG("TTG(Gamez)");

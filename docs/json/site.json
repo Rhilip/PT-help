@@ -174,9 +174,23 @@
       {
         "value": 223,
         "name": "HD4FANS"
+      },
+      {
+        "value": 225,
+        "name": "TLFBits"
+      },
+      {
+        "value": 226,
+        "name": "BTSCHOOL"
       }
     ],
     "wz": [],
-    "bt": []
+    "bt": [
+      {
+        "value": 301,
+        "name": "DMHY",
+        "disable": true
+      }
+    ]
   }
 }
