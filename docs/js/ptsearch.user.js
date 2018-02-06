@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180130.2
+// @version      20180206
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -497,6 +497,48 @@ $(document).ready(function () {
                         }
                     }
                     writelog("End of Search Site HDStreet.");
+                }
+            });
+        }
+        if ($.inArray("HDRoute", search_site) > -1) {
+            writelog("Start Searching in Site HDRoute. Notice This Site is not official support. And completed number will not show.");
+            GM_xmlhttpRequest({
+                method: 'GET',
+                url: "http://hdroute.org/browse.php?s=" + search_text,
+                onload: function (responseDetail) {
+                    if (responseDetail.finalUrl.search("login") > -1) {
+                        writelog("Not Login in Site HDRoute.");
+                    } else {
+                        writelog("Get Search Pages Success in Site HDRoute.");
+                        var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
+                        var tr_list = doc.querySelectorAll("dl[id^='dl_torrent']");  // 所有种子均在id开头为dl_torrent的dl标签下
+                        writelog("Get " + tr_list.length + " records in Site HDRoute.");
+                        for (var i = 0; i < tr_list.length; i++) {   // 遍历记录
+                            var torrent_data_raw = $(tr_list[i]);
+                            // 获取种子标题名
+                            var _tag_torrent_title = torrent_data_raw.find("div.torrent_title");
+                            var _title_chs = _tag_torrent_title.find("p.title_chs").text();
+                            var _title_eng = _tag_torrent_title.find("p.title_eng").text();
+
+                            var _date = torrent_data_raw.find("div.torrent_added").text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
+
+                            var _size = torrent_data_raw.find("div.torrent_size").text();
+                            var _seeders = torrent_data_raw.find("a[href*='list_peers']").eq(0).text();
+                            var _leechers = torrent_data_raw.find("a[href*='list_peers']").eq(1);
+
+                            table_append({
+                                "site": "HDRoute",
+                                "name": _title_chs + " | " + _title_eng,
+                                "link": torrent_data_raw.find("div.torrent_detail_icon > a").attr("href"),
+                                "pubdate": Date.parse(_date),
+                                "size": FileSizetoLength(_size),
+                                "seeders": _seeders.replace(',', '').replace("---", 0) || 0,  // 出现 `---`表示无数据
+                                "leechers": _leechers.replace(',', '').replace("---", 0) || 0,
+                                "completed": 0 // 搜索页不显示完成人数
+                            });
+                        }
+                    }
+                    writelog("End of Search Site HDRoute.");
                 }
             });
         }
