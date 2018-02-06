@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180206
+// @version      20180206.1
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -89,14 +89,12 @@ $(document).ready(function () {
             }
         }
 
-        // 通用处理模板，如果默认解析模板可以解析该站点则请不要自建解析方法
-        // NexusPHP类站点
-        function NexusPHP(site, url_prefix, search_prefix, torrent_table_selector) {
+        function Get_Search_Page(site, search_url, parser_func) {
             if ($.inArray(site, search_site) > -1) {
-                writelog("Start Searching in Site " + site + ", Using The normal parser for NexusPHP.");
+                writelog("Start Searching in Site " + site + " .");
                 GM_xmlhttpRequest({
                     method: 'GET',
-                    url: search_prefix + search_text,
+                    url: search_url,
                     onload: function (responseDetail) {
                         if (responseDetail.finalUrl.search("login") > -1) {
                             writelog("Not Login in Site " + site + ".");
@@ -105,111 +103,95 @@ $(document).ready(function () {
                             var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
                             var body = doc.querySelector("body");
                             var page = $(body); // 构造 jQuery 对象
-                            var tr_list = page.find(torrent_table_selector || ".torrents > tbody > tr:gt(0)");
-                            writelog("Get " + tr_list.length + " records in Site " + site + ".");
-                            for (var i = 0; i < tr_list.length; i++) {
-                                var torrent_data_raw = tr_list.eq(i);
-                                var _tag_name = torrent_data_raw.find("a[href*='hit']");
-
-                                // 确定日期tag，因用户在站点设置中配置及站点优惠信息的情况的存在，此处dom结构会有不同
-                                // 此外多数站点对于 seeders, leechers, completed 没有额外的定位信息，故要依赖于正确的日期tag
-                                var _tag_date, _date;
-                                _tag_date = torrent_data_raw.find((site === "U2") ? "time" : "span").filter(function () {
-                                    return time_regex.test($(this).attr("title"));
-                                }).last().parent("td");
-                                if (/[分时天月年]/.test(_tag_date.text())) {
-                                    _date = _tag_date.children((site === "U2") ? "time" : "span").attr("title");
-                                } else {
-                                    _tag_date = torrent_data_raw.find("td").filter(function () {
-                                        return time_regex.test($(this).text());
-                                    }).last();
-                                    _date = _tag_date.text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
-                                }
-
-                                var _tag_size = _tag_date.next("td");
-                                var _tag_seeders = _tag_size.next("td");
-                                var _tag_leechers = _tag_seeders.next("td");
-                                var _tag_completed = _tag_leechers.next("td");
-
-                                table_append({
-                                    "site": site,
-                                    "name": _tag_name.attr("title") || _tag_name.text(),
-                                    "link": url_prefix + _tag_name.attr("href"),
-                                    "pubdate": Date.parse(_date),
-                                    "size": FileSizetoLength(_tag_size.text()),
-                                    "seeders": _tag_seeders.text().replace(',', '') || 0,  // 获取不到正常信息的时候置0
-                                    "leechers": _tag_leechers.text().replace(',', '') || 0,
-                                    "completed": _tag_completed.text().replace(',', '') || 0
-                                });
-                            }
+                            parser_func(doc, body, page);
                         }
                         writelog("End of Search Site " + site + ".");
                     }
                 });
             }
         }
-        function TTG(site) {
-            if ($.inArray(site, search_site) > -1) {
-                var cat;
-                switch (site) {
-                    case "TTG(Media)":
-                        cat = "M";
-                        break;
-                    case "TTG(Gamez)":
-                        cat = "G";
-                        break;
-                }
+        // 通用处理模板，如果默认解析模板可以解析该站点则请不要自建解析方法
+        // NexusPHP类站点
+        function NexusPHP(site, url_prefix, search_prefix, torrent_table_selector) {
+            Get_Search_Page(site, search_prefix + search_text, function (doc, body, page) {
+                writelog("Using The normal parser for NexusPHP in Site: " + site);
+                var tr_list = page.find(torrent_table_selector || ".torrents > tbody > tr:gt(0)");
+                writelog("Get " + tr_list.length + " records in Site " + site + ".");
+                for (var i = 0; i < tr_list.length; i++) {
+                    var torrent_data_raw = tr_list.eq(i);
+                    var _tag_name = torrent_data_raw.find("a[href*='hit']");
 
-                GM_xmlhttpRequest({
-                    method: 'GET',
-                    url: "https://totheglory.im/browse.php?c=" + cat + "&search_field=" + search_text,
-                    onload: function (responseDetail) {
-                        if (responseDetail.finalUrl.search("login") > -1) {
-                            writelog("Not Login in Site " + site + ".");
-                        } else {
-                            writelog("Get Search Pages Success in Site " + site + ".");
-                            var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
-                            var body = doc.querySelector("body");
-                            var page = $(body); // 构造 jQuery 对象
-                            var tr_list = page.find("#torrent_table tr.hover_hr");
-                            writelog("Get " + tr_list.length + " records in Site " + site + ".");
-                            for (var i = 0; i < tr_list.length; i++) {
-                                var torrent_data_raw = tr_list.eq(i);
-                                var _tag_name = torrent_data_raw.find("a[href^='/t/']");
-
-                                var _name_match = _tag_name.html().match(/<b>(.+?)<br>/);
-                                var _name = _name_match ? _name_match[1] : _tag_name.text();
-
-                                var _tag_date, _date;
-                                _tag_date = torrent_data_raw.find("td").filter(function () {
-                                    return time_regex.test($(this).text());
-                                });
-                                _date = _tag_date.text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
-
-                                var _tag_size = torrent_data_raw.find("td").filter(function () {
-                                    return /[kMGT]B$/.test($(this).text());
-                                });
-
-                                var _tag_seeders = torrent_data_raw.find("a[href$='toseeders=1']");
-                                var _tag_leechers = torrent_data_raw.find("a[href$='todlers=1']");
-                                var _tag_completed = _tag_size.next("td");
-
-                                table_append({
-                                    "site": site,
-                                    "name": _name,
-                                    "link": "https://totheglory.im" + _tag_name.attr("href"),
-                                    "pubdate": Date.parse(_date),
-                                    "size": FileSizetoLength(_tag_size.text()),
-                                    "seeders": _tag_seeders.text().replace(',', '') || 0,
-                                    "leechers": _tag_leechers.text().replace(',', '') || 0,
-                                    "completed": _tag_completed.text().match(/\d+/)[0].replace(',', '')
-                                });
-                            }
-                        }
-                        writelog("End of Search Site " + site + ".");
+                    // 确定日期tag，因用户在站点设置中配置及站点优惠信息的情况的存在，此处dom结构会有不同
+                    // 此外多数站点对于 seeders, leechers, completed 没有额外的定位信息，故要依赖于正确的日期tag
+                    var _tag_date, _date;
+                    _tag_date = torrent_data_raw.find((site === "U2") ? "time" : "span").filter(function () {
+                        return time_regex.test($(this).attr("title"));
+                    }).last().parent("td");
+                    if (/[分时天月年]/.test(_tag_date.text())) {
+                        _date = _tag_date.children((site === "U2") ? "time" : "span").attr("title");
+                    } else {
+                        _tag_date = torrent_data_raw.find("td").filter(function () {
+                            return time_regex.test($(this).text());
+                        }).last();
+                        _date = _tag_date.text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
                     }
-                });
-            }
+
+                    var _tag_size = _tag_date.next("td");
+                    var _tag_seeders = _tag_size.next("td");
+                    var _tag_leechers = _tag_seeders.next("td");
+                    var _tag_completed = _tag_leechers.next("td");
+
+                    table_append({
+                        "site": site,
+                        "name": _tag_name.attr("title") || _tag_name.text(),
+                        "link": url_prefix + _tag_name.attr("href"),
+                        "pubdate": Date.parse(_date),
+                        "size": FileSizetoLength(_tag_size.text()),
+                        "seeders": _tag_seeders.text().replace(',', '') || 0,  // 获取不到正常信息的时候置0
+                        "leechers": _tag_leechers.text().replace(',', '') || 0,
+                        "completed": _tag_completed.text().replace(',', '') || 0
+                    });
+                }
+            });
+        }
+
+        function TTG(site, search_prefix) {
+            Get_Search_Page(site, search_prefix + search_text, function (doc, body, page) {
+                var tr_list = page.find("#torrent_table tr.hover_hr");
+                writelog("Get " + tr_list.length + " records in Site " + site + ".");
+                for (var i = 0; i < tr_list.length; i++) {
+                    var torrent_data_raw = tr_list.eq(i);
+                    var _tag_name = torrent_data_raw.find("a[href^='/t/']");
+
+                    var _name_match = _tag_name.html().match(/<b>(.+?)<br>/);
+                    var _name = _name_match ? _name_match[1] : _tag_name.text();
+
+                    var _tag_date, _date;
+                    _tag_date = torrent_data_raw.find("td").filter(function () {
+                        return time_regex.test($(this).text());
+                    });
+                    _date = _tag_date.text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
+
+                    var _tag_size = torrent_data_raw.find("td").filter(function () {
+                        return /[kMGT]B$/.test($(this).text());
+                    });
+
+                    var _tag_seeders = torrent_data_raw.find("a[href$='toseeders=1']");
+                    var _tag_leechers = torrent_data_raw.find("a[href$='todlers=1']");
+                    var _tag_completed = _tag_size.next("td");
+
+                    table_append({
+                        "site": site,
+                        "name": _name,
+                        "link": "https://totheglory.im" + _tag_name.attr("href"),
+                        "pubdate": Date.parse(_date),
+                        "size": FileSizetoLength(_tag_size.text()),
+                        "seeders": _tag_seeders.text().replace(',', '') || 0,
+                        "leechers": _tag_leechers.text().replace(',', '') || 0,
+                        "completed": _tag_completed.text().match(/\d+/)[0].replace(',', '')
+                    });
+                }
+            });
         }
 
 
@@ -222,101 +204,72 @@ $(document).ready(function () {
         NexusPHP("XAUAT6", "http://pt.xauat6.edu.cn/", "http://pt.xauat6.edu.cn/torrents.php?search=");
         NexusPHP("NYPT", "https://nanyangpt.com/", "http://nanyangpt.com/torrents.php?search=");
         NexusPHP("SJTU", "https://pt.sjtu.edu.cn/", "https://pt.sjtu.edu.cn/torrents.php?search=");
-        // NexusPHP("CUGB", "http://pt.cugb.edu.cn/", "http://pt.cugb.edu.cn/torrents.php?search=");
         NexusPHP("HUDBT", "", "https://hudbt.hust.edu.cn/torrents.php?search=", ".torrents tr:gt(0)");
         NexusPHP("TJUPT", "https://tjupt.org/", "https://tjupt.org/torrents.php?search=");
 
         // 教育网不能使用通用NexusPHP解析的站点
-        if ($.inArray("NPU", search_site) > -1) {     // NPUPT
-            writelog("Start Searching in NPUPT.");
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: "https://npupt.com/torrents.php?search=" + search_text,
-                onload: function (responseDetail) {
-                    if (responseDetail.finalUrl.search("login") > -1) {
-                        writelog("Not Login in Site NPUPT.");
-                    } else {
-                        var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
-                        var body = doc.querySelector("body");
-                        var page = $(body); // 构造 jQuery 对象
-                        var tr_list = page.find("#torrents_table tr");
-                        for (var i = 1; i < tr_list.length; i += 3) {
-                            var torrent_data_raw = tr_list.eq(i);
-                            var _tag_name = torrent_data_raw.find("a[href*='hit']");
-                            var _date = torrent_data_raw.find("span[title*='-'][title*=':'][title^='20']").attr("title") || $.trim(torrent_data_raw.find("div.small").text()) || torrent_data_raw.text().match(/(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
-                            var _tag_size = torrent_data_raw.find("center");
+        Get_Search_Page("NPU", "https://npupt.com/torrents.php?search=" + search_text, function (doc, body, page) {
+            // TODO Fix
+            var tr_list = page.find("#torrents_table tr");
+            for (var i = 1; i < tr_list.length; i += 3) {
+                var torrent_data_raw = tr_list.eq(i);
+                var _tag_name = torrent_data_raw.find("a[href*='hit']");
+                var _date = torrent_data_raw.find("span[title*='-'][title*=':'][title^='20']").attr("title") || $.trim(torrent_data_raw.find("div.small").text()) || torrent_data_raw.text().match(/(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
+                var _tag_size = torrent_data_raw.find("center");
 
-                            table_append({
-                                "site": "NPU",
-                                "name": _tag_name.attr("title") || _tag_name.text(),
-                                "link": "https://npupt.com/" + _tag_name.attr("href"),
-                                "pubdate": Date.parse(_date),
-                                "size": FileSizetoLength(_tag_size.text()),
-                                "seeders": torrent_data_raw.find("span.badge").eq(0).text(),
-                                "leechers": torrent_data_raw.find("span.badge").eq(1).text(),
-                                "completed": parseInt(torrent_data_raw.find("a[href^='viewsnatches.php?id=']").text()) || 0
-                            });
-                        }
-                    }
-                    writelog("End of Search Site NPUPT.");
+                table_append({
+                    "site": "NPU",
+                    "name": _tag_name.attr("title") || _tag_name.text(),
+                    "link": "https://npupt.com/" + _tag_name.attr("href"),
+                    "pubdate": Date.parse(_date),
+                    "size": FileSizetoLength(_tag_size.text()),
+                    "seeders": torrent_data_raw.find("span.badge").eq(0).text(),
+                    "leechers": torrent_data_raw.find("span.badge").eq(1).text(),
+                    "completed": parseInt(torrent_data_raw.find("a[href^='viewsnatches.php?id=']").text()) || 0
+                });
+            }
+        });
+        Get_Search_Page("ZX", "http://pt.zhixing.bjtu.edu.cn/search/x" + search_text, function (doc, body, page) {
+            var torrent_list_table = page.find(".torrenttable tr");
+            writelog("Get " + torrent_list_table.length + " records in Site ZX.");
+            for (var i = 1; i < torrent_list_table.length; i++) {
+                var torrent_data_raw = torrent_list_table.eq(i);
+
+                var _tag_name = torrent_data_raw.find("a[name='title']");
+                var _tag_size = torrent_data_raw.find("td.r");
+                var _tag_date = _tag_size.next("td").next("td").next("td");
+                var _tag_seeders = _tag_date.next("td");
+                var _tag_leechers = _tag_seeders.next("td");
+                var _tag_completed = _tag_leechers.next("td");
+
+                // 对这个站点的垃圾时间简写进行标准化
+                var _date, myDate = new Date();
+                var _tag_date_text = _tag_date.text();
+                switch (true) {
+                    case /\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(_tag_date_text):   // "2017-12-29 22:44"（完整，不需要改动）
+                        _date = Date.parse(_tag_date_text);
+                        break;
+                    case /\d{2}-\d{2} \d{2}:\d{2}/.test(_tag_date_text):   // "01-06 10:05"（当年）
+                        _date = Date.parse(myDate.getFullYear() + "-" + _tag_date_text);
+                        break;
+                    case /\d{2}:\d{2}/.test(_tag_date_text):   // "18:50"（当日）
+                        _date = Date.parse(myDate.getFullYear() + "-" + (myDate.getMonth() + 1) + "-" + myDate.getDate() + " " + _tag_date_text);
+                        break;
                 }
-            });
-        }
-        if ($.inArray("ZX", search_site) > -1) {     // ZX
-            writelog("Start Searching in ZX.");
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: "http://pt.zhixing.bjtu.edu.cn/search/x" + search_text,
-                onload: function (responseDetail) {
-                    if (responseDetail.finalUrl.search("login") > -1) {
-                        writelog("Not Login in Site ZX.");
-                    } else {
-                        var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
-                        var body = doc.querySelector("body");
-                        var page = $(body); // 构造 jQuery 对象
-                        var torrent_list_table = page.find(".torrenttable tr");
-                        writelog("Get " + torrent_list_table.length + " records in Site ZX.");
-                        for (var i = 1; i < torrent_list_table.length; i++) {
-                            var torrent_data_raw = torrent_list_table.eq(i);
 
-                            var _tag_name = torrent_data_raw.find("a[name='title']");
-                            var _tag_size = torrent_data_raw.find("td.r");
-                            var _tag_date = _tag_size.next("td").next("td").next("td");
-                            var _tag_seeders = _tag_date.next("td");
-                            var _tag_leechers = _tag_seeders.next("td");
-                            var _tag_completed = _tag_leechers.next("td");
-
-                            // 对这个站点的垃圾时间简写进行标准化
-                            var _date, myDate = new Date();
-                            var _tag_date_text = _tag_date.text();
-                            switch (true) {
-                                case /\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(_tag_date_text):   // "2017-12-29 22:44"（完整，不需要改动）
-                                    _date = Date.parse(_tag_date_text);
-                                    break;
-                                case /\d{2}-\d{2} \d{2}:\d{2}/.test(_tag_date_text):   // "01-06 10:05"（当年）
-                                    _date = Date.parse(myDate.getFullYear() + "-" + _tag_date_text);
-                                    break;
-                                case /\d{2}:\d{2}/.test(_tag_date_text):   // "18:50"（当日）
-                                    _date = Date.parse(myDate.getFullYear() + "-" + (myDate.getMonth() + 1) + "-" + myDate.getDate() + " " + _tag_date_text);
-                                    break;
-                            }
-
-                            table_append({
-                                "site": "ZX",
-                                "name": _tag_name.text(),
-                                "link": "http://pt.zhixing.bjtu.edu.cn" + _tag_name.attr("href"),
-                                "pubdate": _date,
-                                "size": FileSizetoLength(_tag_size.text()),
-                                "seeders": _tag_seeders.text().replace(',', ''),
-                                "leechers": _tag_leechers.text().replace(',', ''),
-                                "completed": _tag_completed.text().replace(',', '')
-                            });
-                        }
-                    }
-                    writelog("End of Search Site ZX.");
-                }
-            });
-        }
+                table_append({
+                    "site": "ZX",
+                    "name": _tag_name.text(),
+                    "link": "http://pt.zhixing.bjtu.edu.cn" + _tag_name.attr("href"),
+                    "pubdate": _date,
+                    "size": FileSizetoLength(_tag_size.text()),
+                    "seeders": _tag_seeders.text().replace(',', ''),
+                    "leechers": _tag_leechers.text().replace(',', ''),
+                    "completed": _tag_completed.text().replace(',', '')
+                });
+            }
+        });
+        // NexusPHP("CUGB", "http://pt.cugb.edu.cn/", "http://pt.cugb.edu.cn/torrents.php?search=");
 
         // 公网通用模板解析
         NexusPHP("HDSKY", "https://hdsky.me/", "https://hdsky.me/torrents.php?search=", ".torrents tr.progresstr");
@@ -342,207 +295,144 @@ $(document).ready(function () {
         NexusPHP("TLFBits", "http://pt.eastgame.org/", "http://pt.eastgame.org/torrents.php?search=");
         NexusPHP("BTSCHOOL", "http://pt.btschool.net/", "http://pt.btschool.net/torrents.php?search=");
 
-        TTG("TTG(Media)");
-        TTG("TTG(Gamez)");
+        TTG("TTG(Media)", "https://totheglory.im/browse.php?c=M&search_field=");
+        TTG("TTG(Gamez)", "https://totheglory.im/browse.php?c=G&search_field=");
 
         // 公网不能使用通用NexusPHP解析的站点
-        if ($.inArray("HDChina", search_site) > -1) {
-            writelog("Start Searching in Site HDChina.");
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: "https://hdchina.org/torrents.php?search=" + search_text,
-                onload: function (responseDetail) {
-                    if (responseDetail.finalUrl.search("login") > -1) {
-                        writelog("Not Login in Site HDChina.");
-                    } else {
-                        writelog("Get Search Pages Success in Site HDChina.");
-                        var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
-                        var body = doc.querySelector("body");
-                        var page = $(body); // 构造 jQuery 对象
-                        var tr_list = page.find(".torrent_list tr:odd");
-                        writelog("Get " + tr_list.length + " records in Site HDChina.");
-                        for (var i = 0; i < tr_list.length; i++) {
-                            var torrent_data_raw = tr_list.eq(i);
-                            var _tag_name = torrent_data_raw.find("a[href*='hit']");
+        Get_Search_Page("HDChina", "https://hdchina.org/torrents.php?search=" + search_text, function (doc, body, page) {
+            var tr_list = page.find(".torrent_list tr:odd");
+            writelog("Get " + tr_list.length + " records in Site HDChina.");
+            for (var i = 0; i < tr_list.length; i++) {
+                var torrent_data_raw = tr_list.eq(i);
+                var _tag_name = torrent_data_raw.find("a[href*='hit']");
 
-                            var _date, _tag_date = torrent_data_raw.find(".t_time");
-                            if (/[分时天月年]/.test(_tag_date.text())) {
-                                _date = _tag_date.children("span").attr("title");
-                            } else {
-                                _date = _tag_date.text();
-                            }
-
-                            var _tag_size = torrent_data_raw.find(".t_size");
-                            var _tag_seeders = torrent_data_raw.find(".t_torrents");
-                            var _tag_leechers = torrent_data_raw.find(".t_leech");
-                            var _tag_completed = torrent_data_raw.find(".t_completed");
-
-                            table_append({
-                                "site": "HDChina",
-                                "name": _tag_name.attr("title") || _tag_name.text(),
-                                "link": "https://hdchina.org/" + _tag_name.attr("href"),
-                                "pubdate": Date.parse(_date),
-                                "size": FileSizetoLength(_tag_size.text()),
-                                "seeders": _tag_seeders.text().replace(',', ''),
-                                "leechers": _tag_leechers.text().replace(',', ''),
-                                "completed": _tag_completed.text().replace(',', '')
-                            });
-                        }
-                    }
-                    writelog("End of Search Site HDChina.");
+                var _date, _tag_date = torrent_data_raw.find(".t_time");
+                if (/[分时天月年]/.test(_tag_date.text())) {
+                    _date = _tag_date.children("span").attr("title");
+                } else {
+                    _date = _tag_date.text();
                 }
-            });
-        }
-        if ($.inArray("HDCity", search_site) > -1) {
-            writelog("Start Searching in Site HDCity.");
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: "https://hdcity.work/pt?iwannaseethis=" + search_text,
-                onload: function (responseDetail) {
-                    if (responseDetail.finalUrl.search("login") > -1) {
-                        writelog("Not Login in Site HDCity.For HDCity,you should use `https://hdcity.work/` but not `https://hdcity.leniter.org/`");
-                    } else {
-                        writelog("Get Search Pages Success in Site HDCity.");
-                        var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
-                        var body = doc.querySelector("body");
-                        var page = $(body); // 构造 jQuery 对象
-                        var tr_list = page.find("div[class^='text'][style='line-height:1rem;']");
-                        writelog("Get " + tr_list.length + " records in Site HDCity.");
-                        for (var i = 0; i < tr_list.length; i++) {
-                            var torrent_data_raw = tr_list.eq(i);
-                            var _tag_name = torrent_data_raw.find("a[href*='t-']");
 
-                            var _date, _tag_date;
-                            _tag_date = torrent_data_raw.find("div").filter(function () {
-                                return time_regex.test($(this).text());
-                            }).last();
-                            _date = _tag_date.text();
+                var _tag_size = torrent_data_raw.find(".t_size");
+                var _tag_seeders = torrent_data_raw.find(".t_torrents");
+                var _tag_leechers = torrent_data_raw.find(".t_leech");
+                var _tag_completed = torrent_data_raw.find(".t_completed");
 
-                            var _tag_size = _tag_name.parent("div");
-                            var _tag_seeders = torrent_data_raw.find("a[href$='#seeders']");
-                            var _tag_leechers = torrent_data_raw.find("a[href$='#leechers']");
-                            var _tag_completed = torrent_data_raw.find("a[href^='viewsnatches']");
+                table_append({
+                    "site": "HDChina",
+                    "name": _tag_name.attr("title") || _tag_name.text(),
+                    "link": "https://hdchina.org/" + _tag_name.attr("href"),
+                    "pubdate": Date.parse(_date),
+                    "size": FileSizetoLength(_tag_size.text()),
+                    "seeders": _tag_seeders.text().replace(',', ''),
+                    "leechers": _tag_leechers.text().replace(',', ''),
+                    "completed": _tag_completed.text().replace(',', '')
+                });
+            }
+        });
+        Get_Search_Page("HDCity", "https://hdcity.work/pt?iwannaseethis=" + search_text, function (doc, body, page) {
+            var tr_list = page.find("div[class^='text'][style='line-height:1rem;']");
+            writelog("Get " + tr_list.length + " records in Site HDCity.");
+            for (var i = 0; i < tr_list.length; i++) {
+                var torrent_data_raw = tr_list.eq(i);
+                var _tag_name = torrent_data_raw.find("a[href*='t-']");
 
+                var _date, _tag_date;
+                _tag_date = torrent_data_raw.find("div").filter(function () {
+                    return time_regex.test($(this).text());
+                }).last();
+                _date = _tag_date.text();
 
-                            var _size = _tag_size.text().match(/\[([.\d]+? [KMGT]B)/)[1];
+                var _tag_size = _tag_name.parent("div");
+                var _tag_seeders = torrent_data_raw.find("a[href$='#seeders']");
+                var _tag_leechers = torrent_data_raw.find("a[href$='#leechers']");
+                var _tag_completed = torrent_data_raw.find("a[href^='viewsnatches']");
 
-                            table_append({
-                                "site": "HDCity",
-                                "name": _tag_name.text(),
-                                "link": "https://hdcity.work/" + _tag_name.attr("href"),
-                                "pubdate": Date.parse(_date),
-                                "size": FileSizetoLength(_size),
-                                "seeders": _tag_seeders.text().replace(',', '') || 0,
-                                "leechers": _tag_leechers.text().replace(',', '') || 0,
-                                "completed": _tag_completed.text().replace(',', '') || 0
-                            });
-                        }
-                    }
-                    writelog("End of Search Site HDCity.");
+                var _size = _tag_size.text().match(/\[([.\d]+? [KMGT]B)/)[1];
+
+                table_append({
+                    "site": "HDCity",
+                    "name": _tag_name.text(),
+                    "link": "https://hdcity.work/" + _tag_name.attr("href"),
+                    "pubdate": Date.parse(_date),
+                    "size": FileSizetoLength(_size),
+                    "seeders": _tag_seeders.text().replace(',', '') || 0,
+                    "leechers": _tag_leechers.text().replace(',', '') || 0,
+                    "completed": _tag_completed.text().replace(',', '') || 0
+                });
+            }
+        });
+        Get_Search_Page("HDStreet", "http://hdstreet.club/torrents.php?search=" + search_text, function (doc, body, page) {
+            // 继承自蚂蚁的使用大量colspan,rowspan的表格处理
+            var tr_list = page.find(".torrents > tbody > tr:gt(1)");    // 前两行都是表题栏，不要
+            writelog("Get " + tr_list.length / 2 + " records in Site HDStreet.");
+            for (var i = 0; i < tr_list.length; i += 2) {    // 每两行数据组成一个种子资源的完整信息
+                var torrent_data_raw_1 = tr_list.eq(i);
+                var torrent_data_raw_2 = tr_list.eq(i + 1);
+                var _tag_name = torrent_data_raw_1.find("a[href$='hit=1']");
+
+                // 确定日期tag，因用户在站点设置中配置及站点优惠信息的情况的存在，此处dom结构会有不同
+                // 此外多数站点对于 seeders, leechers, completed 没有额外的定位信息，故要依赖于正确的日期tag
+                var _tag_date, _date;
+                _tag_date = torrent_data_raw_2.find("span").filter(function () {
+                    return time_regex.test($(this).attr("title"));
+                }).last().parent("td");
+                if (/[分时天月年]/.test(_tag_date.text())) {
+                    _date = _tag_date.children("span").attr("title");
+                } else {
+                    _tag_date = torrent_data_raw_2.find("td").filter(function () {
+                        return time_regex.test($(this).text());
+                    }).last();
+                    _date = _tag_date.text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
                 }
-            });
-        }
-        if ($.inArray("HDStreet", search_site) > -1) {
-            writelog("Start Searching in Site HDStreet, The Login Check may Wrong in this site.");
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: "http://hdstreet.club/torrents.php?search=" + search_text,
-                onload: function (responseDetail) {
-                    if (responseDetail.finalUrl.search("login") > -1) {
-                        writelog("Not Login in Site HDStreet.");
-                    } else {
-                        writelog("Get Search Pages Success in Site HDStreet.");
-                        var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
-                        var body = doc.querySelector("body");
-                        var page = $(body); // 构造 jQuery 对象
 
-                        // 继承自蚂蚁的使用大量colspan,rowspan的表格处理
-                        var tr_list = page.find(".torrents > tbody > tr:gt(1)");    // 前两行都是表题栏，不要
-                        writelog("Get " + tr_list.length / 2 + " records in Site HDStreet.");
-                        for (var i = 0; i < tr_list.length; i += 2) {    // 每两行数据组成一个种子资源的完整信息
-                            var torrent_data_raw_1 = tr_list.eq(i);
-                            var torrent_data_raw_2 = tr_list.eq(i + 1);
-                            var _tag_name = torrent_data_raw_1.find("a[href$='hit=1']");
+                var _tag_size = _tag_date.next("td");
+                var _tag_seeders = torrent_data_raw_1.find("a[href$='#seeders']");
+                var _tag_leechers = torrent_data_raw_1.find("a[href$='#leechers']");
+                var _tag_completed = torrent_data_raw_1.find("a[href^='viewsnatches.php']");
 
-                            // 确定日期tag，因用户在站点设置中配置及站点优惠信息的情况的存在，此处dom结构会有不同
-                            // 此外多数站点对于 seeders, leechers, completed 没有额外的定位信息，故要依赖于正确的日期tag
-                            var _tag_date, _date;
-                            _tag_date = torrent_data_raw_2.find("span").filter(function () {
-                                return time_regex.test($(this).attr("title"));
-                            }).last().parent("td");
-                            if (/[分时天月年]/.test(_tag_date.text())) {
-                                _date = _tag_date.children("span").attr("title");
-                            } else {
-                                _tag_date = torrent_data_raw_2.find("td").filter(function () {
-                                    return time_regex.test($(this).text());
-                                }).last();
-                                _date = _tag_date.text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
-                            }
+                table_append({
+                    "site": "HDStreet",
+                    "name": _tag_name.attr("title") || _tag_name.text(),
+                    "link": "http://hdstreet.club/" + _tag_name.attr("href"),
+                    "pubdate": Date.parse(_date),
+                    "size": FileSizetoLength(_tag_size.text()),
+                    "seeders": _tag_seeders.text().replace(',', '') || 0,
+                    "leechers": _tag_leechers.text().replace(',', '') || 0,
+                    "completed": _tag_completed.text().replace(',', '') || 0
+                });
+            }
+        });
+        Get_Search_Page("HDRoute", "http://hdroute.org/browse.php?s=" + search_text, function (doc) {
+            var tr_list = doc.querySelectorAll("dl[id^='dl_torrent']");  // 所有种子均在id开头为dl_torrent的dl标签下
+            writelog("Get " + tr_list.length + " records in Site HDRoute.");
+            for (var i = 0; i < tr_list.length; i++) {   // 遍历记录
+                var torrent_data_raw = $(tr_list[i]);
+                // 获取种子标题名
+                var _tag_torrent_title = torrent_data_raw.find("div.torrent_title");
+                var _title_chs = _tag_torrent_title.find("p.title_chs").text();
+                var _title_eng = _tag_torrent_title.find("p.title_eng").text();
 
-                            var _tag_size = _tag_date.next("td");
-                            var _tag_seeders = torrent_data_raw_1.find("a[href$='#seeders']");
-                            var _tag_leechers = torrent_data_raw_1.find("a[href$='#leechers']");
-                            var _tag_completed = torrent_data_raw_1.find("a[href^='viewsnatches.php']");
+                var _date = torrent_data_raw.find("div.torrent_added").text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
 
-                            table_append({
-                                "site": "HDStreet",
-                                "name": _tag_name.attr("title") || _tag_name.text(),
-                                "link": "http://hdstreet.club/" + _tag_name.attr("href"),
-                                "pubdate": Date.parse(_date),
-                                "size": FileSizetoLength(_tag_size.text()),
-                                "seeders": _tag_seeders.text().replace(',', '') || 0,
-                                "leechers": _tag_leechers.text().replace(',', '') || 0,
-                                "completed": _tag_completed.text().replace(',', '') || 0
-                            });
-                        }
-                    }
-                    writelog("End of Search Site HDStreet.");
-                }
-            });
-        }
-        if ($.inArray("HDRoute", search_site) > -1) {
-            writelog("Start Searching in Site HDRoute. Notice This Site is not official support. And completed number will not show.");
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: "http://hdroute.org/browse.php?s=" + search_text,
-                onload: function (responseDetail) {
-                    if (responseDetail.finalUrl.search("login") > -1) {
-                        writelog("Not Login in Site HDRoute.");
-                    } else {
-                        writelog("Get Search Pages Success in Site HDRoute.");
-                        var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
-                        var tr_list = doc.querySelectorAll("dl[id^='dl_torrent']");  // 所有种子均在id开头为dl_torrent的dl标签下
-                        writelog("Get " + tr_list.length + " records in Site HDRoute.");
-                        for (var i = 0; i < tr_list.length; i++) {   // 遍历记录
-                            var torrent_data_raw = $(tr_list[i]);
-                            // 获取种子标题名
-                            var _tag_torrent_title = torrent_data_raw.find("div.torrent_title");
-                            var _title_chs = _tag_torrent_title.find("p.title_chs").text();
-                            var _title_eng = _tag_torrent_title.find("p.title_eng").text();
+                var _size = torrent_data_raw.find("div.torrent_size").text();
+                var _seeders = torrent_data_raw.find("a[href*='list_peers']").eq(0).text();
+                var _leechers = torrent_data_raw.find("a[href*='list_peers']").eq(1);
 
-                            var _date = torrent_data_raw.find("div.torrent_added").text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
+                table_append({
+                    "site": "HDRoute",
+                    "name": _title_chs + " | " + _title_eng,
+                    "link": torrent_data_raw.find("div.torrent_detail_icon > a").attr("href"),
+                    "pubdate": Date.parse(_date),
+                    "size": FileSizetoLength(_size),
+                    "seeders": _seeders.replace(',', '').replace("---", 0) || 0,  // 出现 `---`表示无数据
+                    "leechers": _leechers.replace(',', '').replace("---", 0) || 0,
+                    "completed": 0 // 搜索页不显示完成人数
+                });
+            }
+        });
 
-                            var _size = torrent_data_raw.find("div.torrent_size").text();
-                            var _seeders = torrent_data_raw.find("a[href*='list_peers']").eq(0).text();
-                            var _leechers = torrent_data_raw.find("a[href*='list_peers']").eq(1);
-
-                            table_append({
-                                "site": "HDRoute",
-                                "name": _title_chs + " | " + _title_eng,
-                                "link": torrent_data_raw.find("div.torrent_detail_icon > a").attr("href"),
-                                "pubdate": Date.parse(_date),
-                                "size": FileSizetoLength(_size),
-                                "seeders": _seeders.replace(',', '').replace("---", 0) || 0,  // 出现 `---`表示无数据
-                                "leechers": _leechers.replace(',', '').replace("---", 0) || 0,
-                                "completed": 0 // 搜索页不显示完成人数
-                            });
-                        }
-                    }
-                    writelog("End of Search Site HDRoute.");
-                }
-            });
-        }
-        // TODO CCFBits, (I May not support this site.)
+        // TODO CCFBits, (I May not support this site due to bad dom.)
 
         // 外网站点
 
