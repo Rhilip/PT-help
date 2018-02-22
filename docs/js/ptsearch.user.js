@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180206.1
+// @version      20180222
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -72,6 +72,7 @@ $(document).ready(function () {
         var search_text = $("#keyword").val().trim();     // 搜索文本
         var search_site = localStorage.getItem('selected_name').split(',') || [];   // 搜索站点
         var config_log = $("#config-log").prop("checked"); // 搜索日志记录
+        var config_not_check_login = $("#config-not-check-login").prop("checked"); // 搜索日志记录
 
         if (!$('#config-keep-old').prop('checked')) {
             table.bootstrapTable('removeAll');  // 清空已有表格信息
@@ -96,16 +97,16 @@ $(document).ready(function () {
                     method: 'GET',
                     url: search_url,
                     onload: function (responseDetail) {
-                        if (responseDetail.finalUrl.search("login") > -1) {
-                            writelog("Not Login in Site " + site + ".");
+                        if (!config_not_check_login && responseDetail.finalUrl.search("login") > -1) {
+                            writelog("Not Login in Site " + site + ". The final Url is '" + responseDetail.finalUrl + "'(, This may help to check the login status).");
                         } else {
                             writelog("Get Search Pages Success in Site " + site + ".");
                             var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
                             var body = doc.querySelector("body");
                             var page = $(body); // 构造 jQuery 对象
                             parser_func(doc, body, page);
+                            writelog("End of Search in Site " + site + ".");
                         }
-                        writelog("End of Search Site " + site + ".");
                     }
                 });
             }
