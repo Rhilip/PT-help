@@ -109,16 +109,12 @@ $(document).ready(function () {
                                 parser_func(doc, body, page);
                                 writelog("End of Search in Site " + site + ".");
                             } catch (error) {
-                                writelog(
-                                    "Meet error when search in Site " + site
-                                    + ". With Error information: " + error
-                                    + ". Please opening a issues at https://github.com/Rhilip/PT-help/issues/2"
-                                )
+                                writelog("An error occurred when parser in Site " + site + ". With Error information: " + error + ". Please opening a issues to report at https://github.com/Rhilip/PT-help/issues/2");
                             }
                         }
                     },
                     onerror: function (res) {
-                        writelog("An error occurred when searching in Site " + site + " .With finalUrl: " + res.finalUrl);
+                        writelog("An error occurred when searching in Site " + site + " .With finalUrl: " + res.finalUrl + ". Your computer may not be able to access this site.");
                     }
                 });
             }
