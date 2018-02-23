@@ -1,195 +1,59 @@
 {
   "name": "Site List for PT-search",
-  "site_type": [
-    "jyw",
-    "gw",
-    "wz",
-    "bt"
+  "jyw": [
+    "BYR",
+    "6V",
+    "NPU",
+    "WHU",
+    "NWSUAF6",
+    "XAUAT6",
+    "ZX",
+    "NYPT",
+    "SJTU",
+    "HIT",
+    "CUGB",
+    "Antsoul",
+    "HUDBT",
+    "TJUPT"
   ],
-  "site": {
-    "jyw": [
-      {
-        "value": 101,
-        "name": "BYR"
-      },
-      {
-        "value": 102,
-        "name": "6V",
-        "disable": true
-      },
-      {
-        "value": 103,
-        "name": "NPU"
-      },
-      {
-        "value": 104,
-        "name": "WHU"
-      },
-      {
-        "value": 105,
-        "name": "NWSUAF6"
-      },
-      {
-        "value": 106,
-        "name": "XAUAT6"
-      },
-      {
-        "value": 107,
-        "name": "ZX"
-      },
-      {
-        "value": 108,
-        "name": "NYPT"
-      },
-      {
-        "value": 109,
-        "name": "SJTU"
-      },
-      {
-        "value": 110,
-        "name": "HIT",
-        "disable": true
-      },
-      {
-        "value": 111,
-        "name": "CUGB",
-        "disable": true
-      },
-      {
-        "value": 112,
-        "name": "Antsoul",
-        "disable": true
-      },
-      {
-        "value": 113,
-        "name": "HUDBT"
-      },
-      {
-        "value": 114,
-        "name": "TJUPT"
-      }
-    ],
-    "gw": [
-      {
-        "value": 201,
-        "name": "HDSKY"
-      },
-      {
-        "value": 202,
-        "name": "Hyperay"
-      },
-      {
-        "value": 203,
-        "name": "HDChina"
-      },
-      {
-        "value": "204-1",
-        "name": "HDHome"
-      },
-      {
-        "value": "204-2",
-        "name": "HDHome(Live)"
-      },
-      {
-        "value": 205,
-        "name": "HDTime"
-      },
-      {
-        "value": 206,
-        "name": "HDU"
-      },
-      {
-        "value": 207,
-        "name": "JoyHD"
-      },
-      {
-        "value": 208,
-        "name": "CHDBits"
-      },
-      {
-        "value": 209,
-        "name": "Ourbits"
-      },
-      {
-        "value": 210,
-        "name": "OpenCD"
-      },
-      {
-        "value": 211,
-        "name": "SolaGS"
-      },
-      {
-        "value": 212,
-        "name": "TTHD"
-      },
-      {
-        "value": 213,
-        "name": "KeepFrds"
-      },
-      {
-        "value": 214,
-        "name": "TCCF"
-      },
-      {
-        "value": 215,
-        "name": "U2"
-      },
-      {
-        "value": 216,
-        "name": "CMCT"
-      },
-      {
-        "value": 217,
-        "name": "MTeam"
-      },
-      {
-        "value": 217,
-        "name": "MTeam(Adult)"
-      },
-      {
-        "value": 218,
-        "name": "GZTown"
-      },
-      {
-        "value": "219-1",
-        "name": "TTG(Media)"
-      },
-      {
-        "value": "219-2",
-        "name": "TTG(Gamez)"
-      },
-      {
-        "value": 220,
-        "name": "HDStreet"
-      },
-      {
-        "value": 221,
-        "name": "HDCity"
-      },
-      {
-        "value": 222,
-        "name": "CCFBits",
-        "disable": true
-      },
-      {
-        "value": 223,
-        "name": "HD4FANS"
-      },
-      {
-        "value": 225,
-        "name": "TLFBits"
-      },
-      {
-        "value": 226,
-        "name": "BTSCHOOL"
-      },
-      {
-        "value": 227,
-        "name": "HDRoute"
-      }
-    ],
-    "wz": [],
-    "bt": [
-    ]
-  }
+  "gw": [
+    "HDSKY",
+    "Hyperay",
+    "HDChina",
+    "HDHome",
+    "HDHome(Live)",
+    "HDTime",
+    "HDU",
+    "JoyHD",
+    "CHDBits",
+    "Ourbits",
+    "OpenCD",
+    "SolaGS",
+    "TTHD",
+    "KeepFrds",
+    "TCCF",
+    "U2",
+    "CMCT",
+    "MTeam",
+    "MTeam(Adult)",
+    "GZTown",
+    "TTG(Media)",
+    "TTG(Gamez)",
+    "HDStreet",
+    "HDCity",
+    "CCFBits",
+    "HD4FANS",
+    "TLFBits",
+    "BTSCHOOL",
+    "HDRoute"
+  ],
+  "wz": [],
+  "bt": [],
+  "disable": [
+    "6V",
+    "HIT",
+    "CUGB",
+    "Antsoul",
+    "CCFBits"
+  ]
 }

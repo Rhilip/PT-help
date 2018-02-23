@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180222
+// @version      20180223
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -66,13 +66,14 @@ $(document).ready(function () {
         search_log.append("<li>" + TimeStampFormatter(Date.now()) + " - " + text + "</li>");
     }
 
-    // 搜索开始
+    // Begin after click `search` Button
     $("#advsearch").click(function () {
-        // 获取搜索设置
-        var search_text = $("#keyword").val().trim();     // 搜索文本
-        var search_site = localStorage.getItem('selected_name').split(',') || [];   // 搜索站点
-        var config_log = $("#config-log").prop("checked"); // 搜索日志记录
-        var config_not_check_login = $("#config-not-check-login").prop("checked"); // 搜索日志记录
+        // Get Search Info
+        var search_text = $("#keyword").val().trim();     // Search Text
+        var search_site = localStorage.getItem('selected_name').split(',') || [];   // Search Site
+        // Get Config
+        var config_log = $("#config-log").prop("checked"); // Logging
+        var config_not_check_login = $("#config-not-check-login").prop("checked"); // Login Check
 
         if (!$('#config-keep-old').prop('checked')) {
             table.bootstrapTable('removeAll');  // 清空已有表格信息
@@ -91,26 +92,30 @@ $(document).ready(function () {
         }
 
         function Get_Search_Page(site, search_url, parser_func) {
-            if ($.inArray(site, search_site) > -1) {
+            if (search_site.indexOf(site) > -1) {
                 writelog("Start Searching in Site " + site + " .");
                 GM_xmlhttpRequest({
                     method: 'GET',
                     url: search_url,
-                    onload: function (responseDetail) {
-                        if (!config_not_check_login && responseDetail.finalUrl.search("login") > -1) {
-                            writelog("Not Login in Site " + site + ". The final Url is '" + responseDetail.finalUrl + "'(, This may help to check the login status).");
+                    onload: function (res) {
+                        if (!config_not_check_login && res.finalUrl.search("login") > -1) {
+                            writelog("May Not Login in Site " + site + ". With finalUrl: " + res.finalUrl);
                         } else {
                             writelog("Get Search Pages Success in Site " + site + ".");
-                            var doc = (new DOMParser()).parseFromString(responseDetail.responseText, 'text/html');
+                            var doc = (new DOMParser()).parseFromString(res.responseText, 'text/html');
                             var body = doc.querySelector("body");
                             var page = $(body); // 构造 jQuery 对象
                             parser_func(doc, body, page);
                             writelog("End of Search in Site " + site + ".");
                         }
+                    },
+                    onerror: function (res) {
+                        writelog("An error occurred when searching in Site " + site + " .With finalUrl: " + res.finalUrl);
                     }
                 });
             }
         }
+
         // 通用处理模板，如果默认解析模板可以解析该站点则请不要自建解析方法
         // NexusPHP类站点
         function NexusPHP(site, url_prefix, search_prefix, torrent_table_selector) {
@@ -198,6 +203,9 @@ $(document).ready(function () {
 
         // 开始各站点遍历
         writelog("Script Version: " + script_version + ", Choose Site List: " + search_site.toString() + ", With Search Keywords: " + search_text);
+        if (config_not_check_login) {
+            writelog("Login Check is disable by your settings.");
+        }
         // 教育网通用模板解析
         NexusPHP("BYR", "https://bt.byr.cn/", "https://bt.byr.cn/torrents.php?search=");
         NexusPHP("WHU", "", "https://pt.whu.edu.cn/torrents.php?search=", ".torrents tr:gt(0)");

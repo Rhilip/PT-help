@@ -387,28 +387,46 @@
         escape: true
     });
 
+    var btn_save_site = $("#save-site");
+
+    btn_save_site.click(function () {
+        // 获取用户选择搜索的网站
+        var selected_site = [];
+        $('#check-site input:checked').each(function () {
+            selected_site.push($(this).attr('name'));
+        });
+
+        // 获取用户其他设置
+        var config = {};
+        $("input.config").each(function () {
+            config[$(this).attr("id")] = $(this).prop("checked")
+        });
+
+        // 在localStorage中存储，以便下次调用
+        localStorage.setItem('selected_name', selected_site);
+        localStorage.setItem('config', JSON.stringify(config));
+    });
 
     $.get("./json/site.json", function (data) {
-        var site_list = data.site;
-        var type_list = data.site_type;
+        var type_list = ["jyw", "gw", "wz", "bt"];  // 与json文件对应的站点类型
         for (var i = 0; i < type_list.length; i++) {
             var type_name = type_list[i];
-            var type_data = site_list[type_name];
+            var type_data = data[type_name];
             var type_select = "";
 
             for (var j = 0; j < type_data.length; j++) {
-                var _data = type_data[j];
-                var _disable = _data["disable"] ? "disabled" : "";
-                type_select += "<label><input type='checkbox' id='site-check' value='" + _data["value"] + "' name='" + _data["name"] + "'" + _disable + ">" + _data["name"] + "&nbsp;&nbsp;&nbsp;</label>"
+                var site = type_data[j];
+                var _disable = data.disable.indexOf(site) > -1 ? "disabled" : "";
+                type_select += "<label><input type='checkbox' id='site-check' name='" + site + "'" + _disable + ">" + site + "&nbsp;&nbsp;&nbsp;</label>"
             }
             $("div#site-" + type_name).html(type_select);
         }
 
         // 从localStorage中获取存储的搜索网站，并勾选
-        var last_selected_var_raw = localStorage.getItem('selected_var') || "101";
-        var last_selected_var = last_selected_var_raw.split(',');
-        for (var last_selected_var_i = 0; last_selected_var_i < last_selected_var.length; last_selected_var_i++) {
-            $('#check-site input[value="' + last_selected_var[last_selected_var_i] + '"]').prop('checked', true);
+        var last_selected_name_raw = localStorage.getItem('selected_name') || "BYR";
+        var last_selected_name = last_selected_name_raw.split(',');
+        for (var last_selected_var_i = 0; last_selected_var_i < last_selected_name.length; last_selected_var_i++) {
+            $('#check-site input[name="' + last_selected_name[last_selected_var_i] + '"]').prop('checked', true);
         }
 
         // 从localStorage中获取存储的设置
@@ -420,27 +438,6 @@
         }
 
         btn_save_site.click();
-    });
-
-    var btn_save_site = $("#save-site");
-    btn_save_site.click(function () {
-        // 获取用户选择搜索的网站
-        var selected_name = [], selected_var = [];
-        $('#check-site input:checked').each(function () {
-            selected_name.push($(this).attr('name'));
-            selected_var.push($(this).attr('value'));
-        });
-
-        // 获取用户其他设置
-        var config = {};
-        $("input.config").each(function () {
-            config[$(this).attr("id")] = $(this).prop("checked")
-        });
-
-        // 在localStorage中存储，以便下次调用
-        localStorage.setItem('selected_name', selected_name);
-        localStorage.setItem('selected_var', selected_var);
-        localStorage.setItem('config', JSON.stringify(config));
     });
 </script>
 </body>
