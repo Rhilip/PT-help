@@ -105,8 +105,16 @@ $(document).ready(function () {
                             var doc = (new DOMParser()).parseFromString(res.responseText, 'text/html');
                             var body = doc.querySelector("body");
                             var page = $(body); // 构造 jQuery 对象
-                            parser_func(doc, body, page);
-                            writelog("End of Search in Site " + site + ".");
+                            try {
+                                parser_func(doc, body, page);
+                                writelog("End of Search in Site " + site + ".");
+                            } catch (error) {
+                                writelog(
+                                    "Meet error when search in Site " + site
+                                    + ". With Error information: " + error
+                                    + ". Please opening a issues at https://github.com/Rhilip/PT-help/issues/2"
+                                )
+                            }
                         }
                     },
                     onerror: function (res) {
@@ -143,9 +151,9 @@ $(document).ready(function () {
                     }
 
                     var _tag_size = _tag_date.next("td");
-                    var _tag_seeders = _tag_size.next("td");
-                    var _tag_leechers = _tag_seeders.next("td");
-                    var _tag_completed = _tag_leechers.next("td");
+                    var _tag_seeders = _tag_size.next("td");  // torrent_data_raw.find("a[href$='#seeders']")
+                    var _tag_leechers = _tag_seeders.next("td");  // torrent_data_raw.find("a[href$='#leechers']")
+                    var _tag_completed = _tag_leechers.next("td");  // torrent_data_raw.find("a[href^='viewsnatches']")
 
                     table_append({
                         "site": site,
