@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         Byrbt : Auto thanks torrent's uploader
 // @namespace    http://blog.rhilip.info
-// @version      20171014
+// @version      20180304
 // @description  自动感谢种子发布者
 // @author       Rhilip
 // @match        http*://bt.byr.cn/details.php*
 // @icon         http://bt.byr.cn/favicon.ico
 // @grant        none
+// @updateURL    https://github.com/Rhilip/PT-help/raw/master/docs/js/Byrbt%20-%20Auto%20Thanks.user.js
 // ==/UserScript==
 
 // == Control Options ==
