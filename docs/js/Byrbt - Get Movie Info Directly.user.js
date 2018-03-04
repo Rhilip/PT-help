@@ -105,7 +105,7 @@ CKEDITOR.on('instanceReady', function (evt) {
         }
     }
 
-    function gen_descr_raw_to_ckeditor(raw) {
+    function gen_descr_raw_to_editor(raw) {
         // 添加图片信息
         if (img_list) {
             var img_html = "<hr>你可能需要下载下列图片，并上传到本站。（注意，如果图片名中含有特殊字符串或较长，请修改图片文件名）<table id=\"gen_img_table\" style=\"table-layout:fixed ; width:100%\">";
@@ -422,7 +422,7 @@ CKEDITOR.on('instanceReady', function (evt) {
                                 description_text.push('\n◎获奖情况\n\n　　' + awards.replace(/\n/g, '\n' + '　'.repeat(2)));
                             }
 
-                            gen_descr_raw_to_ckeditor(description_text.join('\n'));
+                            gen_descr_raw_to_editor(description_text.join('\n'));
                         };
                         $.when.apply($, requests).then(function () {   // 等待
                             descriptionGenerator();
@@ -477,7 +477,7 @@ CKEDITOR.on('instanceReady', function (evt) {
                         "[b]CAST : [/b]\n" + raw_cast.join("\n") + "\n\n" +
                         "(来源于 " + res.finalUrl + " )\n";
 
-                    gen_descr_raw_to_ckeditor(outtext);
+                    gen_descr_raw_to_editor(outtext);
                 })
             }
         } else {
