@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Byrbt : Get Movie Info Directly
 // @namespace   http://blog.rhilip.info
-// @version     20180304.1
+// @version     20180304.2
 // @description 从其他信息站点（Douban、Bangumi）获取种子简介信息，并辅助表单信息填写与美化
 // @author      Rhilip
 // @include     /^https?:\/\/(bt\.byr\.cn|byr\.rhilip\.info)\/upload\.php\?type=40(8|1|4)/
@@ -77,21 +77,26 @@ CKEDITOR.on('instanceReady', function (evt) {
                 // 暂无QAQ
                 break;
             case 408:   // 电影区
-                if (descr.match(/译　　名　(.+?)</)) {  // 填写中文名
-                    $("input[name$=cname]").val(limit_item(descr.match(/译　　名　(.+?)</)[1]));
+                if (descr.match(/[片译]　　名　(.+?)</)) {  // 填写中文名
+                    var this_name, trans_title, _title;   // 片名，译名
+                    this_name = descr.match(/片　　名　(.+?)</) ? descr.match(/片　　名　(.+?)</)[1] : "";
+                    trans_title = descr.match(/译　　名　(.+?)</) ? descr.match(/译　　名　(.+?)</)[1] : "";
+                    _title = (this_name ? (this_name + "/") : "") + trans_title;   // 获得所有片名与译名
+
+                    // 移除其中的非中文名称
+                    _title = _title.split("/");
+                    _title = _title.filter(function (x) {
+                        return /[\u4E00-\u9FA5]/.test(x);
+                    });
+                    _title = _title.join('/');
+
+                    $("input[name$=cname]").val(limit_item(_title));
                 }
-                if (descr.match(/(https?:\/\/movie\.douban\.com\/subject\/\d+\/?)/)) {  // 豆瓣链接
-                    $("input[name=dburl]").val(descr.match(/(https?:\/\/movie\.douban\.com\/subject\/\d+\/?)/)[1]);
-                }
-                if (descr.match(/(https?:\/\/www\.imdb\.com\/title\/tt\d+\/?)/)) {  // IMDb链接
-                    $("input[name=url]").val(descr.match(/(https?:\/\/www\.imdb\.com\/title\/tt\d+\/)/)[1]);
-                }
-                if (descr.match(/类　　别　(.+?)</)) {  // 电影类别
-                    $("#movie_type").val(limit_item(descr.match(/类　　别　(.+?)</)[1]));
-                }
-                if (descr.match(/产　　地　(.+?)</)) {  // 制片国家/地区
-                    $("#movie_country").val(limit_item(descr.match(/产　　地　(.+?)</)[1]));
-                }
+
+                $("input[name=dburl]").val(descr.match(/(https?:\/\/movie\.douban\.com\/subject\/\d+\/?)/) ? descr.match(/(https?:\/\/movie\.douban\.com\/subject\/\d+\/?)/)[1] : "");// 豆瓣链接
+                $("input[name=url]").val(descr.match(/(https?:\/\/www\.imdb\.com\/title\/tt\d+\/)/) ? descr.match(/(https?:\/\/www\.imdb\.com\/title\/tt\d+\/)/)[1] : "");  // IMDb链接
+                $("#movie_type").val(limit_item(descr.match(/类　　别　(.+?)</) ? descr.match(/类　　别　(.+?)</)[1] : ""));  // 电影类别
+                $("#movie_country").val(limit_item(descr.match(/产　　地　(.+?)</) ? descr.match(/产　　地　(.+?)</)[1] : ""));  // 制片国家/地区
                 break;
             case 404:   // 动漫区（动漫区辅助填写依赖脚本自动抓取的简介信息，暂不能根据已有信息填充）
                 $("#comic_cname").val(GM_getValue("comic_cname"));
