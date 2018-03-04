@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         Bangumi Info Export
 // @namespace    blog.rhilip.info
-// @version      20180109
+// @version      20180304
 // @description  Export Anime Info form Bangumi as BBCode or Html
 // @author       Rhilip
 // @include      /^https?:\/\/(bgm\.tv|bangumi\.tv|chii\.in)\/subject\//
 // @require      http://cdn.bootcss.com/simplemodal/1.4.4/jquery.simplemodal.min.js
 // @grant        GM_setClipboard
+// @updateURL    https://github.com/Rhilip/PT-help/raw/master/docs/js/Bangumi%20-%20Info%20Export.user.js
 // ==/UserScript==
 
 ////////////////////////////////////////////////////////////////

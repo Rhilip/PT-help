@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         Byrbt : Quote in CKEditor
 // @namespace    http://blog.rhilip.info
-// @version      20180104
+// @version      20180304
 // @description  为BYRBT的编辑器添加代码（code）引用框
 // @author       Rhilip
 // @match        http*://bt.byr.cn/edit.php*
 // @match        http*://bt.byr.cn/upload.php*
 // @icon         http://bt.byr.cn/favicon.ico
 // @require      https://cdn.bootcss.com/simplemodal/1.4.4/jquery.simplemodal.min.js
+// @updateURL    https://github.com/Rhilip/PT-help/raw/master/docs/js/Byrbt%20-%20Quote%20in%20CKEditor.user.js
 // ==/UserScript==
 
 const DEFAULT_STYLE = [

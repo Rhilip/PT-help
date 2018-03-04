@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         NPU - Add Clone btn in torrents page
 // @namespace    http://blog.rhilip.info
-// @version      0.1
+// @version      20180304
 // @description  Direct Clone button in torrent list page
 // @author       Rhilip
 // @match        http*://npupt.com/torrents.php*
 // @icon         http://npupt.com/favicon.ico
-// @grant        none
+// @updateURL    https://github.com/Rhilip/PT-help/raw/master/docs/js/NPUBits%20-%20Clone%20btn%20in%20torrents%20page.user.js
 // ==/UserScript==
 
 $(document).ready(function () {

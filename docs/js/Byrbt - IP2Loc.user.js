@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         Byrbt : IP2Loc
 // @namespace    http://blog.rhilip.info
-// @version      20170517
+// @version      20180304
 // @description  It's an userscript show peer's loc due to their IPv6 address(,only for uesrs who's Level is highter than Moderator)
 // @author       Rhilip
 // @match        http*://bt.byr.cn/*
 // @icon         http://bt.byr.cn/favicon.ico
-// @grant        none
+// @updateURL    https://github.com/Rhilip/PT-help/raw/master/docs/js/Byrbt%20-%20IP2Loc.user.js
 // ==/UserScript==
 
 function trueIp(ip) {

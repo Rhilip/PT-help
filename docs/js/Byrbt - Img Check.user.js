@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         Byrbt : Img Check
 // @namespace    http://blog.rhilip.info
-// @version      20171015
+// @version      20180304
 // @description  检查外链图片、未完全显示的图片数目
 // @author       Rhilip
 // @match        http*://bt.byr.cn/details.php?id=*
 // @match        http*://bt.byr.cn/offers.php?id=*
 // @icon         http://bt.byr.cn/favicon.ico
-// @grant        none
+// @updateURL    https://github.com/Rhilip/PT-help/raw/master/docs/js/Byrbt%20-%20Img%20Check.user.js
 // ==/UserScript==
 
 $(document).ready(function () {

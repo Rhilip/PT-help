@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name        Putao : Get Movie Info Directly
+// @namespace   http://blog.rhilip.info
+// @version     20180304
 // @author      Rhilip
 // @description 从其他信息站点（Douban、Bangumi）获取种子简介信息
 // @include     https://pt.sjtu.edu.cn/upload.php
 // @icon        https://pt.sjtu.edu.cn/favicon.ico
 // @run-at      document-end
-// @connect     api.rhilip.info
-// @connect     api.douban.com
-// @connect     api.bgm.tv
+// @connect     *
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setClipboard
-// @version     20171014
+// @updateURL   https://github.com/Rhilip/PT-help/raw/master/docs/js/Putao%20-%20Get%20Movie%20Info%20Directly.user.js
 // ==/UserScript==
 
 var script_version = '';

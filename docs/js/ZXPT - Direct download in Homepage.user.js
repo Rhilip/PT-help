@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         ZXPT - Direct download in Homepage
 // @namespace    http://blog.rhilip.info
-// @version      0.2
+// @version      20180304
 // @description  It's an userscript which helped people in ZXPT download directly in torrent list page
 // @author       Rhilip
 // @match        http*://pt.zhixing.bjtu.edu.cn/*
 // @icon         http://pt.zhixing.bjtu.edu.cn/favicon.ico
-// @grant        none
+// @updateURL    https://github.com/Rhilip/PT-help/raw/master/docs/js/ZXPT%20-%20Direct%20download%20in%20Homepage.user.js
 // ==/UserScript==
 
 $(document).ready(function () {

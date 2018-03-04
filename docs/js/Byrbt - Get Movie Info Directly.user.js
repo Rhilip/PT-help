@@ -1,14 +1,15 @@
 // ==UserScript==
 // @name        Byrbt : Get Movie Info Directly
+// @namespace   http://blog.rhilip.info
+// @version     20180304.1
+// @description 从其他信息站点（Douban、Bangumi）获取种子简介信息，并辅助表单信息填写与美化
 // @author      Rhilip
-// @description 从其他信息站点（Douban、Bangumi）获取种子简介信息
-// @include     /^https?:\/\/bt\.byr\.cn\/upload\.php\?type=40(8|1|4)/
-// @include     /^https?:\/\/byr\.rhilip\.info\/upload\.php\?type=40(8|1|4)/
+// @include     /^https?:\/\/(bt\.byr\.cn|byr\.rhilip\.info)\/upload\.php\?type=40(8|1|4)/
 // @icon        http://bt.byr.cn/favicon.ico
 // @run-at      document-end
 // @connect     *
 // @grant       GM_xmlhttpRequest
-// @version     20180304
+// @updateURL   https://github.com/Rhilip/PT-help/raw/master/docs/js/Byrbt%20-%20Get%20Movie%20Info%20Directly.user.js
 // ==/UserScript==
 
 var script_version = '';

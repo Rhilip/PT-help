@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         Byrbt : Give Other Bonus
 // @namespace    http://blog.rhilip.info
-// @version      20170118
+// @version      20180304
 // @description  You can give any number of Bones you want(not 25,50,100,200,400) to torrent's owner
 // @author       Rhilip
 // @match        http*://bt.byr.cn/details.php*
 // @icon         http://bt.byr.cn/favicon.ico
-// @grant        none
+// @updateURL    https://github.com/Rhilip/PT-help/raw/master/docs/js/Byrbt%20-%20Give%20Other%20Bones.user.js
 // ==/UserScript==
 
 $(document).ready(function () {
