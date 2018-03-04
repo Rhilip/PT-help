@@ -6,14 +6,14 @@
 // @include      http://bt.neu6.edu.cn/search*
 // @include      http://bt.neu6.edu.cn/forum*
 // @include      http://bt.neu6.edu.cn/thread*
-// @require      http://code.jquery.com/jquery-2.2.4.min.js
+// @require      https://cdn.bootcss.com/jquery/1.8.3/jquery.min.js
 // @icon         http://bt.neu6.edu.cn/favicon.ico
 // @supportURL   http://bt.neu6.edu.cn/thread-1555682-1-1.html
-// @version      20170803
+// @version      20171111
 // ==/UserScript==
 
 // jQuery链接(为避免流量，请将第10行juqery源换为下面2的链接)
-// 1：http://code.jquery.com/jquery-2.2.4.min.js
+// 1：https://cdn.bootcss.com/jquery/1.8.3/jquery.min.js
 // 2：http://bt.neu6.edu.cn/static/js/mobile/jquery-1.8.3.min.js
 
 
@@ -26,10 +26,15 @@ var common_links = {
 };
 // ~~~~~~~~~~~~~~~~~~~~~~功能开启与关闭~~~~~~~~~~~~~~~~~~~~~~
 var AutoAdd = true; //自动增加集数，可选true,false
-var AutoImgRemove = true; //自动移除最后一张图片，可选true,false
+var AutoImgRemove = false; //自动移除最后一张图片，可选true,false
 var OpenSearchEnhance = true; //开启搜索加强工具，可选true,false
-var SearchEnhanceDefaultShow = false; //搜索默认显示/隐藏，可选true,false
+var SearchEnhanceDefaultShow = true; //搜索默认显示/隐藏，可选true,false
 var SeedTitleBigFont = false; //标题框放大，可选true,false
+
+var ShowFromat = false;
+var ShowVideoRatioCalc = false; //显示码率计算框，可选true,false
+var ShowCommonLink = true; //显示常用链接，可选true,false
+var ShowSubtitle = false; //显示搜索字幕，可选true,false
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // 脚本预处理阶段
@@ -38,15 +43,14 @@ var jq = jQuery.noConflict();
 (function () {
     // 各板块列表
     if (jq('table#threadlisttableid').length) {
-        var match = location.href.match(/(forum-|fid=)(\d+)/);
-        var cat = match ? (match[2]) : 0;
+        var cat = location.href.match(/(forum-|fid=)(\d+)/)[2];
         jq("table#threadlisttableid tbody").each(function () {
             var tbody = jq(this);
-            if (tbody.find('tr td:eq(1) img').length) {
+            if (tbody.find('tr td:eq(1) img').length)
                 tbody.find('tr td:lt(3)').css("text-align", "center");
-            } else if (tbody.find('tr td:eq(2) img').length) {
+            else if (tbody.find('tr td:eq(2) img').length)
                 tbody.find('tr td:lt(4)').css("text-align", "center");
-            }
+
             var id = 0;
             if (typeof(tbody.attr('id')) != "undefined" && tbody.attr("id") != "separatorline") {
                 id = tbody.attr('id').match(/(\d+)/)[1];
@@ -224,7 +228,7 @@ var jq = jQuery.noConflict();
         "tvseries7": [48, 77, 58, 14, 73, 62]
     };
     // 搜索页面
-    if (OpenSearchEnhance && location.href.match(/search\.php$/) && jq('div.sttl.mbn').length) {
+    if (OpenSearchEnhance && location.href.match(/search\.php(\Smod=forum)?$/) && jq('div.sttl.mbn').length) {
         jq("table tr:eq(1)").after('<tr><th>搜索范围</th><td><p id="showsearchenhance"><b>----[显示/隐藏]----</b></p><div id="mysearchbox" hidden="true"><table bgcolor="#F0F0F0" cellspacing="0" cellpadding="0"><tr>----[大版块]----</tr><tr><td><label class="lb"><b>[各版块]</b></label></td><td><label class="my_search lb" id="forum_big1"><input type="radio" class="pr" name="searchenhance"/>六维索引互动区</label></td><td><label class="my_search lb" id="forum_big2"><input type="radio" class="pr" name="searchenhance"/>六维高清资源区</label></td><td><label class="my_search lb" id="forum_big3"><input type="radio" class="pr" name="searchenhance"/>六维普通资源区</label></td><td><label class="my_search lb" id="forum_big4"><input type="radio" class="pr" name="searchenhance"/>六维休闲娱乐区</label></td><td><label class="my_search lb" id="forum_big5"><input type="radio" class="pr" name="searchenhance"/>六维事务处理区</label></td><td><label class="my_search lb" id="forum_big6"><input type="radio" class="pr" name="searchenhance"/>六维内部交流区</label></td></tr><tr><td><label class="lb"><b>[资源区]</b></label></td><td><label class="my_search lb" id="forum_resource1"><input type="radio" class="pr" name="searchenhance"/>电影剧场</label></td><td><label class="my_search lb" id="forum_resource2"><input type="radio" class="pr" name="searchenhance"/>电视剧集</label></td><td><label class="my_search lb" id="forum_resource3"><input type="radio" class="pr" name="searchenhance"/>综艺娱乐</label></td><td><label class="my_search lb" id="forum_resource4"><input type="radio" class="pr" name="searchenhance"/>体育天地</label></td><td><label class="my_search lb" id="forum_resource5"><input type="radio" class="pr" name="searchenhance"/>音乐地带</label></td><td><label class="my_search lb" id="forum_resource6"><input type="radio" class="pr" name="searchenhance"/>纪录写实</label></td></tr><tr><td></td><td><label class="my_search lb" id="forum_resource7"><input type="radio" class="pr" name="searchenhance"/>卡通动漫</label></td><td><label class="my_search lb" id="forum_resource8"><input type="radio" class="pr" name="searchenhance"/>游戏天下</label></td><td><label class="my_search lb" id="forum_resource9"><input type="radio" class="pr" name="searchenhance"/>资料文档</label></td><td><label class="my_search lb" id="forum_resource10"><input type="radio" class="pr" name="searchenhance"/>软件快跑</label></td><td><label class="my_search lb" id="forum_resource11"><input type="radio" class="pr" name="searchenhance"/>其他资源</label></td></tr></table><table bgcolor="#F0F0F0" cellspacing="0" cellpadding="0"><tr>----[小版块]----</tr><tr><td><label class="lb"><b>[电- -影]</b></label></td><td><label class="my_search lb" id="movie1"><input type="radio" class="pr" name="searchenhance"/>电影--资源区</label></td><td><label class="my_search lb" id="movie2"><input type="radio" class="pr" name="searchenhance"/>电影--高清</label></td><td><label class="my_search lb" id="movie3"><input type="radio" class="pr" name="searchenhance"/>电影--普清</label></td><td><label class="my_search lb" id="movie4"><input type="radio" class="pr" name="searchenhance"/>电影--所有</label></td></tr><tr><td><label class="lb"><b>[剧- -集]</b></label></td><td><label class="my_search lb" id="tvseries1"><input type="radio" class="pr" name="searchenhance"/>剧集--资源区</label></td><td><label class="my_search lb" id="tvseries2"><input type="radio" class="pr" name="searchenhance"/>剧集--高清</label></td><td><label class="my_search lb" id="tvseries3"><input type="radio" class="pr" name="searchenhance"/>剧集--普清</label></td><td><label class="my_search lb" id="tvseries4"><input type="radio" class="pr" name="searchenhance"/>剧集--合集</label></td><td><label class="my_search lb" id="tvseries5"><input type="radio" class="pr" name="searchenhance"/>高清剧集</label></td><td><label class="my_search lb" id="tvseries6"><input type="radio" class="pr" name="searchenhance"/>电视剧集</label></td><td><label class="my_search lb" id="tvseries7"><input type="radio" class="pr" name="searchenhance"/>剧集--所有</label></td></tr></table></div></td></tr>');
     }
     jq("label.my_search").click(function () {
@@ -236,54 +240,56 @@ var jq = jQuery.noConflict();
     });
     // 帖子页面
     if (location.href.match(/thread-\d+-\d+-\d/) || location.href.match(/mod=viewthread\Stid=\d+/)) {
-        if (jq('div.pcb div.mtw.mbw').length) {
+        if (ShowVideoRatioCalc && jq('div.pcb div.mtw.mbw').length) {
             jq('div#fj.y label').before('<label id="malvjisuan" class="z">计算=</label><input type="text" class="px p_fre z" size="2" id="malvzhi" title="码率估算" />');
         }
         if (jq('div.pob.cl:first em').length && jq('div.pcb div.mtw.mbw').length) {
-            var seedid_match = location.href.match(/thread-(\d+)-\d-\d/);
-            var seedid = seedid_match ? (seedid_match[1]) : (location.href.match(/tid=(\d+)/)[1]);
+            var seedid = location.href.match(/(thread-|tid=)(\d+)/)[2];
             var a_length = jq('div#pt div.z a').length - 2;
-            var cat1_match = jq('div#pt div.z a:eq(' + a_length + ')').attr("href").match(/forum-(\d+)-\d/);
-            var cat1 = cat1_match ? (cat1_match[1]) : (jq('div#pt div.z a:eq(' + a_length + ')').attr("href").match(/fid=(\d+)/)[1]);
-
+            var cat1 = jq('div#pt div.z a:eq(' + a_length + ')').attr("href").match(/(forum-|fid=)(\d+)/)[2];
             var index = 0;
 
             jq('div.pob.cl').each(function () {
-                var quote_id = jq('div.pcbs:eq(' + index + ') table:first td:first').attr("id").match(/postmessage_(\d+)/)[1];
-                var link_reply = "http://bt.neu6.edu.cn/forum.php?mod=post&action=reply&fid=" + cat1 + "&extra=page%3D1&tid=" + seedid + "&reppost=" + quote_id;
-                if (index > 0) {
-                    link_reply = "http://bt.neu6.edu.cn/forum.php?mod=post&action=reply&fid=" + cat1 + "&extra=page%3D1&tid=" + seedid + "&repquote=" + quote_id;
-                }
-                index++;
-                var commonlink = "commonlink_" + index;
                 var seed_p = jq(this).find('p');
-                seed_p.find('a:first').before('<a href="javascript:;" id="' + commonlink + '" onmouseover="showMenu(this.id)" class="showmenu">常用链接</a>');
                 // 常用链接
-                var commonlink_string = '<ul id="' + commonlink + '_menu" class="p_pop mgcmn" style="display: none;"><li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/084832wh4p2z362amsf4mv.png) no-repeat 4px 50%;" target="_blank" href="' + link_reply + '">回复本帖高级</a></li>';
-                for (var key in common_links) {
-                    commonlink_string = commonlink_string + "<li><a style=\"background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/104809kzjj6ujkzpv6j6uj.png) no-repeat 4px 50%;\" target=\"_blank\" href=\"" + common_links[key] + "\">" + key + "</a></li>";
-                }
-                commonlink_string = commonlink_string + "</ul>";
-
-                seed_p.after(commonlink_string);
-                // 搜索字幕
-                var tvname_cn = jq('title').text().match(/\[([\S\s]+?)[\/\]]/)[1];
-                if (null !== tvname_cn) {
-                    var subtitle_id = "subtitle_" + index;
-                    seed_p.find('a:first').before('<a href="javascript:;" id="' + subtitle_id + '" onmouseover="showMenu(this.id)" class="showmenu">搜索字幕</a>');
-                    var subtitle_links = {
-                        "ZIMUZU": "http://www.zimuzu.tv/search?keyword=" + encodeURI(tvname_cn),
-                        "SHOOTER": "http://assrt.net/sub/?searchword=" + encodeURI(tvname_cn),
-                        "Sub HD": "http://subhd.com/search/" + encodeURI(tvname_cn),
-                        "ZIMUKU": "http://www.zimuku.net/search?ad=1&q=" + encodeURI(tvname_cn),
-                        "ADDIC7ED": "http://www.addic7ed.com/",
-                    };
-                    var subtiltelink_string = '<ul id="' + subtitle_id + '_menu" class="p_pop mgcmn" style="display: none;">';
-                    for (var key_sub in subtitle_links) {
-                        subtiltelink_string = subtiltelink_string + '<li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/062944dfdubs5f99gr5mzu.png) no-repeat 4px 50%;" target="_blank" href="' + subtitle_links[key_sub] + '">' + key_sub + '</a></li>';
+                if (ShowCommonLink) {
+                    var quote_id = jq('div.pcbs:eq(' + index + ') table:first td:first').attr("id").match(/postmessage_(\d+)/)[1];
+                    var link_reply = "http://bt.neu6.edu.cn/forum.php?mod=post&action=reply&fid=" + cat1 + "&extra=page%3D1&tid=" + seedid + "&reppost=" + quote_id;
+                    if (index > 0) {
+                        link_reply = "http://bt.neu6.edu.cn/forum.php?mod=post&action=reply&fid=" + cat1 + "&extra=page%3D1&tid=" + seedid + "&repquote=" + quote_id;
                     }
-                    subtiltelink_string = subtiltelink_string + "</ul>";
-                    seed_p.after(subtiltelink_string);
+                    index++;
+                    var commonlink = "commonlink_" + index;
+
+                    seed_p.find('a:first').before('<a href="javascript:;" id="' + commonlink + '" onmouseover="showMenu(this.id)" class="showmenu">常用链接</a>');
+                    // 添加常用链接
+                    var commonlink_string = '<ul id="' + commonlink + '_menu" class="p_pop mgcmn" style="display: none;"><li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/084832wh4p2z362amsf4mv.png) no-repeat 4px 50%;" target="_blank" href="' + link_reply + '">回复本帖高级</a></li>';
+                    for (var key in common_links) {
+                        commonlink_string = commonlink_string + "<li><a style=\"background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/104809kzjj6ujkzpv6j6uj.png) no-repeat 4px 50%;\" target=\"_blank\" href=\"" + common_links[key] + "\">" + key + "</a></li>";
+                    }
+                    commonlink_string = commonlink_string + "</ul>";
+                    seed_p.after(commonlink_string);
+                }
+                // 搜索字幕
+                if (ShowSubtitle) {
+                    var tvname_cn = jq('title').text().match(/\[([\S\s]+?)[\/\]]/)[1];
+                    if (null !== tvname_cn) {
+                        var subtitle_id = "subtitle_" + index;
+                        seed_p.find('a:first').before('<a href="javascript:;" id="' + subtitle_id + '" onmouseover="showMenu(this.id)" class="showmenu">搜索字幕</a>');
+                        var subtitle_links = {
+                            "ZIMUZU": "http://www.zimuzu.tv/search?keyword=" + encodeURI(tvname_cn),
+                            "SHOOTER": "http://assrt.net/sub/?searchword=" + encodeURI(tvname_cn),
+                            "Sub HD": "http://subhd.com/search/" + encodeURI(tvname_cn),
+                            "ZIMUKU": "http://www.zimuku.net/search?ad=1&q=" + encodeURI(tvname_cn),
+                            "ADDIC7ED": "http://www.addic7ed.com/",
+                        };
+                        var subtiltelink_string = '<ul id="' + subtitle_id + '_menu" class="p_pop mgcmn" style="display: none;">';
+                        for (var key_sub in subtitle_links) {
+                            subtiltelink_string = subtiltelink_string + '<li><a style="background: url(http://bt.neu6.edu.cn/data/attachment/forum/201609/29/062944dfdubs5f99gr5mzu.png) no-repeat 4px 50%;" target="_blank" href="' + subtitle_links[key_sub] + '">' + key_sub + '</a></li>';
+                        }
+                        subtiltelink_string = subtiltelink_string + "</ul>";
+                        seed_p.after(subtiltelink_string);
+                    }
                 }
             });
         }
@@ -312,23 +318,52 @@ var jq = jQuery.noConflict();
             jq('#subject').attr('style', 'width: 70em;height: 1.5em;font-size: 1.45em');
         } else
             jq('#subject').attr('style', 'width: 70em'); //更改发种界面的输入框宽度
-        jq('div#postbox').before('<div class="pbt cl"><div class="ftid"><span width="80">种子信息克隆：</span></div><div class="z"><span><input type="text" style="width:300px;" id="clone_from" class="px" placeholder="要克隆的种子编号链接" onkeypress="if(event.keyCode==13){clone_btn.click();}"></span><input type="button" id="clone_btn" style="size:100px;" value=" 克   隆 ">&nbsp;&nbsp;&nbsp;&nbsp;<span>[克隆状态：</span><span id="clone_info">请输入要克隆的种子链接</span><span>]</span></div></div><div id="seedfilename" hidden="true" class="pbt cl"><div class="ftid"><span width="80">种子文件名称：</span></div><div class="z"><input  type="text" style="width:71.5em;" class="px" id="uploadseedname"></div></div>');
+        jq('div#postbox').before('<div class="pbt cl"><div class="ftid"><span width="80">种子信息克隆：</span></div><div class="z"><span><input type="text" style="width:300px;" id="clone_from" class="px" placeholder="要克隆的种子编号链接" onkeypress="if(event.keyCode==13){clone_btn.click();}"></span><input type="button" id="clone_btn" style="size:100px;" value=" 克   隆 ">&nbsp;&nbsp;&nbsp;&nbsp;<span>[克隆状态：</span><span id="clone_info">请输入要克隆的种子链接</span><span>]</span><span id="myformat" hidden>&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" id="foramt_title" style="size:100px;" value="标题格式化"></span></div></div><div id="seedfilename" hidden="true" class="pbt cl"><div class="ftid"><span width="80">种子文件名称：</span></div><div class="z"><input  type="text" style="width:71.5em;" class="px" id="uploadseedname"></div></div>');
         //展开标签栏，预备填写
         jq('#extra_tag_b').addClass('a');
         jq('#extra_tag_c').css('display', 'block');
     }
+    // 标题格式化
+    jq('#foramt_title').click(function () {
+        var forum_type = location.href.match(/fid=(\d+)/)[1];
+        var t_str = jq('input[name=subject]').val();
+        t_str = t_str.replace(/(\s+\[\s*|\s+\]\s*|\s*\]\s+|\s*\[\s+|\s+\/\s*|\s*\/\s+)/ig, function ($1) {
+            return $1.replace(/\s/g, "");
+        });
+        t_str = t_str.replace(/\s/g, ".");
+        if (forum_type == 14 || forum_type == 73 || forum_type == 77) {
+            t_str = t_str.replace(/(\[\d+)P\//, "$1p/");
+            t_str = t_str.replace(/(MP4|MKV|TS|ISO|RMVB|FLV|AVI|WEB-DL|WEB|HDTV)/ig, function ($1) {
+                return $1.toUpperCase();
+            });
+        }
+        jq('input[name=subject]').attr('value', t_str);
+    });
 
     // 自动处理并复制种子文件名
     function seedname_copy() {
         jq("div#seedfilename").show();
-        var uploadseedname = jq("div.specialpost.s_clear input").val().replace(/.*\\([^\.\\]+)/g, "$1");
-        uploadseedname = uploadseedname.replace(/(\.torrent$)/, "");
-        uploadseedname = uploadseedname.replace(/(^\[\S+?\][\.]{0,1})/, "");
-        uploadseedname = uploadseedname.replace(/(\.mkv$)|(\.mp4$)|(\.rmvb$)|(\.ts$)|(\.avi$)|(\.iso$)/i, "");
-        uploadseedname = uploadseedname.replace(/(^\s*)|(\s*$)/g, "");
-        uploadseedname = uploadseedname.replace(/([\s])/g, ".");
-        jq("input#uploadseedname").val(uploadseedname);
-        jq("input#uploadseedname").select();
+        // 去掉路径
+        var tname = jq("div.specialpost.s_clear input").val().replace(/.*\\([^\.\\]+)/g, "$1");
+        tname = tname.replace(/(\.torrent$)/, "");
+        tname = tname.replace(/(\.mkv$)|(\.mp4$)|(\.rmvb$)|(\.ts$)|(\.avi$)|(\.iso$)/i, "");
+        // 空格替换为.
+        tname = tname.replace(/(\s)/g, ".");
+        var tname_copy = tname;
+        // 去掉: [发布组]
+        tname = tname.replace(/(\.*\[\S+\]\.*)*/, "");
+        // 去掉开头与结尾的.
+        tname = tname.replace(/(^\.*)|(\.*$)/g, "");
+        if (tname) {
+            jq("input#uploadseedname").val(tname);
+            var torrenttype = location.href.match(/fid=(\d+)/)[1];
+            var en_name = tname.match(/\w[-￡@\'\w\.]+/)[0];
+            if (en_name && ((torrenttype == 48 && en_name.match(/Ep?\d+/i)) || torrenttype == 13 || torrenttype == 45)) {
+                var t = jq('input[name=subject]').val().replace(/\]\[[^\]]+/, "][" + en_name);
+                jq('input[name=subject]').attr('value', t);
+            }
+        } else
+            jq("input#uploadseedname").val(tname_copy);
     }
 
     //AutoAdd处理部分内容
@@ -378,13 +413,7 @@ var jq = jQuery.noConflict();
         var info = jq('#clone_info');
         if (/^\d+$/.test(copy_link) || copy_link.match(/bt\.neu6\.edu\.cn/)) {
             var seedtype = location.search.match(/fid=(\d+)/)[1];
-            var seedfrom = 0;
-            if (/^\d+$/.test(copy_link)) {
-                seedfrom = copy_link;
-            } else {
-                var match = copy_link.match(/thread-(\d+)/);
-                seedfrom = match ? (match[1]) : (copy_link.match(/tid=(\d+)/)[1]);
-            }
+            var seedfrom = (/^\d+$/.test(copy_link)) ? copy_link : copy_link.match(/(thread-|tid=)(\d+)/)[2];
             if (/^\d+$/.test(seedfrom)) {
                 // 如果输入了有效的编号，开始读取对应的种子页面
                 info.text('正在读取');
@@ -453,6 +482,7 @@ var jq = jQuery.noConflict();
                     if (page.find("h1.ts a").length) {
                         var movietype = page.find("h1.ts a").text().replace(/^\[|\]$/g, '');
                         var typeid = page.find("h1.ts a").attr("href").match(/typeid=(\d+)/)[1];
+                        // 如果发布种子与引用的种子的版块不一样
                         if (oldtype != newtype) {
                             var type_id_name = {
                                 "48": {
@@ -547,20 +577,33 @@ var jq = jQuery.noConflict();
                         var hideimg = img.parent('ignore_js_op'); //移动img结点
                         img.insertAfter(hideimg);
                     });
+                    descr.find('img:first').removeAttr('id zoomfile onmouseover onclick');
                     //代码部分处理
                     descr.find('div.quote').remove();
                     descr.find('.blockcode').remove();
                     descr.find('blockcode').remove();
                     //移除含有图片或附件的父节点
                     descr.find('ignore_js_op').remove();
-                    //填写内容
-                    var gonggaomatch = jq('#e_textarea').html().match(/(\Stable[\s\S]+\/table\S)/);
-                    if (gonggaomatch) {
+                    //填写内容 公告 announcement
+                    var m_am = jq('#e_textarea').html().match(/(\Stable[\s\S]+\/table\S)/);
+                    if (m_am) {
                         descr.find('table:first').remove();
-                        jq('#e_iframe').contents().find('body').html(bbcode2html(gonggaomatch[1]) + descr.html());
+                        jq('#e_iframe').contents().find('body').html(bbcode2html(m_am[1]) + descr.html());
                     } else {
                         jq('#e_iframe').contents().find('body').html(descr.contents());
                     }
+                    // var contextinfo = jq('#e_textarea').html();
+                    // var m_am = contextinfo.match(/\[align=center\]\[table=[\s\S]+?\[\/table\][\s\S]+?\[\/align\]/);
+                    // var announcement = m_am ? m_am : contextinfo.match(/\[table=[\s\S]+?\[\/table\]/);
+                    // if (announcement) {
+                    // 	if (descr.find('div[align=center]:first table').length)
+                    // 		descr.find('div[align=center]:first').remove();
+                    // 	else
+                    // 		descr.find('table:first').remove();
+                    // 	jq('#e_iframe').contents().find('body').html(bbcode2html(announcement[0]) + descr.html());
+                    // } else {
+                    // 	jq('#e_iframe').contents().find('body').html(descr.contents());
+                    // }
                     //填写标签
                     var tag = [];
                     page.find('div.ptg.mbm.mtn a').each(function () {
@@ -589,12 +632,16 @@ var jq = jQuery.noConflict();
         if (SearchEnhanceDefaultShow) {
             jq("div#mysearchbox").show();
         }
-        var match = location.href.match(/#clone[_]{0,3}(\d+)/);
+        var match = location.href.match(/#clone_(\d+)/);
         if (match) {
             jq('#clone_from').val(match[1]);
             var link = location.href.substring(0, 64);
             history.pushState("", document.title, link);
             jq('#clone_btn').click();
+        }
+
+        if (ShowFromat) {
+            jq('span#myformat').show();
         }
     });
 
