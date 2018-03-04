@@ -9,13 +9,13 @@
 // @grant        none
 // ==/UserScript==
 
-$(document).ready(function(){
+$(document).ready(function () {
 
-    if($('table#torrents_table > tbody > tr > td.rowfollow.th-fat > table > tbody').length){
-        $('table#torrents_table > tbody > tr > td.rowfollow.th-fat > table > tbody > tr').each(function(){
+    if ($('table#torrents_table > tbody > tr > td.rowfollow.th-fat > table > tbody').length) {
+        $('table#torrents_table > tbody > tr > td.rowfollow.th-fat > table > tbody > tr').each(function () {
             var tr = $(this);
-            if(tr.find('span').length){
-                var id  = tr.find('a[href^="details.php?id="]').attr('href').match(/id=(\d+)/)[1];
+            if (tr.find('span').length) {
+                var id = tr.find('a[href^="details.php?id="]').attr('href').match(/id=(\d+)/)[1];
                 tr.find('div > span:last').after('<span class="torrent_property_item"><a href="upload.php?torrent=' + id + '" title="新窗口打开" target="_blank">引用发布</a></span>');
             }
         });

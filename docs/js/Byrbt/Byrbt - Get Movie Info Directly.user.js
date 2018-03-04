@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        BYRBT : Get Movie Info Directly
+// @name        Byrbt : Get Movie Info Directly
 // @author      Rhilip
 // @description 从其他信息站点（Douban、Bangumi）获取种子简介信息
 // @include     /^https?:\/\/bt\.byr\.cn\/upload\.php\?type=40(8|1|4)/
@@ -18,10 +18,10 @@ if (GM_info && GM_info.script) {
 
 var cat = parseInt(location.href.match(/(\d+)$/)[1]); // 408,电影 ; 401,剧集 ; 404, 动漫
 
-function limit_item(raw_str, limit){
+function limit_item(raw_str, limit) {
     limit = limit || 3;
-    var _str = raw_str.replace(/ \/ /g,"/");  // 统一
-    return _str.split("/").slice(0,limit).join("/");  // 分割，切片，组合
+    var _str = raw_str.replace(/ \/ /g, "/");  // 统一
+    return _str.split("/").slice(0, limit).join("/");  // 分割，切片，组合
 }
 
 CKEDITOR.on('instanceReady', function (evt) {
@@ -34,7 +34,7 @@ CKEDITOR.on('instanceReady', function (evt) {
 
     var img_list = [];
 
-    function gen_input_help(){   // 表单辅助填写
+    function gen_input_help() {   // 表单辅助填写
         var descr = CKEDITOR.instances.descr.getData();
         // 电影区相关
         if (descr.match(/译　　名　(.+?)</)) {  // 填写中文名
@@ -57,9 +57,9 @@ CKEDITOR.on('instanceReady', function (evt) {
     function gen_descr_raw_to_ckeditor(raw) {
         // 添加图片信息
         if (img_list) {
-            var img_html  = "<hr>你可能需要下载下列图片，并上传到本站。（注意，如果图片名中含有特殊字符串或较长，请修改图片文件名）<table id=\"ben_img_table\" style=\"table-layout:fixed ; width:100%\">";
-            for (var i=0;i<img_list.length;i++) {
-                img_html += "<tr><td style='overflow:hidden; text-overflow:ellipsis;'><a href='" + img_list[i] +"' target='_blank'>" + img_list[i] + "</a></td></tr>";
+            var img_html = "<hr>你可能需要下载下列图片，并上传到本站。（注意，如果图片名中含有特殊字符串或较长，请修改图片文件名）<table id=\"ben_img_table\" style=\"table-layout:fixed ; width:100%\">";
+            for (var i = 0; i < img_list.length; i++) {
+                img_html += "<tr><td style='overflow:hidden; text-overflow:ellipsis;'><a href='" + img_list[i] + "' target='_blank'>" + img_list[i] + "</a></td></tr>";
             }
             img_html += "</table>";
 
@@ -72,10 +72,10 @@ CKEDITOR.on('instanceReady', function (evt) {
         ben_info.text("已完成填写。");
     }
 
-    function gen_descr_format(){   // 简介美化
+    function gen_descr_format() {   // 简介美化
         var descr = CKEDITOR.instances.descr.getData();
 
-        if (!descr.match("byrbt_info_gen")){   // 如果没有发现`Gen`信息
+        if (!descr.match("byrbt_info_gen")) {   // 如果没有发现`Gen`信息
             switch (cat) {
                 case 401:   // 剧集区
                 // 暂无QAQ （所以先用电影区的~）
@@ -93,7 +93,7 @@ CKEDITOR.on('instanceReady', function (evt) {
                     break;
                 case 404:   // 动漫区
                     if (descr) {
-                        descr = descr.replace(/\[b](.+?)\[\/b]/g,"<span style=\"color: #008080;font-family: Impact,serif;font-size: large;\"> $1 </span><br>");
+                        descr = descr.replace(/\[b](.+?)\[\/b]/g, "<span style=\"color: #008080;font-family: Impact,serif;font-size: large;\"> $1 </span><br>");
                     } else {  // TODO 似乎没有用.......
                         descr = '<br />\n' +
                             "<span style=\"color: #008080;font-family: Impact,serif;font-size: large;\">STORY : </span><br>" +
@@ -107,7 +107,7 @@ CKEDITOR.on('instanceReady', function (evt) {
             }
 
             // 对简介中出现的图片字符串进行标红处理
-            descr = descr.replace(/(http.+?\.jpg)/,"<span style=\"color:#ff0000;\">$1</span>");
+            descr = descr.replace(/(http.+?\.jpg)/, "<span style=\"color:#ff0000;\">$1</span>");
 
             // 添加`Gen`信息，以防止二次格式化
             descr += '<div class=\"byrbt_info_gen\" data-version=\"' + script_version + '\" style=\"display:none\">Info Format Powered By @Rhilip</div>';
@@ -143,7 +143,7 @@ CKEDITOR.on('instanceReady', function (evt) {
             onload: function (res) {
                 if (res.status >= 200 && res.status < 400) {
                     var resj = JSON.parse(res.responseText);  // 解析成Json格式
-                    callback(res,resj);
+                    callback(res, resj);
                 }
             },
             onerror: function (res) {
@@ -152,7 +152,7 @@ CKEDITOR.on('instanceReady', function (evt) {
         });
     }
 
-    $("#ben_format").click(function(){
+    $("#ben_format").click(function () {
         gen_descr_format();  // 格式化
         gen_input_help();    // 辅助填写表单
     });

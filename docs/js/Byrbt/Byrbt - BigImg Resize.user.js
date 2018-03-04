@@ -12,21 +12,21 @@
 
 var ControlWidth = 1080;
 
-$(document).ready(function(){
+$(document).ready(function () {
     $("div#kdescr img").each(function () {
-       var img = $(this);
-       var width = img.width();
+        var img = $(this);
+        var width = img.width();
         var orginstyle = img.attr("style");
-       if (width > ControlWidth) {
-           img.attr("style", "max-width: 100%;");
-           img.click(function () {
-               if(img.attr("style") === "max-width: 100%;"){
-                   img.attr("style",orginstyle);
-               }else {
-                   img.attr("style", "max-width: 100%;");
-               }
-           });
-       }
+        if (width > ControlWidth) {
+            img.attr("style", "max-width: 100%;");
+            img.click(function () {
+                if (img.attr("style") === "max-width: 100%;") {
+                    img.attr("style", orginstyle);
+                } else {
+                    img.attr("style", "max-width: 100%;");
+                }
+            });
+        }
     });
 });
 

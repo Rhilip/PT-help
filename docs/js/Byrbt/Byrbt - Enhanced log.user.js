@@ -10,8 +10,8 @@
 // @grant        none
 // ==/UserScript==
 
-$(document).ready(function(){
-    if (location.pathname === "/log.php"){
+$(document).ready(function () {
+    if (location.pathname === "/log.php") {
         $("form").after("<b>常用快捷搜索关键词：</b>" +
             "<a href='/log.php?query=was+added+by&search=all&action=dailylog'><u>(Offer) was added by</u></a>&nbsp;&nbsp;" +
             "<a href='/log.php?query=was+uploaded+by&search=all&action=dailylog'><u>(Torrent) was uploaded by</u></a>&nbsp;&nbsp;" +
@@ -25,32 +25,32 @@ $(document).ready(function(){
 
         $("td#outer > table:last > tbody tr").each(function () {
             var tr = $(this);
-            if (tr.find('td:nth-child(2) > font').length){
+            if (tr.find('td:nth-child(2) > font').length) {
                 var logfont = tr.find('td:nth-child(2) > font');
                 var logtext = logfont.text();
-                if (logtext.match((/Torrent (\d+) \((.+)\)/)) && logtext.match(/edited|uploaded/)){     // (torrent) uploaded,edited,deleted
+                if (logtext.match((/Torrent (\d+) \((.+)\)/)) && logtext.match(/edited|uploaded/)) {     // (torrent) uploaded,edited,deleted
                     var tid = logtext.match(/Torrent (\d+)/)[1];
-                    logfont.html(logtext.replace(/(\((.+?])\))/,"<a href='/details.php?id=" + tid + "' style='color: " +logfont.attr('color')  + " ' target='_blank'><u>$1</u></a>"));
-                    logfont.parent().append("<a href='/edit.php?id="+ tid +"' style='display: inline-block;float: right;' target='_blank'>快速编辑</a>");
+                    logfont.html(logtext.replace(/(\((.+?])\))/, "<a href='/details.php?id=" + tid + "' style='color: " + logfont.attr('color') + " ' target='_blank'><u>$1</u></a>"));
+                    logfont.parent().append("<a href='/edit.php?id=" + tid + "' style='display: inline-block;float: right;' target='_blank'>快速编辑</a>");
                 }
-                if (logtext.match(/批量/)){      // 批量设置了种子优惠|批量置顶了种子|批量取消了置顶
-                    logfont.html(logtext.replace(/(\d+),/g,"<a href='/details.php?id=$1' style='color: " +logfont.attr('color')  + "' target='_blank'><u>$1</u></a>,"));
+                if (logtext.match(/批量/)) {      // 批量设置了种子优惠|批量置顶了种子|批量取消了置顶
+                    logfont.html(logtext.replace(/(\d+),/g, "<a href='/details.php?id=$1' style='color: " + logfont.attr('color') + "' target='_blank'><u>$1</u></a>,"));
                     logfont.parent().append("<div class='foundbuff' style='display: inline-block;float: right;'>查询优惠类型</div>");
                 }
-                if (logtext.match(/Subtitle/)){         // subtitle
-                    logfont.html(logtext.replace(/\((.+?)\)/,"(<a href='/subtitles.php?search=$1' style='color: " +logfont.attr('color')  + "' target='_blank'><u>$1</u></a>)"));
+                if (logtext.match(/Subtitle/)) {         // subtitle
+                    logfont.html(logtext.replace(/\((.+?)\)/, "(<a href='/subtitles.php?search=$1' style='color: " + logfont.attr('color') + "' target='_blank'><u>$1</u></a>)"));
                 }
-                if (logtext.match(/首页置顶种子/)){
-                    logfont.html(logtext.replace(/] (\[.+?])成功/,"]&nbsp;<a href='/details.php?id=" + logtext.match(/id:(\d+)/)[1] + "' style='color: " +logfont.attr('color')  + " ' target='_blank'><u>$1</u></a>成功"));
+                if (logtext.match(/首页置顶种子/)) {
+                    logfont.html(logtext.replace(/] (\[.+?])成功/, "]&nbsp;<a href='/details.php?id=" + logtext.match(/id:(\d+)/)[1] + "' style='color: " + logfont.attr('color') + " ' target='_blank'><u>$1</u></a>成功"));
                 }
             }
         });
 
 
-        $("div.foundbuff").one("click",function () {      //查询种子优惠
-            var foundbuff= $(this);
+        $("div.foundbuff").one("click", function () {      //查询种子优惠
+            var foundbuff = $(this);
             var tid = foundbuff.siblings("font").text().match(/(\d+)/)[1];
-            $.get('details.php?id='+tid+'&hit=1', function(resp){
+            $.get('details.php?id=' + tid + '&hit=1', function (resp) {
                 var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
                 var buff = $(body).find("h1#share > b").text();
                 foundbuff.text(buff);
@@ -62,25 +62,25 @@ $(document).ready(function(){
         });
     }
 
-    if(location.pathname === "/details.php"){
+    if (location.pathname === "/details.php") {
         $("td.no_border_wide:last").after("<td class=\"no_border_wide\"><b>种子日志：</b><a id='log' href='javascript:void(0)'>[查看日志]</a></td>")
             .parents("td").append("<span id='loglist'></span>");
         $("#log").click(function () {
-            var logbtn= $(this);
+            var logbtn = $(this);
             var loglist = $("#loglist");
-            if(logbtn.text() === "[查看日志]"){
-                if(loglist.html()){
+            if (logbtn.text() === "[查看日志]") {
+                if (loglist.html()) {
                     loglist.show();
-                }else {
+                } else {
                     var tid = location.href.match(/id=(\d+)/)[1];
-                    $.get('/log.php?query='+tid+'&search=all&action=dailylog',function (resp) {
+                    $.get('/log.php?query=' + tid + '&search=all&action=dailylog', function (resp) {
                         var body = resp.match(/<body[^>]*>[\s\S]*<\/body>/gi)[0];
                         var table = $(body).find("#outer > table:last").removeAttr("width");
                         loglist.html(table);
                     });
                 }
                 logbtn.text("[隐藏日志]");
-            }else {
+            } else {
                 loglist.hide();
                 logbtn.text("[查看日志]");
             }
@@ -90,5 +90,5 @@ $(document).ready(function(){
 
 
 /**
-    * Created by Rhilip on 01/22/17.
-    */
+ * Created by Rhilip on 01/22/17.
+ */

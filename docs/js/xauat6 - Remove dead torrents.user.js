@@ -8,10 +8,10 @@
 // @grant        none
 // ==/UserScript==
 
-(function() {
-    jQuery("#outer > table.torrents > tbody > tr").each(function(){
+(function () {
+    jQuery("#outer > table.torrents > tbody > tr").each(function () {
         var tr = jQuery(this);
-        if (tr.find("td:nth-child(6) > span").text() == "0"){
+        if (tr.find("td:nth-child(6) > span").text() == "0") {
             tr.remove();
         }
     });

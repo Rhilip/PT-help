@@ -14,20 +14,20 @@ const DEFAULT_STYLE = [
     {
         "name": "类似其他PT站的代码格式",
         "style": "<div class=\"codetop\" style=\"padding: 3px; font-weight: bold; margin: 0 auto;\">{0}</div><div class=\"codemain\" style=\"font-family: Consolas; border-width: 1px; border-style: solid; padding: 6px; margin: 0 auto;\">{1}</div>",
-    },{
+    }, {
         "name": "类似其他PT站的引用格式",
         "style": "<fieldset><legend><b>{0}</b></legend><div style=\"font-family: Consolas;\">{1}</div></fieldset>",
-    },{
+    }, {
         "name": "@DoxHead个人美化版",
         "style": "<fieldset style=\"font-family: Consolas;\"><legend><span style=\"color:#ffffff;background-color:#000000;\">&nbsp;{0}&nbsp;</span></legend>{1}</fieldset>",
         "checked": true
-    },{
+    }, {
         "name": "类似TTG的引用格式",
         "style": "<div class=\"sub\"><b>{0}</b></div><table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"background-color:#5a5;\"><td style=\"font-family: Consolas; border: 1px black dotted\">{1}</td></table>",
-    },{
+    }, {
         "name": "本站块引用增强",
         "style": "<blockquote style=\"box-sizing: border-box; padding: 8px; margin: 5px; font-size: small; border-width: 1px 1px 1px 5px; border-style: solid;\"><p style=\"box-sizing: border-box; margin: 0px 0px 10px;\">{0}</p><div style=\"font-family: Consolas;\">{1}</div></blockquote>",
-    },{
+    }, {
         "name": "本站表格增强",
         "style": "<table width=\"100%\"><tbody><tr><td class=\"colhead\">{0}</td></tr><tr><td><div style=\"font-family: Consolas;\">{1}</div></td></tr></tbody></table>",
     }
@@ -51,10 +51,10 @@ CKEDITOR.on('instanceReady', function (evt) {
     code_btn.click(function () {
         // Generate the modal code
         var code = '<div id="modal_out_window"><div id="modal_out_title">Code Properties</div><div id="modal_data"><div id="modal_choose"><div><span>Style: (具体展示见 <a href="/forums.php?action=viewtopic&forumid=9&topicid=11235" target="_blank">新手学园-->资源简介美化——引用nfo格式</a> )</span><a id="modal_more_style_btn" style="float:right;" href="javascript:void(0);">↓ Show</a><div id="modal_style"><div style="display: flex;">';
-        for (var i= 0 ;i < DEFAULT_STYLE.length;i++){
+        for (var i = 0; i < DEFAULT_STYLE.length; i++) {
             var choose = (DEFAULT_STYLE[i].checked || (DEFAULT_STYLE[i].checked = false)) === true ? ' checked=""' : '';
-            code += '<label style="width:50%;"><input type="radio" name="code_style" value="{0}" {1}> {2}</label>'.format(i,choose,DEFAULT_STYLE[i].name);
-            if ((i+1)%2 === 0){
+            code += '<label style="width:50%;"><input type="radio" name="code_style" value="{0}" {1}> {2}</label>'.format(i, choose, DEFAULT_STYLE[i].name);
+            if ((i + 1) % 2 === 0) {
                 code += '</div><div style="display: flex;">';
             }
         }
@@ -79,7 +79,7 @@ CKEDITOR.on('instanceReady', function (evt) {
         var more_style_btn = $("#modal_more_style_btn");
 
         more_style.hide();
-        more_style_btn.click(function(){
+        more_style_btn.click(function () {
             more_style.toggle();
             more_style_btn.text(more_style.is(":visible") ? "↑ Hide" : "↓ Show");
         });
@@ -92,7 +92,7 @@ CKEDITOR.on('instanceReady', function (evt) {
             var insert_data_raw = DEFAULT_STYLE[quote_style_id].style.format(menu_str, info_str.split("\n").join("<br>"));  // info_str.replace("/\n/g","<br>"));
 
             // 对用户提交的数据进行部分替换(转义成字符实体)
-            insert_data_raw = insert_data_raw.replace(/0[Xx]/g,"0&times;"); // x -> &times;
+            insert_data_raw = insert_data_raw.replace(/0[Xx]/g, "0&times;"); // x -> &times;
 
             if ($("#modal_skip_clone").attr("checked") === "checked") {
                 insert_data_raw = "<div class='byrbt_info_clone_ignore'>" + insert_data_raw + "</div>";

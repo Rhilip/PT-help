@@ -13,33 +13,33 @@
 // 以下为自定义输出参数，请按照说明修改
 const STAFFSTART = 4;                 // 读取Staff栏的起始位置（假定bgm的顺序为中文名、话数、放送开始、放送星期... ，staff从第四个 导演 起算）；初始值为 4
 const STAFFNUMBER = 9;                // 读取Staff栏数目；初始9，可加大，溢出时按最大可能的staff数读取，如需读取全部请设置值为 Number.MAX_VALUE (或一个你觉得可能最大的值 eg.20)
-const MENU = ["STORY : ","STAFF : ","CAST : "];   //输出Menu控制(大小写？)
+const MENU = ["STORY : ", "STAFF : ", "CAST : "];   //输出Menu控制(大小写？)
 const UBB = {                          // !--预设BBCode生成样式
-    before : "[b]",                    // before && after 放在 MENU字段 前后
-    after : "[/b]",                    // 请保证before after 自闭合
-    linedivision : "\n",              //行间分割控制
-    sectiondivision :"\n\n"           //段间分割控制
+    before: "[b]",                    // before && after 放在 MENU字段 前后
+    after: "[/b]",                    // 请保证before after 自闭合
+    linedivision: "\n",              //行间分割控制
+    sectiondivision: "\n\n"           //段间分割控制
 };
 const HTML = {                         // !--预设Html生成样式
     before: "<font color=\"#008080\" face=\"Impact\" size=\"5\" style=\"margin: 0px; padding: 0px; word-wrap: break-word;\">",
-    after : '</font>',
-    linedivision :"<br>",
-    sectiondivision :"<br><br>"
+    after: '</font>',
+    linedivision: "<br>",
+    sectiondivision: "<br><br>"
 };
 const OUTFORMAT = "UBB";               //默认输出格式（在不点击输出格式的情况下）；初始UBB，可选 "HTML" "NONE"(不自动生成，点击输出)
 ////////////////////////////////////////////////////////////////
 
 // Begin~
-$(document).ready(function() {
+$(document).ready(function () {
     //创建初始交互按钮
     $("div#headerSubject > div > ul >li:last").after("<div id=\"output\" class=\"rr\"><a>导出Bamgumi简介</a></div>");
 
     //数据获取
-    var img=$("div#bangumiInfo > div > div:nth-child(1) > a > img").attr("src");
+    var img = $("div#bangumiInfo > div > div:nth-child(1) > a > img").attr("src");
     var story = $("div#subject_summary").text();             //Story
     var raw_staff = [], staff_box = $("ul#infobox");        //Staff
     for (var staff_number = STAFFSTART; staff_number < Math.min(STAFFNUMBER + STAFFSTART, staff_box.children("li").length); staff_number++) {
-        raw_staff[staff_number-STAFFSTART] = staff_box.children("li").eq(staff_number).text();
+        raw_staff[staff_number - STAFFSTART] = staff_box.children("li").eq(staff_number).text();
         //console.log(raw_staff[staff_number]);
     }
     var raw_cast = [], cast_box = $("ul#browserItemList");      //Cast
@@ -63,12 +63,12 @@ $(document).ready(function() {
             '</div></div></div>' +
             '<hr />' +
             '<div class="cell"><textarea name="Out_text" id="Out_text" cols="32" rows="20" class="quick"></textarea></div></form></div></div>' +
-            '</div>',{                    // !-- SimpleModal插件属性
+            '</div>', {                    // !-- SimpleModal插件属性
             //containerCss:{"margin-left": "-265px","width": "530px","margin-top": "-195px","display":"block"},
-            autoPosition : true,         // 自动定位
-            zIndex : 102,
-            escClose : true,             //按ESC关闭模态窗口
-            overlayClose : true          //按overlay（遮罩层）关闭模态窗口
+            autoPosition: true,         // 自动定位
+            zIndex: 102,
+            escClose: true,             //按ESC关闭模态窗口
+            overlayClose: true          //按overlay（遮罩层）关闭模态窗口
 
         });
         //仿照Bgm的修改窗口添加样式（待进一步完善）
@@ -82,7 +82,7 @@ $(document).ready(function() {
             $(this).select();                                         //输出栏绑定 点击全选 事件
         });
 
-        var toUBBbtn = $("#OuttoUBB").click(function (){                //BBCode
+        var toUBBbtn = $("#OuttoUBB").click(function () {                //BBCode
             var outubb = //"[img]" + img + "[/img]" + UBB.sectiondivision +
                 UBB.before + MENU[0] + UBB.after + UBB.linedivision +
                 story + UBB.sectiondivision +
@@ -90,7 +90,7 @@ $(document).ready(function() {
                 raw_staff.join(UBB.linedivision) + UBB.sectiondivision +
                 UBB.before + MENU[2] + UBB.after + UBB.linedivision +
                 raw_cast.join(UBB.linedivision) + UBB.sectiondivision +
-                "(来源于" + base_link +")" + UBB.linedivision;
+                "(来源于" + base_link + ")" + UBB.linedivision;
             outTextBox.val(outubb).select();                           //向输出框填入合成的BBcode代码并自动全选
             GM_setClipboard(outubb);
         });
@@ -103,15 +103,20 @@ $(document).ready(function() {
                 raw_staff.join(HTML.linedivision) + HTML.sectiondivision +
                 HTML.before + MENU[2] + HTML.after + HTML.linedivision +
                 raw_cast.join(HTML.linedivision) + HTML.sectiondivision +
-                "(来源于" + base_link +")" + HTML.linedivision;
+                "(来源于" + base_link + ")" + HTML.linedivision;
             outTextBox.val(outhtml).select();
             GM_setClipboard(outhtml);
         });
 
-        switch (OUTFORMAT){
-            case "NONE" : break;
-            case "UBB" : toUBBbtn.click(); break;
-            case "HTML" : toHtmlbtn.click(); break;
+        switch (OUTFORMAT) {
+            case "NONE" :
+                break;
+            case "UBB" :
+                toUBBbtn.click();
+                break;
+            case "HTML" :
+                toHtmlbtn.click();
+                break;
         }
     });
 });

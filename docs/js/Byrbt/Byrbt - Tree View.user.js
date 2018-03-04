@@ -32,6 +32,7 @@ var Dictionary = (function () {
     function Dictionary() {
         this.__data__ = {};
     }
+
     Dictionary.prototype.add = function (key, value) {
         if (key in this.__data__)
             return;
@@ -57,13 +58,16 @@ var Dictionary = (function () {
 var FileSize = (function () {
     function FileSize() {
     }
+
     FileSize.toLength = function (size) {
         if (size === undefined)
             return -1;
         size = size.toLowerCase();
         var head = "";
         var tail = "";
-        var isNumber = function (c) { return (c >= '0' && c <= '9') || c === '.' || c === '-'; };
+        var isNumber = function (c) {
+            return (c >= '0' && c <= '9') || c === '.' || c === '-';
+        };
         for (var _i = 0, size_1 = size; _i < size_1.length; _i++) {
             var c = size_1[_i];
             if (isNumber(c))
@@ -73,12 +77,18 @@ var FileSize = (function () {
         }
         var value = parseFloat(head);
         switch (tail) {
-            case " byte": return value;
-            case " bytes": return value;
-            case " kb": return value * Math.pow(2, 10);
-            case " mb": return value * Math.pow(2, 20);
-            case " gb": return value * Math.pow(2, 30);
-            case " tb": return value * Math.pow(2, 40);
+            case " byte":
+                return value;
+            case " bytes":
+                return value;
+            case " kb":
+                return value * Math.pow(2, 10);
+            case " mb":
+                return value * Math.pow(2, 20);
+            case " gb":
+                return value * Math.pow(2, 30);
+            case " tb":
+                return value * Math.pow(2, 40);
         }
         return -1;
     };
@@ -105,6 +115,7 @@ var TreeNode = (function () {
         this.__length__ = 0;
         this.__childNode__ = new Dictionary();
     }
+
     TreeNode.prototype.add = function (key, value) {
         this.__childNode__.add(key, value);
         return this.__childNode__.get(key);
@@ -139,7 +150,7 @@ var TreeNode = (function () {
         ret.children = [];
         ret.length = 0;
         ret.text = this.__name__;
-        ret.state = { opened: true };
+        ret.state = {opened: true};
         for (var key in this.__childNode__.values()) {
             var files = [];
             var value = this.__childNode__.get(key);
@@ -192,8 +203,8 @@ var TreeNode = (function () {
     $("#change_tree").click(function () {
         var change_tree_btn = $(this);
         jstree_demo_div.show();
-        if (change_tree_btn.text() === "[树状化]"){
-            if (jstree_demo_div.html() === ""){
+        if (change_tree_btn.text() === "[树状化]") {
+            if (jstree_demo_div.html() === "") {
                 var data = new TreeNode($("a.index[href^=download]").text().match(/\[BYRBT]\.(.+)\.torrent/)[1]);
                 $('#filelist > table tr:gt(0)').each(function (index) {
                     var tr = $(this);
@@ -202,7 +213,7 @@ var TreeNode = (function () {
                     data.insert(nodes, size);
                 });
                 jstree_demo_div.jstree({
-                    core: { data: data.toObject() }
+                    core: {data: data.toObject()}
                 });
             }
             $("#filelist").hide();

@@ -13,7 +13,7 @@
 var AutoThx = 1; //Auto Click thanks button  (2 - Thanks all;1 - Just thanks yourself;0 - No thanks)
 
 // == Main part ==
-$(document).ready(function() {
+$(document).ready(function () {
     var thxBtn = $("#saythanks[value*='说谢谢']");
     switch (AutoThx) {
         case 0:
