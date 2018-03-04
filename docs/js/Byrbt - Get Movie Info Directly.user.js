@@ -9,6 +9,8 @@
 // @run-at      document-end
 // @connect     *
 // @grant       GM_xmlhttpRequest
+// @grant       GM_setValue
+// @grant       GM_getValue
 // @updateURL   https://github.com/Rhilip/PT-help/raw/master/docs/js/Byrbt%20-%20Get%20Movie%20Info%20Directly.user.js
 // ==/UserScript==
 
@@ -16,6 +18,39 @@ var script_version = '';
 if (GM_info && GM_info.script) {
     script_version = GM_info.script.version || script_version;
 }
+
+Date.prototype.format = function (format) {
+    var o = {
+        "M+": this.getMonth() + 1, //month
+        "d+": this.getDate(),    //day
+        "h+": this.getHours(),   //hour
+        "m+": this.getMinutes(), //minute
+        "s+": this.getSeconds(), //second
+        "q+": Math.floor((this.getMonth() + 3) / 3),  //quarter
+        "S": this.getMilliseconds() //millisecond
+    };
+    if (/(y+)/.test(format)) format = format.replace(RegExp.$1,
+        (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    for (var k in o) if (new RegExp("(" + k + ")").test(format))
+        format = format.replace(RegExp.$1, RegExp.$1.length === 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+    return format;
+};
+String.prototype.toDateEx = function () {
+    var data = {y: 0, M: 0, d: 0, h: 0, m: 0, s: 0, ms: 0};
+    var cn = {"年": "y", "月": "M", "日": "d", "时": "h", "分": "m", "秒": "s", "毫秒": "ms"}; //中文单位与英文单位对应
+    var result = this.match(/\d+((ms)|[yMdhms年月日时分秒]|(毫秒))/ig); //第一步，取出数字与单位，如10月,2009年
+    for (var i = 0; i < result.length; i++) {  //第二步，循环取出数字，再根据单位把数据赋值到data中
+        RegExp(/(\d+)([yMdhms年月日时分秒]|(毫秒))/).test(result[i]);
+        //例：2009年这个时间中，RegExp.$2应该是年，而data[年]是取不到合法的值的，
+        //所以值为undefined，这样我们就可以判断是中文的值
+        if (data[RegExp.$2] === undefined) {
+            data[cn[RegExp.$2]] = RegExp.$1;
+        } else {
+            data[RegExp.$2] = RegExp.$1;
+        }
+    }
+    return new Date(data.y, data.M - 1, data.d, data.h, data.m, data.s, data.ms);
+};
 
 var cat = parseInt(location.href.match(/(\d+)$/)[1]); // 408,电影 ; 401,剧集 ; 404, 动漫
 
@@ -27,50 +62,60 @@ function limit_item(raw_str, limit) {
 
 CKEDITOR.on('instanceReady', function (evt) {
     // 构造本脚本和用户交互行
-    $('#compose').find('> table > tbody > tr:eq(2)').after('<tr id="ben_help"><td class="rowhead nowrap">快速填写信息</td><td class="rowfollow" valign="top" align="left"><input type="text" id="ben_url" placeholder="相应网站上资源信息页的 URL 或资源名称" size="80" class="clone_skip"> <input type="button" id="ben_btn" value="搜索/导入">&nbsp;<input type="button" id="ben_format" value="简介美化/辅助填写">&nbsp;&nbsp;<span id="ben_info"></span><br> 此功能可以从 豆瓣 / Bangumi 上抓取信息，并生成标题tag信息（在正确类型下）及简介。目前仅支持电影 / 剧集 / 动漫区。（如有问题，请带上链接和错误信息及时<a href="https://bt.byr.cn/sendmessage.php?receiver=222616" target="_blank"><img class="button_pm" src="data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA=="></a>）<br><span id="ben_extra"><hr><span>你也可以手动从简介生成工具（如： <a href=\'http://movieinfogen.sinaapp.com/\' target=\'_blank\'>http://movieinfogen.sinaapp.com/ (需要豆瓣账号)</a>， <a href=\'http://huancun.org/\' target=\'_blank\'>http://huancun.org/</a> ）获取数据并填入，然后点击`简介美化`。</span></span></td></tr>');
+    $('form#compose > table > tbody > tr:eq(2)').after('<tr id="gen_help"><td class="rowhead nowrap">快速填写信息</td><td class="rowfollow" valign="top" align="left"><input type="text" id="gen_url" placeholder="相应网站上资源信息页的 URL 或资源名称" size="80" class="clone_skip"> <input type="button" id="gen_btn" value="搜索/导入">&nbsp;<input type="button" id="gen_format" value="简介美化/辅助填写">&nbsp;&nbsp;<span id="gen_info"></span><br> 此功能可以从 豆瓣 / Bangumi 上抓取信息，并生成标题tag信息（在正确类型下）及简介。目前仅支持电影 / 剧集 / 动漫区。（如有问题，请带上链接和错误信息及时<a href="https://bt.byr.cn/sendmessage.php?receiver=222616" target="_blank"><img class="button_pm" src="data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA=="></a>）<br><span id="gen_extra"><hr><span>你也可以手动从简介生成工具（如： <a href=\'http://movieinfogen.sinaapp.com/\' target=\'_blank\'>http://movieinfogen.sinaapp.com/ (需要豆瓣账号)</a>， <a href=\'http://huancun.org/\' target=\'_blank\'>http://huancun.org/</a> ）获取数据并填入，然后点击`简介美化`。</span></span></td></tr>');
 
     // 注册脚本添加的相关DOM
-    var ben_info = $("#ben_info");
-    var ben_extra = $("#ben_extra");
+    var gen_info = $("#gen_info");
+    var gen_extra = $("#gen_extra");
 
     var img_list = [];
 
     function gen_input_help() {   // 表单辅助填写
         var descr = CKEDITOR.instances.descr.getData();
-        // 电影区相关
-        if (descr.match(/译　　名　(.+?)</)) {  // 填写中文名
-            $("input[name$=cname]").val(limit_item(descr.match(/译　　名　(.+?)</)[1]));
-        }
-        if (descr.match(/(https?:\/\/movie\.douban\.com\/subject\/\d+\/?)/)) {  // 豆瓣链接
-            $("input[name=dburl]").val(descr.match(/(https?:\/\/movie\.douban\.com\/subject\/\d+\/?)/)[1]);
-        }
-        if (descr.match(/(https?:\/\/www\.imdb\.com\/title\/tt\d+\/?)/)) {  // IMDb链接
-            $("input[name=url]").val(descr.match(/(https?:\/\/www\.imdb\.com\/title\/tt\d+\/)/)[1]);
-        }
-        if (descr.match(/类　　别　(.+?)</)) {  // 电影类别
-            $("#movie_type").val(limit_item(descr.match(/类　　别　(.+?)</)[1]));
-        }
-        if (descr.match(/产　　地　(.+?)</)) {  // 制片国家/地区
-            $("#movie_country").val(limit_item(descr.match(/产　　地　(.+?)</)[1]));
+        switch (cat) {
+            case 401:   // 剧集区
+                // 暂无QAQ
+                break;
+            case 408:   // 电影区
+                if (descr.match(/译　　名　(.+?)</)) {  // 填写中文名
+                    $("input[name$=cname]").val(limit_item(descr.match(/译　　名　(.+?)</)[1]));
+                }
+                if (descr.match(/(https?:\/\/movie\.douban\.com\/subject\/\d+\/?)/)) {  // 豆瓣链接
+                    $("input[name=dburl]").val(descr.match(/(https?:\/\/movie\.douban\.com\/subject\/\d+\/?)/)[1]);
+                }
+                if (descr.match(/(https?:\/\/www\.imdb\.com\/title\/tt\d+\/?)/)) {  // IMDb链接
+                    $("input[name=url]").val(descr.match(/(https?:\/\/www\.imdb\.com\/title\/tt\d+\/)/)[1]);
+                }
+                if (descr.match(/类　　别　(.+?)</)) {  // 电影类别
+                    $("#movie_type").val(limit_item(descr.match(/类　　别　(.+?)</)[1]));
+                }
+                if (descr.match(/产　　地　(.+?)</)) {  // 制片国家/地区
+                    $("#movie_country").val(limit_item(descr.match(/产　　地　(.+?)</)[1]));
+                }
+                break;
+            case 404:   // 动漫区（动漫区辅助填写依赖脚本自动抓取的简介信息，暂不能根据已有信息填充）
+                $("#comic_cname").val(GM_getValue("comic_cname"));
+                $("#comic_year").val(GM_getValue("comic_year"));
+                break;
         }
     }
 
     function gen_descr_raw_to_ckeditor(raw) {
         // 添加图片信息
         if (img_list) {
-            var img_html = "<hr>你可能需要下载下列图片，并上传到本站。（注意，如果图片名中含有特殊字符串或较长，请修改图片文件名）<table id=\"ben_img_table\" style=\"table-layout:fixed ; width:100%\">";
+            var img_html = "<hr>你可能需要下载下列图片，并上传到本站。（注意，如果图片名中含有特殊字符串或较长，请修改图片文件名）<table id=\"gen_img_table\" style=\"table-layout:fixed ; width:100%\">";
             for (var i = 0; i < img_list.length; i++) {
                 img_html += "<tr><td style='overflow:hidden; text-overflow:ellipsis;'><a href='" + img_list[i] + "' target='_blank'>" + img_list[i] + "</a></td></tr>";
             }
             img_html += "</table>";
 
-            ben_extra.html(img_html).show();
+            gen_extra.html(img_html).show();
         }
 
         var descr = raw.replace(/\n/g, "<br />");  // 将原始字符串（为BBCode格式）中的`\n` 替换为 `<br>`
         CKEDITOR.instances.descr.setData(descr);  // 填入原始简介
-        $("#ben_format").click();   // 模拟点击，美化简介及辅助填写表单
-        ben_info.text("已完成填写。");
+        $("#gen_format").click();   // 模拟点击，美化简介及辅助填写表单
+        gen_info.text("已完成填写。");
     }
 
     function gen_descr_format() {   // 简介美化
@@ -114,9 +159,9 @@ CKEDITOR.on('instanceReady', function (evt) {
             descr += '<div class=\"byrbt_info_gen\" data-version=\"' + script_version + '\" style=\"display:none\">Info Format Powered By @Rhilip</div>';
 
             CKEDITOR.instances.descr.setData(descr);
-            ben_info.text("简介美化完成。");
+            gen_info.text("简介美化完成。");
         } else {
-            ben_info.text("简介已被美化，请勿再次美化。");
+            gen_info.text("简介已被美化，请勿再次美化。");
         }
     }
 
@@ -132,7 +177,7 @@ CKEDITOR.on('instanceReady', function (evt) {
                 callback(res, doc, body, page);    // 回调地狱~
             },
             onerror: function (res) {
-                ben_info.text("向对应服务器请求数据失败，可能是你的网络问题吧2333");
+                gen_info.text("向对应服务器请求数据失败，可能是你的网络问题吧2333");
             }
         });
     }
@@ -148,37 +193,36 @@ CKEDITOR.on('instanceReady', function (evt) {
                 }
             },
             onerror: function (res) {
-                ben_info.text("向对应API服务器请求数据失败，可能是你的网络问题吧2333");
+                gen_info.text("向对应API服务器请求数据失败，可能是你的网络问题吧2333");
             }
         });
     }
 
-    $("#ben_format").click(function () {
+    $("#gen_format").click(function () {
         gen_descr_format();  // 格式化
         gen_input_help();    // 辅助填写表单
     });
 
-    $('#ben_btn').click(function () {
+    $('#gen_btn').click(function () {
 
         img_list = [];
-        var subject_url = $('#ben_url').val().trim();
+        var subject_url = $('#gen_url').val().trim();
 
         if (/^http/.test(subject_url)) {
-            ben_info.text("识别输入内容为链接格式，开始请求源数据....");
+            gen_info.text("识别输入内容为链接格式，开始请求源数据....");
 
             if (subject_url.match(/movie\.douban\.com/)) {   // 豆瓣链接
-                // 以下豆瓣相关解析修改自 `https://greasyfork.org/zh-CN/scripts/38878-电影信息查询脚本` 对此表示感谢
-                ben_info.text("你似乎输入的是豆瓣链接，尝试请求对应豆瓣页面....");
-
+                gen_info.text("你似乎输入的是豆瓣链接，尝试请求对应豆瓣页面....");
+                // 以下豆瓣相关解析修改自 `https://greasyfork.org/zh-CN/scripts/38878-电影信息查询脚本` 对此表示感谢a
                 var fetch = function (anchor) {
                     return anchor[0].nextSibling.nodeValue.trim();
                 };
                 getDoc(subject_url, function (res, doc, body, page) {
                     // 检查对应资源是否存在
                     if (/<title>页面不存在<\/title>/.test(res.responseText)) {
-                        ben_info.text("该链接对应的资源似乎并不存在，你确认没填错");
+                        gen_info.text("该链接对应的资源似乎并不存在，你确认没填错");
                     } else {
-                        ben_info.text("已成功获取源页面，开始解析");
+                        gen_info.text("已成功获取源页面，开始解析");
 
                         var description_text = [];
                         var movie_id = res.finalUrl.match(/\/subject\/(\d+)/)[1];
@@ -253,7 +297,7 @@ CKEDITOR.on('instanceReady', function (evt) {
                         var imdb_average_rating, imdb_votes, imdb_rating;
                         var tags;
 
-                        ben_info.text("豆瓣主页面解析完成，开始请求补充信息");
+                        gen_info.text("豆瓣主页面解析完成，开始请求补充信息");
                         var requests = [];
 
                         // 该影片的评奖信息
@@ -295,30 +339,16 @@ CKEDITOR.on('instanceReady', function (evt) {
 
                         // IMDb信息
                         if (imdb_link) {
-                            var imdb_url = 'https://p.media-imdb.com/static-content/documents/v1/title/' + imdb_link.match(/tt\d+/) + '/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json';
                             requests.push(
                                 GM_xmlhttpRequest({
                                     method: 'GET',
-                                    url: imdb_url,
+                                    url: 'https://p.media-imdb.com/static-content/documents/v1/title/' + imdb_link.match(/tt\d+/) + '/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json',
                                     onload: function (res) {
                                         var try_match = res.responseText.match(/imdb.rating.run\((.+)\)/);
-                                        if (try_match) {
-                                            var a = JSON.parse(try_match[1]);
-                                            imdb_average_rating = (parseFloat(a.resource.rating).toFixed(1) + '').replace('NaN', '');
-                                            imdb_votes = a.resource.ratingCount ? a.resource.ratingCount.toLocaleString() : '';
-                                            imdb_rating = imdb_votes ? imdb_average_rating + '/10 from ' + imdb_votes + ' users' : '';
-                                        }
-                                    },
-                                    onerror: function (res) {
-                                        switch (res.status) {
-                                            case 404:
-                                                console.log('IMDb链接不存在！');
-                                                imdb_link = '';
-                                                break;
-                                            default:
-                                                console.log('无法获取IMDb评分！');
-                                                break;
-                                        }
+                                        var a = JSON.parse(try_match[1]);
+                                        imdb_average_rating = (parseFloat(a.resource.rating).toFixed(1) + '').replace('NaN', '');
+                                        imdb_votes = a.resource.ratingCount ? a.resource.ratingCount.toLocaleString() : '';
+                                        imdb_rating = imdb_votes ? imdb_average_rating + '/10 from ' + imdb_votes + ' users' : '';
                                     }
                                 })
                             );
@@ -396,36 +426,83 @@ CKEDITOR.on('instanceReady', function (evt) {
                 });
             }
             else if (subject_url.match(/(bgm\.tv|bangumi\.tv|chii\.in)\/subject/)) {
-                // TODO From `Bangumi Info Export`
+                gen_info.text("你似乎输入的是Bgm链接，尝试请求对应Bgm页面....");
+
+                // 以下Bgm相关解析修改自 `https://github.com/Rhilip/PT-help/blob/master/docs/js/Bangumi%20-%20Info%20Export.user.js` 对此表示感谢a
+                const STAFFSTART = 4;                 // 读取Staff栏的起始位置（假定bgm的顺序为中文名、话数、放送开始、放送星期... ，staff从第四个 导演 起算）；初始值为 4（对于新番比较合适）
+                const STAFFNUMBER = 9;                // 读取Staff栏数目；初始9，可加大，溢出时按最大可能的staff数读取，如需读取全部请设置值为 Number.MAX_VALUE (或一个你觉得可能最大的值 eg.20)
+
+                getDoc(subject_url, function (res, doc, body, page) {
+                    var img = page.find("div#bangumiInfo > div > div:nth-child(1) > a > img").attr("src").replace(/cover\/[lcmsg]/, "cover/l");
+                    img_list.push(img);
+
+                    // 使用GM_getValue,GM_setValue 传递的表单信息
+                    GM_setValue("comic_cname", page.find("#infobox > li:contains('中文名')").text().replace("中文名: ", "").trim());
+
+                    var on_air_date = page.find("#infobox > li:contains('放送开始')").text().replace("放送开始: ", "");
+                    try {  // 尝试将日期转成 yyyy.mm 格式
+                        on_air_date = on_air_date.toDateEx().format("yyyy.MM")
+                    } catch (error) {
+                        console.log(error);
+                    } finally {
+                        GM_setValue("comic_year", on_air_date);
+                    }
+
+                    // 主介绍
+                    var story = page.find("div#subject_summary").text();             //Story
+                    var raw_staff = [], staff_box = page.find("ul#infobox");        //Staff
+                    for (var staff_number = STAFFSTART; staff_number < Math.min(STAFFNUMBER + STAFFSTART, staff_box.children("li").length); staff_number++) {
+                        raw_staff[staff_number - STAFFSTART] = staff_box.children("li").eq(staff_number).text();
+                        //console.log(raw_staff[staff_number]);
+                    }
+                    var raw_cast = [], cast_box = page.find("ul#browserItemList");      //Cast
+                    for (var cast_number = 0; cast_number < cast_box.children("li").length; cast_number++) {    //cast_box.children("li").length
+                        var cast_name = cast_box.children("li").eq(cast_number).find("span.tip").text();
+                        if (!(cast_name.length)) {     //如果不存在中文名，则用cv日文名代替
+                            cast_name = cast_box.children("li").eq(cast_number).find("div > strong > a").text().replace(/(^\s*)|(\s*$)/g, "");   //#browserItemList > li > div > strong > a
+                        }
+                        var cv_name = cast_box.children("li").eq(cast_number).find("span.tip_j > a").text();
+                        raw_cast[cast_number] = cast_name + ' : ' + cv_name;
+                        //console.log(raw_cast[cast_number]);
+                    }
+
+                    var outtext = "\n\n" + // img + "\n\n" +
+                        "[b]STORY : [/b]\n" + story + "\n\n" +
+                        "[b]STAFF : [/b]\n" + raw_staff.join("\n") + "\n\n" +
+                        "[b]CAST : [/b]\n" + raw_cast.join("\n") + "\n\n" +
+                        "(来源于 " + res.finalUrl + " )\n";
+
+                    gen_descr_raw_to_ckeditor(outtext);
+                })
             }
         } else {
-            ben_info.text("识别输入内容为文字格式，尝试搜索");
+            gen_info.text("识别输入内容为文字格式，尝试搜索");
 
             if ([408, 401].indexOf(cat) > -1) {    // 电影区，剧集区
                 getJSON("https://api.douban.com/v2/movie/search?q=" + subject_url, function (res, resj) {
-                    ben_info.text("请求成功，请在下方选择对应链接。");
+                    gen_info.text("请求成功，请在下方选择对应链接。");
                     if (resj.total !== 0) {
-                        var search_html = "<hr>下面为可能的搜索结果，请确认<table id=\"ben_search_table\" style='width: 100%' align='center'><tr><td class=\"colhead\" align='center'>年代</td><td class=\"colhead\" align='center'>类别</td><td class=\"colhead\" align='center'>标题</td><td class=\"colhead\" align='center'>豆瓣链接</td><td class=\"colhead\" align='center'>行为</td></tr>";
+                        var search_html = "<hr>下面为可能的搜索结果，请确认<table id=\"gen_search_table\" style='width: 100%' align='center'><tr><td class=\"colhead\" align='center'>年代</td><td class=\"colhead\" align='center'>类别</td><td class=\"colhead\" align='center'>标题</td><td class=\"colhead\" align='center'>豆瓣链接</td><td class=\"colhead\" align='center'>行为</td></tr>";
                         for (var i_douban = 0; i_douban < resj.subjects.length; i_douban++) {
                             var i_item = resj.subjects[i_douban];
                             search_html += "<tr><td class='rowfollow' align='center'>" + i_item.year + "</td><td class='rowfollow' align='center'>" + i_item.subtype + "</td><td class='rowfollow'>" + i_item.title + "</td><td class='rowfollow'><a href='" + i_item.alt + "' target='_blank'>" + i_item.alt + "</a></td><td class='rowfollow' align='center'><a href='javascript:void(0);' class='gen_search_choose' data-url='" + i_item.alt + "'>选择</a></td></tr>";
                         }
                         search_html += "</table>";
-                        $("#ben_extra").html(search_html).show();
+                        $("#gen_extra").html(search_html).show();
 
                         $("a.gen_search_choose").click(function () {
                             var tag = $(this);
-                            $('#ben_url').val(tag.attr("data-url"));
-                            $('#ben_btn').click();
+                            $('#gen_url').val(tag.attr("data-url"));
+                            $('#gen_btn').click();
                         });
                     } else {
-                        ben_info.text("无搜索结果");
+                        gen_info.text("无搜索结果");
                     }
                 });
             } else if (cat === 404) {   // 动漫区
                 getJSON("https://api.bgm.tv/search/subject/" + subject_url + "?responseGroup=large&max_results=20&start=0", function (res, resj) {
                     if (resj.results !== 0) {
-                        var search_html = "<hr>下面为可能的搜索结果，请确认<table id=\"ben_search_table\" style='width: 100%' align='center'><tr><td class=\"colhead\" align='center'>放送开始</td><td class=\"colhead\" align='center'>类别</td><td class=\"colhead\" align='center'>名称</td><td class=\"colhead\" align='center'>Bangumi链接</td><td class=\"colhead\" align='center'>行为</td></tr>";
+                        var search_html = "<hr>下面为可能的搜索结果，请确认<table id=\"gen_search_table\" style='width: 100%' align='center'><tr><td class=\"colhead\" align='center'>放送开始</td><td class=\"colhead\" align='center'>类别</td><td class=\"colhead\" align='center'>名称</td><td class=\"colhead\" align='center'>Bangumi链接</td><td class=\"colhead\" align='center'>行为</td></tr>";
                         for (var i_bgm = 0; i_bgm < resj.list.length; i_bgm++) {
                             var i_item = resj.list[i_bgm];
                             var tp = i_item.type;
@@ -450,15 +527,15 @@ CKEDITOR.on('instanceReady', function (evt) {
                             search_html += "<tr><td class='rowfollow' align='center'>" + i_item.air_date + "</td><td class='rowfollow' align='center'>" + tp + "</td><td class='rowfollow'>" + i_item.name_cn + " | " + i_item.name + "</td><td class='rowfollow'><a href='" + i_item.url + "' target='_blank'>" + i_item.url + "</a></td><td class='rowfollow' align='center'><a href='javascript:void(0);' class='gen_search_choose' data-url='" + i_item.url + "'>选择</a></td></tr>";
                         }
                         search_html += "</table>";
-                        ben_extra.html(search_html).show();
+                        gen_extra.html(search_html).show();
 
                         $("a.gen_search_choose").click(function () {
                             var tag = $(this);
-                            $('#ben_url').val(tag.attr("data-url"));
-                            $('#ben_btn').click();
+                            $('#gen_url').val(tag.attr("data-url"));
+                            $('#gen_btn').click();
                         });
                     } else {
-                        ben_info.text("无搜索结果");
+                        gen_info.text("无搜索结果");
                     }
                 });
             }
