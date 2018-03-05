@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Byrbt : Get Movie Info Directly
 // @namespace   http://blog.rhilip.info
-// @version     20180305
+// @version     20180305.1
 // @description 从其他信息站点（Douban、Bangumi）获取种子简介信息，并辅助表单信息填写与美化
 // @author      Rhilip
 // @include     /^https?:\/\/(bt\.byr\.cn|byr\.rhilip\.info)\/upload\.php\?type=40(8|1|4)/
@@ -73,29 +73,32 @@ CKEDITOR.on('instanceReady', function (evt) {
 
     function gen_input_help() {   // 表单辅助填写
         var descr = CKEDITOR.instances.descr.getData();
+
+        // 通用的 - 中文名，豆瓣链接，IMDb链接
+        if (descr.match(/[片译]　　名　(.+?)</)) {  // 填写中文名
+            var this_name, trans_title, _title;   // 片名，译名
+            this_name = descr.match(/片　　名　(.+?)</) ? descr.match(/片　　名　(.+?)</)[1] : "";
+            trans_title = descr.match(/译　　名　(.+?)</) ? descr.match(/译　　名　(.+?)</)[1] : "";
+            _title = (this_name ? (this_name + "/") : "") + trans_title;   // 获得所有片名与译名
+
+            // 移除其中的非中文名称
+            _title = _title.split("/");
+            _title = _title.filter(function (x) {
+                return /[\u4E00-\u9FA5]/.test(x);
+            });
+            _title = _title.join('/');
+
+            $("input[name$=cname]").val(limit_item(_title));
+        }
+        $("input[name=dburl]").val(descr.match(/(https?:\/\/movie\.douban\.com\/subject\/\d+\/?)/) ? descr.match(/(https?:\/\/movie\.douban\.com\/subject\/\d+\/?)/)[1] : "");// 豆瓣链接
+        $("input[name=url]").val(descr.match(/(https?:\/\/www\.imdb\.com\/title\/tt\d+\/)/) ? descr.match(/(https?:\/\/www\.imdb\.com\/title\/tt\d+\/)/)[1] : "");  // IMDb链接
+
+        // 各版块不同的
         switch (cat) {
             case 401:   // 剧集区
                 // 暂无QAQ
                 break;
             case 408:   // 电影区
-                if (descr.match(/[片译]　　名　(.+?)</)) {  // 填写中文名
-                    var this_name, trans_title, _title;   // 片名，译名
-                    this_name = descr.match(/片　　名　(.+?)</) ? descr.match(/片　　名　(.+?)</)[1] : "";
-                    trans_title = descr.match(/译　　名　(.+?)</) ? descr.match(/译　　名　(.+?)</)[1] : "";
-                    _title = (this_name ? (this_name + "/") : "") + trans_title;   // 获得所有片名与译名
-
-                    // 移除其中的非中文名称
-                    _title = _title.split("/");
-                    _title = _title.filter(function (x) {
-                        return /[\u4E00-\u9FA5]/.test(x);
-                    });
-                    _title = _title.join('/');
-
-                    $("input[name$=cname]").val(limit_item(_title));
-                }
-
-                $("input[name=dburl]").val(descr.match(/(https?:\/\/movie\.douban\.com\/subject\/\d+\/?)/) ? descr.match(/(https?:\/\/movie\.douban\.com\/subject\/\d+\/?)/)[1] : "");// 豆瓣链接
-                $("input[name=url]").val(descr.match(/(https?:\/\/www\.imdb\.com\/title\/tt\d+\/)/) ? descr.match(/(https?:\/\/www\.imdb\.com\/title\/tt\d+\/)/)[1] : "");  // IMDb链接
                 $("#movie_type").val(limit_item(descr.match(/类　　别　(.+?)</) ? descr.match(/类　　别　(.+?)</)[1] : ""));  // 电影类别
                 $("#movie_country").val(limit_item(descr.match(/产　　地　(.+?)</) ? descr.match(/产　　地　(.+?)</)[1] : ""));  // 制片国家/地区
                 break;
