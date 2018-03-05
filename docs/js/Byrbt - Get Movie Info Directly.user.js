@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Byrbt : Get Movie Info Directly
 // @namespace   http://blog.rhilip.info
-// @version     20180304.2
+// @version     20180305
 // @description 从其他信息站点（Douban、Bangumi）获取种子简介信息，并辅助表单信息填写与美化
 // @author      Rhilip
 // @include     /^https?:\/\/(bt\.byr\.cn|byr\.rhilip\.info)\/upload\.php\?type=40(8|1|4)/
@@ -11,6 +11,7 @@
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setValue
 // @grant       GM_getValue
+// @grant       GM_addValueChangeListener
 // @updateURL   https://github.com/Rhilip/PT-help/raw/master/docs/js/Byrbt%20-%20Get%20Movie%20Info%20Directly.user.js
 // ==/UserScript==
 
@@ -99,8 +100,8 @@ CKEDITOR.on('instanceReady', function (evt) {
                 $("#movie_country").val(limit_item(descr.match(/产　　地　(.+?)</) ? descr.match(/产　　地　(.+?)</)[1] : ""));  // 制片国家/地区
                 break;
             case 404:   // 动漫区（动漫区辅助填写依赖脚本自动抓取的简介信息，暂不能根据已有信息填充）
-                $("#comic_cname").val(GM_getValue("comic_cname"));
-                $("#comic_year").val(GM_getValue("comic_year"));
+                $("#comic_cname").val(GM_getValue("comic_cname"), "");
+                $("#comic_year").val(GM_getValue("comic_year"), "");
                 break;
         }
     }
@@ -183,6 +184,7 @@ CKEDITOR.on('instanceReady', function (evt) {
             },
             onerror: function (res) {
                 gen_info.text("向对应服务器请求数据失败，可能是你的网络问题吧2333");
+                // console.log(res);
             }
         });
     }
@@ -199,6 +201,7 @@ CKEDITOR.on('instanceReady', function (evt) {
             },
             onerror: function (res) {
                 gen_info.text("向对应API服务器请求数据失败，可能是你的网络问题吧2333");
+                // console.log(res);
             }
         });
     }
@@ -209,13 +212,12 @@ CKEDITOR.on('instanceReady', function (evt) {
     });
 
     $('#gen_btn').click(function () {
-
-        img_list = [];
         var subject_url = $('#gen_url').val().trim();
 
         if (/^http/.test(subject_url)) {
             gen_info.text("识别输入内容为链接格式，开始请求源数据....");
 
+            img_list = [];  // 清空图片缓存列表
             if (subject_url.match(/movie\.douban\.com/)) {   // 豆瓣链接
                 gen_info.text("你似乎输入的是豆瓣链接，尝试请求对应豆瓣页面....");
                 // 以下豆瓣相关解析修改自 `https://greasyfork.org/zh-CN/scripts/38878-电影信息查询脚本` 对此表示感谢a
@@ -229,7 +231,6 @@ CKEDITOR.on('instanceReady', function (evt) {
                     } else {
                         gen_info.text("已成功获取源页面，开始解析");
 
-                        var description_text = [];
                         var movie_id = res.finalUrl.match(/\/subject\/(\d+)/)[1];
 
                         var this_title, trans_title;
@@ -296,135 +297,98 @@ CKEDITOR.on('instanceReady', function (evt) {
                             duration = page.find('#info span[property="v:runtime"]').text().trim();
                         }
 
+                        gen_info.text("豆瓣主页面解析完成，开始(异步)请求补充信息");
+                        GM_setValue("extra_get", "");   // 用来做异步状况请求完成检查，而不是使用Promise.all()或者$.when()
                         var director, writer, cast;
                         var awards;
                         var douban_average_rating, douban_votes, douban_rating, introduction, poster;
                         var imdb_average_rating, imdb_votes, imdb_rating;
                         var tags;
 
-                        gen_info.text("豆瓣主页面解析完成，开始请求补充信息");
-                        var requests = [];
-
-                        // 该影片的评奖信息
-                        requests.push(
-                            getDoc(douban_link + 'awards', function (res, doc, body, page) {
-                                awards = page.find('#content>div>div.article').html()
-                                    .replace(/[ \n]/g, '')
-                                    .replace(/<\/li><li>/g, '</li> <li>')
-                                    .replace(/<\/a><span/g, '</a> <span')
-                                    .replace(/<(div|ul)[^>]*>/g, '\n')
-                                    .replace(/<[^>]+>/g, '')
-                                    .replace(/&nbsp;/g, ' ')
-                                    .replace(/ +\n/g, '\n')
-                                    .trim();
-                            })
-                        );
-
-                        //豆瓣评分，简介，海报，导演，编剧，演员，标签
-                        requests.push(
-                            $.ajax({
-                                type: 'get',
-                                url: 'https://api.douban.com/v2/movie/' + movie_id,
-                                dataType: 'jsonp',
-                                jsonpCallback: 'callback',
-                                success: function (json) {
-                                    douban_average_rating = json.rating.average;
-                                    douban_votes = json.rating.numRaters.toLocaleString();
-                                    douban_rating = douban_average_rating + '/10 from ' + douban_votes + ' users';
-                                    introduction = json.summary.replace(/^None$/g, '暂无相关剧情介绍');
-                                    poster = json.image.replace(/s(_ratio_poster|pic)/g, 'l$1');
-                                    director = json.attrs.director ? json.attrs.director.join(' / ') : '';
-                                    writer = json.attrs.writer ? json.attrs.writer.join(' / ') : '';
-                                    cast = json.attrs.cast ? json.attrs.cast.join('\n') : '';
-                                    tags = json.tags.map(function (member) {
-                                        return member.name;
-                                    }).join(' | ');
-                                }
-                            }));
-
-                        // IMDb信息
+                        // IMDb信息（最慢，最先请求）
                         if (imdb_link) {
-                            requests.push(
-                                GM_xmlhttpRequest({
-                                    method: 'GET',
-                                    url: 'https://p.media-imdb.com/static-content/documents/v1/title/' + imdb_link.match(/tt\d+/) + '/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json',
-                                    onload: function (res) {
-                                        var try_match = res.responseText.match(/imdb.rating.run\((.+)\)/);
-                                        var a = JSON.parse(try_match[1]);
-                                        imdb_average_rating = (parseFloat(a.resource.rating).toFixed(1) + '').replace('NaN', '');
-                                        imdb_votes = a.resource.ratingCount ? a.resource.ratingCount.toLocaleString() : '';
-                                        imdb_rating = imdb_votes ? imdb_average_rating + '/10 from ' + imdb_votes + ' users' : '';
-                                    }
-                                })
-                            );
+                            GM_xmlhttpRequest({
+                                method: 'GET',
+                                url: 'https://p.media-imdb.com/static-content/documents/v1/title/' + imdb_link.match(/tt\d+/) + '/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json',
+                                onload: function (res) {
+                                    var try_match = res.responseText.match(/imdb.rating.run\((.+)\)/);
+                                    var a = JSON.parse(try_match[1]);
+                                    imdb_average_rating = (parseFloat(a.resource.rating).toFixed(1) + '').replace('NaN', '');
+                                    imdb_votes = a.resource.ratingCount ? a.resource.ratingCount.toLocaleString() : '';
+                                    imdb_rating = imdb_votes ? imdb_average_rating + '/10 from ' + imdb_votes + ' users' : '';
+                                    GM_setValue("extra_get", "imdb_api");
+                                }
+                            });
                         }
 
-                        var descriptionGenerator = function () {
-                            if (poster) {
-                                // description_text.push('[img]'+poster+'[/img]\n');
-                                img_list.push(poster);
-                            }
-                            if (trans_title) {
-                                description_text.push('◎译　　名　' + trans_title);
-                            }
-                            if (this_title) {
-                                description_text.push('◎片　　名　' + this_title);
-                            }
-                            if (year) {
-                                description_text.push('◎年　　代　' + year);
-                            }
-                            if (region) {
-                                description_text.push('◎产　　地　' + region);
-                            }
-                            if (genre) {
-                                description_text.push('◎类　　别　' + genre);
-                            }
-                            if (language) {
-                                description_text.push('◎语　　言　' + language);
-                            }
-                            if (playdate) {
-                                description_text.push('◎上映日期　' + playdate);
-                            }
-                            if (imdb_rating) {
-                                description_text.push('◎IMDb评分  ' + imdb_rating);
-                            }
-                            if (imdb_link) {
-                                description_text.push('◎IMDb链接  ' + imdb_link);
-                            }
-                            if (douban_rating) {
-                                description_text.push('◎豆瓣评分　' + douban_rating);
-                            }
-                            if (douban_link) {
-                                description_text.push('◎豆瓣链接　' + douban_link);
-                            }
-                            if (episodes) {
-                                description_text.push('◎集　　数　' + episodes);
-                            }
-                            if (duration) {
-                                description_text.push('◎片　　长　' + duration);
-                            }
-                            if (director) {
-                                description_text.push('◎导　　演　' + director);
-                            }
-                            if (writer) {
-                                description_text.push('◎编　　剧　' + writer);
-                            }
-                            if (cast) {
-                                description_text.push('◎主　　演　' + cast.replace(/\n/g, '\n' + '　'.repeat(4) + '  　').trim());
-                            }
-                            if (tags) {
-                                description_text.push('\n◎标　　签　' + tags);
-                            }
-                            if (introduction) {
-                                description_text.push('\n◎简　　介\n\n　　' + introduction.replace(/\n/g, '\n' + '　'.repeat(2)));
-                            }
-                            if (awards) {
-                                description_text.push('\n◎获奖情况\n\n　　' + awards.replace(/\n/g, '\n' + '　'.repeat(2)));
-                            }
+                        // 该影片的评奖信息
+                        getDoc(douban_link + 'awards', function (res, doc, body, page) {
+                            awards = page.find('#content>div>div.article').html()
+                                .replace(/[ \n]/g, '')
+                                .replace(/<\/li><li>/g, '</li> <li>')
+                                .replace(/<\/a><span/g, '</a> <span')
+                                .replace(/<(div|ul)[^>]*>/g, '\n')
+                                .replace(/<[^>]+>/g, '')
+                                .replace(/&nbsp;/g, ' ')
+                                .replace(/ +\n/g, '\n')
+                                .trim();
+                            GM_setValue("extra_get", "awards");
+                        });
 
-                            gen_descr_raw_to_editor(description_text.join('\n'));
+                        //豆瓣评分，简介，海报，导演，编剧，演员，标签
+                        $.ajax({
+                            type: 'get',
+                            url: 'https://api.douban.com/v2/movie/' + movie_id,
+                            dataType: 'jsonp',
+                            jsonpCallback: 'callback',
+                            success: function (json) {
+                                douban_average_rating = json.rating.average;
+                                douban_votes = json.rating.numRaters.toLocaleString();
+                                douban_rating = douban_average_rating + '/10 from ' + douban_votes + ' users';
+                                introduction = json.summary.replace(/^None$/g, '暂无相关剧情介绍');
+                                poster = json.image.replace(/s(_ratio_poster|pic)/g, 'l$1');
+                                director = json.attrs.director ? json.attrs.director.join(' / ') : '';
+                                writer = json.attrs.writer ? json.attrs.writer.join(' / ') : '';
+                                cast = json.attrs.cast ? json.attrs.cast.join('\n') : '';
+                                tags = json.tags.map(function (member) {
+                                    return member.name;
+                                }).join(' | ');
+
+                                if (poster) {
+                                    // description_text.push('[img]'+poster+'[/img]\n');
+                                    img_list.push(poster);
+                                }
+                                GM_setValue("extra_get", "douban_api");
+                            }
+                        });
+
+                        var descriptionGenerator = function () {
+                            var descr = "";
+                            descr += trans_title ? ('◎译　　名　' + trans_title + "\n") : "";
+                            descr += this_title ? ('◎片　　名　' + this_title + "\n") : "";
+                            descr += year ? ('◎年　　代　' + year + "\n") : "";
+                            descr += region ? ('◎产　　地　' + region + "\n") : "";
+                            descr += genre ? ('◎类　　别　' + genre + "\n") : "";
+                            descr += language ? ('◎语　　言　' + language + "\n") : "";
+                            descr += playdate ? ('◎上映日期　' + playdate + "\n") : "";
+                            descr += imdb_rating ? ('◎IMDb评分  ' + imdb_rating + "\n") : "";
+                            descr += imdb_link ? ('◎IMDb链接  ' + imdb_link + "\n") : "";
+                            descr += douban_rating ? ('◎豆瓣评分　' + douban_rating + "\n") : "";
+                            descr += douban_link ? ('◎豆瓣链接　' + douban_link + "\n") : "";
+                            descr += episodes ? ('◎集　　数　' + episodes + "\n") : "";
+                            descr += duration ? ('◎片　　长　' + duration + "\n") : "";
+                            descr += director ? ('◎导　　演　' + director + "\n") : "";
+                            descr += writer ? ('◎编　　剧　' + writer + "\n") : "";
+                            descr += cast ? ('◎主　　演　' + cast.replace(/\n/g, '\n' + '　'.repeat(4) + '  　').trim() + "\n") : "";
+                            descr += tags ? ('\n◎标　　签　' + tags + "\n") : "";
+                            descr += introduction ? ('\n◎简　　介\n\n　　' + introduction.replace(/\n/g, '\n' + '　'.repeat(2)) + "\n") : "";
+                            descr += awards ? ('\n◎获奖情况\n\n　　' + awards.replace(/\n/g, '\n' + '　'.repeat(2)) + "\n") : "";
+
+                            gen_descr_raw_to_editor(descr);
                         };
-                        $.when.apply($, requests).then(function () {   // 等待
+
+                        descriptionGenerator();   // 预生成一次
+                        GM_addValueChangeListener("extra_get", function () {   // 当异步获取完成时再次生成
                             descriptionGenerator();
                         });
                     }
@@ -551,6 +515,7 @@ CKEDITOR.on('instanceReady', function (evt) {
 
 /**
  * Created by Rhilip on 10/12/2017.
+ * 20180305：补充Bangumi相关解析，修改豆瓣链接异步获取的监听方法。
  * 20180303: 根据 `https://greasyfork.org/zh-CN/scripts/38878-电影信息查询脚本` 脚本重写。
  * 20171031：修改网址输入框的class，防止与魂酱的自引用脚本冲突。
  * 20171027: 大幅度修改脚本，允许直接使用其他简介生成工具提供的简介，并美化及辅助填写。
