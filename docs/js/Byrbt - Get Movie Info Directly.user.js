@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Byrbt : Get Movie Info Directly
 // @namespace   http://blog.rhilip.info
-// @version     20180305.1
+// @version     20180305.2
 // @description 从其他信息站点（Douban、Bangumi）获取种子简介信息，并辅助表单信息填写与美化
 // @author      Rhilip
 // @include     /^https?:\/\/(bt\.byr\.cn|byr\.rhilip\.info)\/upload\.php\?type=40(8|1|4)/
@@ -63,7 +63,7 @@ function limit_item(raw_str, limit) {
 
 CKEDITOR.on('instanceReady', function (evt) {
     // 构造本脚本和用户交互行
-    $('form#compose > table > tbody > tr:eq(2)').after('<tr id="gen_help"><td class="rowhead nowrap">快速填写信息</td><td class="rowfollow" valign="top" align="left"><input type="text" id="gen_url" placeholder="相应网站上资源信息页的 URL 或资源名称" size="80" class="clone_skip"> <input type="button" id="gen_btn" value="搜索/导入">&nbsp;<input type="button" id="gen_format" value="简介美化/辅助填写">&nbsp;&nbsp;<span id="gen_info"></span><br> 此功能可以从 豆瓣 / Bangumi 上抓取信息，并生成标题tag信息（在正确类型下）及简介。目前仅支持电影 / 剧集 / 动漫区。（如有问题，请带上链接和错误信息及时<a href="https://bt.byr.cn/sendmessage.php?receiver=222616" target="_blank"><img class="button_pm" src="data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA=="></a>）<br><span id="gen_extra"><hr><span>你也可以手动从简介生成工具（如： <a href=\'http://movieinfogen.sinaapp.com/\' target=\'_blank\'>http://movieinfogen.sinaapp.com/ (需要豆瓣账号)</a>， <a href=\'http://huancun.org/\' target=\'_blank\'>http://huancun.org/</a> ）获取数据并填入，然后点击`简介美化`。</span></span></td></tr>');
+    $('form#compose > table > tbody > tr:eq(2)').after('<tr id="gen_help"><td class="rowhead nowrap">快速填写信息</td><td class="rowfollow" valign="top" align="left"><input type="text" id="gen_url" placeholder="相应网站上资源信息页的 URL 或资源名称" size="80" class="clone_skip"> <input type="button" id="gen_btn" value="搜索/导入">&nbsp;<input type="button" id="gen_format" value="简介美化/辅助填写">&nbsp;&nbsp;<span id="gen_info"></span><br> 此功能可以从 豆瓣 / Bangumi 上抓取信息，并生成标题tag信息（在正确类型下）及简介。目前仅支持电影 / 剧集 / 动漫区。<br><span id="gen_extra"></span></td></tr>');
 
     // 注册脚本添加的相关DOM
     var gen_info = $("#gen_info");
@@ -413,7 +413,7 @@ CKEDITOR.on('instanceReady', function (evt) {
 
                     var on_air_date = page.find("#infobox > li:contains('放送开始')").text().replace("放送开始: ", "");
                     try {  // 尝试将日期转成 yyyy.mm 格式
-                        on_air_date = on_air_date.toDateEx().format("yyyy.MM")
+                        on_air_date = on_air_date.toDateEx().format("yyyy.MM");
                     } catch (error) {
                         console.log(error);
                     } finally {
@@ -445,7 +445,16 @@ CKEDITOR.on('instanceReady', function (evt) {
                         "(来源于 " + res.finalUrl + " )\n";
 
                     gen_descr_raw_to_editor(outtext);
-                })
+                });
+            }
+            else {
+                gen_info.text("似乎并不认识这种链接(ノ｀Д)ノ");
+                gen_extra.html('<hr>你输入的链接格式不在接受的范围内，脚本支持的链接格式有' +
+                    '<table id="gen_link" style="width: 100%" align="center"><tbody>' +
+                    '<tr><td class="colhead" align="center">站点类型</td><td class="colhead" align="center">网址示例</td></tr>' +
+                    '<tr><td class="rowfollow" align="center"><a href="https://www.douban.com/" target="_blank">豆瓣 Douban</a></td><td class="rowfollow" align="center">https://movie.douban.com/subject/:d/</td></tr>' +
+                    '<tr><td class="rowfollow" align="center"><a href="https://bgm.tv/" target="_blank">番组计划 Bangumi</a></td><td class="rowfollow" align="center">https://bgm.tv/subject/:d/ , http://bangumi.tv/subject/:d/ , http://chii.in/subject/:d/</td></tr>' +
+                    '</tbody></table>')
             }
         } else {
             gen_info.text("识别输入内容为文字格式，尝试搜索");
