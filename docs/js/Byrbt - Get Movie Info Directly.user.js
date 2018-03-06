@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Byrbt : Get Movie Info Directly
 // @namespace   http://blog.rhilip.info
-// @version     20180305.2
+// @version     20180306
 // @description 从其他信息站点（Douban、Bangumi）获取种子简介信息，并辅助表单信息填写与美化
 // @author      Rhilip
 // @include     /^https?:\/\/(bt\.byr\.cn|byr\.rhilip\.info)\/upload\.php\?type=40(8|1|4)/
@@ -179,8 +179,7 @@ CKEDITOR.on('instanceReady', function (evt) {
             method: 'GET',
             url: url,
             onload: function (res) {
-                // 页面解析
-                var doc = (new DOMParser()).parseFromString(res.responseText, 'text/html');
+                var doc = (new DOMParser()).parseFromString(res.responseText, 'text/html');  // 页面解析
                 var body = doc.querySelector("body");
                 var page = $(body); // 构造 jQuery 对象
                 callback(res, doc, body, page);    // 回调地狱~
@@ -454,21 +453,16 @@ CKEDITOR.on('instanceReady', function (evt) {
                     '<tr><td class="colhead" align="center">站点类型</td><td class="colhead" align="center">网址示例</td></tr>' +
                     '<tr><td class="rowfollow" align="center"><a href="https://www.douban.com/" target="_blank">豆瓣 Douban</a></td><td class="rowfollow" align="center">https://movie.douban.com/subject/:d/</td></tr>' +
                     '<tr><td class="rowfollow" align="center"><a href="https://bgm.tv/" target="_blank">番组计划 Bangumi</a></td><td class="rowfollow" align="center">https://bgm.tv/subject/:d/ , http://bangumi.tv/subject/:d/ , http://chii.in/subject/:d/</td></tr>' +
-                    '</tbody></table>')
+                    '</tbody></table>');
             }
         } else {
-            gen_info.text("识别输入内容为文字格式，尝试搜索");
+            gen_info.text("识别输入内容为文字格式，尝试搜索.......");
 
-            if ([408, 401].indexOf(cat) > -1) {    // 电影区，剧集区
-                getJSON("https://api.douban.com/v2/movie/search?q=" + subject_url, function (res, resj) {
+            var Search_From_API = function (url, callback) {
+                getJSON(url, function (res, resj) {
                     gen_info.text("请求成功，请在下方选择对应链接。");
-                    if (resj.total !== 0) {
-                        var search_html = "<hr>下面为可能的搜索结果，请确认<table id=\"gen_search_table\" style='width: 100%' align='center'><tr><td class=\"colhead\" align='center'>年代</td><td class=\"colhead\" align='center'>类别</td><td class=\"colhead\" align='center'>标题</td><td class=\"colhead\" align='center'>豆瓣链接</td><td class=\"colhead\" align='center'>行为</td></tr>";
-                        for (var i_douban = 0; i_douban < resj.subjects.length; i_douban++) {
-                            var i_item = resj.subjects[i_douban];
-                            search_html += "<tr><td class='rowfollow' align='center'>" + i_item.year + "</td><td class='rowfollow' align='center'>" + i_item.subtype + "</td><td class='rowfollow'>" + i_item.title + "</td><td class='rowfollow'><a href='" + i_item.alt + "' target='_blank'>" + i_item.alt + "</a></td><td class='rowfollow' align='center'><a href='javascript:void(0);' class='gen_search_choose' data-url='" + i_item.alt + "'>选择</a></td></tr>";
-                        }
-                        search_html += "</table>";
+                    var search_html = callback(res, resj);
+                    if (search_html) {
                         $("#gen_extra").html(search_html).show();
 
                         $("a.gen_search_choose").click(function () {
@@ -480,44 +474,34 @@ CKEDITOR.on('instanceReady', function (evt) {
                         gen_info.text("无搜索结果");
                     }
                 });
-            } else if (cat === 404) {   // 动漫区
-                getJSON("https://api.bgm.tv/search/subject/" + subject_url + "?responseGroup=large&max_results=20&start=0", function (res, resj) {
-                    if (resj.results !== 0) {
-                        var search_html = "<hr>下面为可能的搜索结果，请确认<table id=\"gen_search_table\" style='width: 100%' align='center'><tr><td class=\"colhead\" align='center'>放送开始</td><td class=\"colhead\" align='center'>类别</td><td class=\"colhead\" align='center'>名称</td><td class=\"colhead\" align='center'>Bangumi链接</td><td class=\"colhead\" align='center'>行为</td></tr>";
-                        for (var i_bgm = 0; i_bgm < resj.list.length; i_bgm++) {
-                            var i_item = resj.list[i_bgm];
-                            var tp = i_item.type;
-                            switch (tp) {
-                                case 1:
-                                    tp = "漫画/小说";
-                                    break;
-                                case 2:
-                                    tp = "动画/二次元番";
-                                    break;
-                                case 3:
-                                    tp = "音乐";
-                                    break;
-                                case 4:
-                                    tp = "游戏";
-                                    break;
-                                case 6:
-                                    tp = "三次元番";
-                                    break;
-                            }
+            };
 
-                            search_html += "<tr><td class='rowfollow' align='center'>" + i_item.air_date + "</td><td class='rowfollow' align='center'>" + tp + "</td><td class='rowfollow'>" + i_item.name_cn + " | " + i_item.name + "</td><td class='rowfollow'><a href='" + i_item.url + "' target='_blank'>" + i_item.url + "</a></td><td class='rowfollow' align='center'><a href='javascript:void(0);' class='gen_search_choose' data-url='" + i_item.url + "'>选择</a></td></tr>";
+            if ([408, 401].indexOf(cat) > -1) {    // 电影区，剧集区
+                Search_From_API("https://api.douban.com/v2/movie/search?q=" + subject_url, function (res, resj) {
+                    var search_html = "";
+                    if (resj.total !== 0) {
+                        search_html = "<hr>下面为可能的搜索结果，请确认<table id=\"gen_search_table\" style='width: 100%' align='center'><tr><td class=\"colhead\" align='center'>年代</td><td class=\"colhead\" align='center'>类别</td><td class=\"colhead\" align='center'>标题</td><td class=\"colhead\" align='center'>豆瓣链接</td><td class=\"colhead\" align='center'>行为</td></tr>";
+                        for (var i_douban = 0; i_douban < resj.subjects.length; i_douban++) {
+                            var i_item = resj.subjects[i_douban];
+                            search_html += "<tr><td class='rowfollow' align='center'>" + i_item.year + "</td><td class='rowfollow' align='center'>" + i_item.subtype + "</td><td class='rowfollow'>" + i_item.title + "</td><td class='rowfollow'><a href='" + i_item.alt + "' target='_blank'>" + i_item.alt + "</a></td><td class='rowfollow' align='center'><a href='javascript:void(0);' class='gen_search_choose' data-url='" + i_item.alt + "'>选择</a></td></tr>";
                         }
                         search_html += "</table>";
-                        gen_extra.html(search_html).show();
-
-                        $("a.gen_search_choose").click(function () {
-                            var tag = $(this);
-                            $('#gen_url').val(tag.attr("data-url"));
-                            $('#gen_btn').click();
-                        });
-                    } else {
-                        gen_info.text("无搜索结果");
                     }
+                    return search_html;
+                });
+            } else if (cat === 404) {   // 动漫区
+                Search_From_API("https://api.bgm.tv/search/subject/" + subject_url + "?responseGroup=large&max_results=20&start=0", function (res, resj) {
+                    var search_html = "";
+                    if (resj.results !== 0) {
+                        search_html = "<hr>下面为可能的搜索结果，请确认<table id=\"gen_search_table\" style='width: 100%' align='center'><tr><td class=\"colhead\" align='center'>放送开始</td><td class=\"colhead\" align='center'>类别</td><td class=\"colhead\" align='center'>名称</td><td class=\"colhead\" align='center'>Bangumi链接</td><td class=\"colhead\" align='center'>行为</td></tr>";
+                        var tp_dict = {1: "漫画/小说", 2: "动画/二次元番", 3: "音乐", 4: "游戏", 6: "三次元番"};
+                        for (var i_bgm = 0; i_bgm < resj.list.length; i_bgm++) {
+                            var i_item = resj.list[i_bgm];
+                            search_html += "<tr><td class='rowfollow' align='center'>" + i_item.air_date + "</td><td class='rowfollow' align='center'>" + tp_dict[i_item.type] + "</td><td class='rowfollow'>" + i_item.name_cn + " | " + i_item.name + "</td><td class='rowfollow'><a href='" + i_item.url + "' target='_blank'>" + i_item.url + "</a></td><td class='rowfollow' align='center'><a href='javascript:void(0);' class='gen_search_choose' data-url='" + i_item.url + "'>选择</a></td></tr>";
+                        }
+                        search_html += "</table>";
+                    }
+                    return search_html;
                 });
             }
         }
