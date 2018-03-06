@@ -3,12 +3,11 @@
 # Copyright (c) 2017-2020 Rhilip <rhilipruan@gmail.com>
 
 import re
-import random
+import json
+
 from utils.netsource import NetBase
 
-from app import app
-
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 douban_format = [
     # (key name in dict. the format of key, string format) with order
@@ -49,6 +48,7 @@ support_list = [
 
 class Gen(NetBase):
     site = sid = url = ret = None
+    img_list = []  # 临时存储图片信息
 
     def __init__(self, url):
         self.clear()
@@ -62,6 +62,7 @@ class Gen(NetBase):
 
     def clear(self):
         self.site = self.sid = self.url = None
+        self.img_list = []  # 临时存储图片信息
         self.ret = {
             "success": False,
             "error": None,
@@ -78,8 +79,6 @@ class Gen(NetBase):
         if raw_data_json.get("msg"):
             self.ret.update({"error": raw_data_json.get("msg")})
         else:
-            img_list = []  # 临时存储图片信息
-
             alt = raw_data_json.get("alt")  # 通过API获取豆瓣链接（而不是自拼
             raw_data_page = self.get_source(alt, bs=True)  # 获取相应页面（用来获取API中未提供的信息），并用BeautifulSoup处理
 
@@ -116,7 +115,7 @@ class Gen(NetBase):
                 # https://img1.doubanio.com/view/movie_poster_cover/lpst/public/p494268647.jpg
                 cover_img = re.sub("^.+img(\d).+p(\d+).+$", r"https://img\1.doubanio.com/view/photo/raw/public/p\2.jpg",
                                    cover_img_tag["src"])
-                img_list.append(cover_img)
+                self.img_list.append(cover_img)
                 self.ret.update({"cover_img": cover_img})
 
             for pat, key in [("类型", "genres"), ("语言", "lang"),
@@ -127,27 +126,22 @@ class Gen(NetBase):
                     _up_data = _search.group(1).strip()
                 self.ret.update({key: _up_data})
 
-            _imdb_rate = _imdb_link = ""
-            try:
-                if self.ret.get("imdb_id"):  # 该影片在豆瓣上存在IMDb链接
-                    raw_api_key = app.config.get("OMDB_API_KEY")
-                    if isinstance(raw_api_key, list):
-                        apikey = raw_api_key[random.randrange(0, len(raw_api_key))]
-                    elif isinstance(raw_api_key, str):
-                        apikey = raw_api_key
-                    else:
-                        raise NotImplementedError
-                    omdb_source = "https://www.omdbapi.com/?apikey={}&i={}".format(apikey, self.ret["imdb_id"])
-                    omdb_json = self.get_source(omdb_source, json=True)  # 通过IMDb的API获取信息
-                    if omdb_json.get("Poster"):
-                        img_list.append(omdb_json.get("Poster"))
-                    if omdb_json.get("imdbRating") and omdb_json.get("imdbVotes"):
-                        _imdb_rate = "{}/10 from {} users".format(omdb_json.get("imdbRating"),
-                                                                  omdb_json.get("imdbVotes"))
-                    _imdb_link = "http://www.imdb.com/title/{}/".format(self.ret["imdb_id"])
-            except (AttributeError, NotImplementedError):
-                pass
-            else:
+            if self.ret.get("imdb_id"):  # 该影片在豆瓣上存在IMDb链接
+                _imdb_link = "http://www.imdb.com/title/{}/".format(self.ret["imdb_id"])
+                _imdb_rate = ""
+                try:
+                    imdb_source = "https://p.media-imdb.com/static-content/documents/v1/title/{}/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json".format(
+                        self.ret["imdb_id"])
+                    imdb_jsonp = self.get_source(imdb_source)  # 通过IMDb的API获取信息
+                    if re.search("imdb.rating.run\((.+)\)", imdb_jsonp):
+                        imdb_json = json.loads(re.search("imdb.rating.run\((.+)\)", imdb_jsonp).group(1))
+                        imdb_average_rating = imdb_json["resource"]["rating"]
+                        imdb_votes = imdb_json["resource"]["ratingCount"]
+                        if imdb_average_rating and imdb_votes:
+                            _imdb_rate = "{}/10 from {} users".format(imdb_average_rating, imdb_votes)
+                except (AttributeError, KeyError):
+                    pass
+
                 self.ret.update({"imdb_rate": _imdb_rate, "imdb_link": _imdb_link})
 
             douban_rate = db_rate_count = ""
@@ -214,7 +208,7 @@ class Gen(NetBase):
                     if isinstance(data, list):
                         data = "\n　　　　　　".join(data)
                     descr += ft.format(data)
-            self.ret.update({"img": img_list, "format": descr, "success": True})
+            self.ret.update({"img": self.img_list, "format": descr, "success": True})
 
     def _gen_imdb(self):
         # TODO 根据tt号先在豆瓣搜索，如果有则直接使用豆瓣解析结果，如果没有，则转而从imdb上解析数据。
@@ -227,8 +221,6 @@ class Gen(NetBase):
         if raw_data_json.get("error"):
             self.ret.update({"error": raw_data_json.get("error")})
         else:
-            img_list = []  # 临时存储图片信息
-
             alt = raw_data_json.get("url")
             raw_data_page = self.get_source(alt, bs=True)  # 获取相应页面（用来获取API中未提供的信息），并用BeautifulSoup处理
 
@@ -243,7 +235,7 @@ class Gen(NetBase):
                 except AttributeError:
                     pass
                 else:
-                    img_list.append(cover_img)
+                    self.img_list.append(cover_img)
                     break
 
             air_date = re.sub("(\d{4})-(\d{2})-(\d{2})", r"\1.\2", raw_data_json.get("air_date"))
@@ -278,7 +270,7 @@ class Gen(NetBase):
                     descr += ft.format(data)
             descr += "(来源于 {} )".format(self.ret.get("alt"))
 
-            self.ret.update({"img": img_list, "format": descr, "success": True})
+            self.ret.update({"img": self.img_list, "format": descr, "success": True})
 
 
 if __name__ == '__main__':

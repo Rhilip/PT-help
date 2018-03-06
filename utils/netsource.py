@@ -16,20 +16,17 @@ class NetBase(object):
     @staticmethod
     def connect(method: str, url: str, json=False, bs=False, max_try=2, **kwargs):
         err = 0
-        ret = ""
         while err < max_try:
             try:
                 kwargs.setdefault("headers", headers)
                 page = requests.request(method.upper(), url, **kwargs)
                 page.encoding = "utf-8"
-                ret = page.json() if json else (BeautifulSoup(page.text, "lxml") if bs else page.text)
+                return page.json() if json else (BeautifulSoup(page.text, "lxml") if bs else page.text)
             except OSError:
                 err += 1
                 time.sleep(0.4)
-            else:
-                break
 
-        return ret
+        return ""
 
     def get_source(self, url: str, **kwargs):
         return self.connect("GET", url, **kwargs)
