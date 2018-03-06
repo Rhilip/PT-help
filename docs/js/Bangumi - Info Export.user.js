@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bangumi Info Export
 // @namespace    blog.rhilip.info
-// @version      20180305
+// @version      20180306
 // @description  Export Anime Info form Bangumi as BBCode or Html
 // @author       Rhilip
 // @include      /^https?:\/\/(bgm\.tv|bangumi\.tv|chii\.in)\/subject\//
@@ -35,7 +35,7 @@ const OUTFORMAT = "UBB";               //默认输出格式（在不点击输出
 $(document).ready(function () {
     // 创建初始交互按钮与交互窗口
     $("div#headerSubject > div > ul >li:last").after("<div id=\"output\" class=\"rr\"><a class=\"infogen\" title=\"导出Bamgumi简介\"  href=\"#TB_inline?tb&height=500&width=500&inlineId=gen\">导出Bamgumi简介</a></div>");
-    $('<div style="display:none;" id="gen"><div class="bibeBox" style="padding:10px"><div class="tagList"><span>导出格式：</span><div class="inner"><a class="btnGray" id="OuttoUBB" data-type="UBB">BBcode</a>&nbsp;&nbsp;<a class="btnGray" id="OuttoHtml" data-type="HTML">Html</a></div></div><textarea name="Out_text" id="Out_text" cols="32" rows="20" class="quick"></textarea></div></div>').insertBefore('#output');
+    $('<div style="display:none;" id="gen"><div class="bibeBox" style="padding:10px"><div class="tagList"><span>导出格式：</span><div class="inner"><a class="btnGray" id="OuttoUBB" data-style="UBB">BBcode</a>&nbsp;&nbsp;<a class="btnGray" id="OuttoHtml" data-style="HTML">Html</a></div></div><textarea name="Out_text" id="Out_text" cols="32" rows="20" class="quick" onclick="$(this).select()"></textarea></div></div>').insertBefore('#output');
     tb_init('a.infogen');  //Re-init the element we just inserted.
 
     //数据获取
@@ -58,11 +58,8 @@ $(document).ready(function () {
     }
 
     //生成输出信息
-    var outTextBox = $("#Out_text").click(function () {
-        $(this).select();                                         //输出栏绑定 点击全选 事件
-    });
-
-    function descriptionGenerator(style) {
+    $("a[id^='Outto']").click(function () {
+        var style = $(this).attr("data-style");
         var descr = ((style === "UBB") ? ("[img]" + img + "[/img]") : ("<img src='" + img + "'>")) + STYLE[style].sectiondivision +
             STYLE[style].before + MENU[0] + STYLE[style].after + STYLE[style].linedivision +
             story + STYLE[style].sectiondivision +
@@ -71,12 +68,8 @@ $(document).ready(function () {
             STYLE[style].before + MENU[2] + STYLE[style].after + STYLE[style].linedivision +
             raw_cast.join(STYLE[style].linedivision) + STYLE[style].sectiondivision +
             "(来源于 " + window.location.href + " )" + STYLE[style].linedivision;
-        outTextBox.val(descr).select();                   //向输出框填入合成的BBcode代码并自动全选
+        $("#Out_text").val(descr).select();              // 向输出框填入合成的信息并自动全选
         GM_setClipboard(descr);                          // 向剪贴板输出合成的信息
-    }
-
-    $("a[id^='Outto']").click(function () {
-        descriptionGenerator($(this).attr("data-type"));
     });
 
     $('#Outto' + OUTFORMAT).click();
