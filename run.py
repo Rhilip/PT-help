@@ -5,12 +5,10 @@
 from app import app
 from modules.geo import geo_blueprint
 from modules.ptboard import ptboard_blueprint
-from modules.token import token_blueprint
 from modules.infogen import getinfo_blueprint
 
 app.register_blueprint(geo_blueprint)
 app.register_blueprint(ptboard_blueprint)
-app.register_blueprint(token_blueprint)
 app.register_blueprint(getinfo_blueprint)
 
 
