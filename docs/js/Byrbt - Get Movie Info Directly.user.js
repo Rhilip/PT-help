@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Byrbt : Get Movie Info Directly
 // @namespace   http://blog.rhilip.info
-// @version     20180307
+// @version     20180308
 // @description 从其他信息站点（Douban、Bangumi）获取种子简介信息，并辅助表单信息填写与美化
 // @author      Rhilip
 // @include     /^https?:\/\/(bt\.byr\.cn|byr\.rhilip\.info)\/upload\.php\?type=40(8|1|4)/
@@ -128,9 +128,10 @@ CKEDITOR.on('instanceReady', function (evt) {
         }
 
         var descr = raw.replace(/\n/g, "<br />");  // 将原始字符串（为BBCode格式）中的`\n` 替换为 `<br>`
-        CKEDITOR.instances.descr.setData(descr);  // 填入原始简介
-        $("#gen_format").click();   // 模拟点击，美化简介及辅助填写表单
-        gen_info.text("已完成填写。");
+        CKEDITOR.instances.descr.setData(descr, function () {     // 填入原始简介
+            $("#gen_format").click();   // 模拟点击，美化简介及辅助填写表单
+            gen_info.text("已完成填写。");
+        });
     }
 
     function gen_descr_format() {   // 简介美化
@@ -513,6 +514,7 @@ CKEDITOR.on('instanceReady', function (evt) {
 
 /**
  * Created by Rhilip on 10/12/2017.
+ * 20180308: 修复Firefox下不能正常填入简介的Bug。
  * 20180305：补充Bangumi相关解析，修改豆瓣链接异步获取的监听方法。
  * 20180303: 根据 `https://greasyfork.org/zh-CN/scripts/38878-电影信息查询脚本` 脚本重写。
  * 20171031：修改网址输入框的class，防止与魂酱的自引用脚本冲突。
