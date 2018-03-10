@@ -19,6 +19,8 @@ offset_default = app.config.get("PTBOARD_OFFSET", 0)
 start_time_default = app.config.get("PTBOARD_START_TIME", 0)
 end_time_default = app.config.get("PTBOARD_END_TIME", "CURRENT_TIMESTAMP")
 
+predb_prefix = "https://trace.corrupt-net.org/?q="
+
 
 def recover_int_to_default(value, default):
     try:
@@ -59,23 +61,23 @@ def ptboard():
     search_opt = site_opt = no_site_opt = "1=1"
     if search:
         search_opt = warp_str(
-            " AND ".join(["`title` LIKE '%{key}%'".format(key=escape_string(i)) for i in search])
+            " AND ".join(["ptboard_record.title LIKE '%{key}%'".format(key=escape_string(i)) for i in search])
         )
 
     start_time = recover_int_to_default(start_time, start_time_default)
     end_time = recover_int_to_default(end_time, end_time_default)
-    time_opt = warp_str("`pubDate` BETWEEN {start} AND {end}".format(start=start_time, end=end_time))
+    time_opt = warp_str("ptboard_record.pubDate BETWEEN {start} AND {end}".format(start=start_time, end=end_time))
 
     if site_raw:
         site = site_raw.split(",")
         site_opt = warp_str(
-            " OR ".join(["`site` = '{site}'".format(site=escape_string(s)) for s in site])
+            " OR ".join(["ptboard_record.site = '{site}'".format(site=escape_string(s)) for s in site])
         )
 
     if no_site_raw:
         no_site = no_site_raw.split(",")
         no_site_opt = warp_str(
-            " AND ".join(["`site` != '{site}'".format(site=escape_string(s)) for s in no_site])
+            " AND ".join(["ptboard_record.site != '{site}'".format(site=escape_string(s)) for s in no_site])
         )
 
     limit = recover_int_to_default(limit, limit_default)
@@ -87,16 +89,25 @@ def ptboard():
     order = "desc" if order_raw not in ["desc", "asc"] else order_raw
 
     opt = " AND ".join([search_opt, time_opt, site_opt, no_site_opt])
-    sql = ("SELECT * FROM `api`.`ptboard_record` WHERE {opt} ORDER BY `pubDate` {_da} "
+    sql = ("SELECT ptboard_record.sid AS sid, ptboard_site.site AS site, ptboard_record.title, "
+           "concat(ptboard_site.torrent_prefix,ptboard_record.sid, ptboard_site.torrent_suffix) AS link, "
+           "ptboard_record.pubDate FROM api.ptboard_record "
+           "INNER JOIN api.ptboard_site ON api.ptboard_site.site = api.ptboard_record.site "
+           "WHERE {opt} ORDER BY `pubDate` {_da} "
            "LIMIT {_offset}, {_limit}".format(opt=opt, _da=order.upper(), _offset=offset, _limit=limit)
            )
 
     # 3. Get response data from Database
     record_count, rows_data = mysql.exec(sql=sql, r_dict=True, fetch_all=True, ret_row=True)
 
+    def fix_predb(d: dict):
+        if d["site"] == "PreDB":
+            d["link"] = predb_prefix + d["title"].split(" | ")[1]
+        return d
+
     ret.update({
         "success": True,
-        "rows": rows_data,
+        "rows": list(map(fix_predb, rows_data)),
         "total": record_count if search else mysql.exec("SELECT count(*) FROM `api`.`ptboard_record`")[0],
     })
 
