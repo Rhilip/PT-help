@@ -4,34 +4,37 @@
 
 import re
 import json
+import requests
+from bs4 import BeautifulSoup
 
-from utils.netsource import NetBase
-
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 douban_format = [
     # (key name in dict. the format of key, string format) with order
-    # ("cover_img", "{}\n\n"),
-    ("title", "◎译　　名　{}\n"),
-    ("original_title", "◎片　　名　{}\n"),
+    ("poster", "[img]{}[/img]\n\n"),
+    ("trans_title", "◎译　　名　{}\n"),
+    ("this_title", "◎片　　名　{}\n"),
     ("year", "◎年　　代　{}\n"),
-    ("countries", "◎产　　地　{}\n"),
-    ("genres", "◎类　　别　{}\n"),
-    ("lang", "◎语　　言　{}\n"),
-    ("pubdate", "◎上映日期　{}\n"),
-    ("imdb_rate", "◎IMDb评分　{}\n"),
+    ("region", "◎产　　地　{}\n"),
+    ("genre", "◎类　　别　{}\n"),
+    ("language", "◎语　　言　{}\n"),
+    ("playdate", "◎上映日期　{}\n"),
+    ("imdb_rating", "◎IMDb评分　{}\n"),
     ("imdb_link", "◎IMDb链接　{}\n"),
-    ("douban_rate", "◎豆瓣评分　{}\n"),
+    ("douban_rating", "◎豆瓣评分　{}\n"),
     ("douban_link", "◎豆瓣链接　{}\n"),
-    ("length", "◎片　　长　{}\n"),
-    ("directors", "◎导　　演　{}\n"),
-    ("casts", "◎主　　演　{}\n\n"),
-    ("summary", "◎简　　介  \n\n　　{}\n\n"),
-    ("awards", "◎获奖情况  \n\n{}"),
+    ("episodes", "◎集　　数　{}\n"),
+    ("duration", "◎片　　长　{}\n"),
+    ("director", "◎导　　演　{}\n"),
+    ("writer", "◎编　　剧　{}\n"),
+    ("cast", "◎主　　演　{}\n\n"),
+    ("tags", "\n◎标　　签　{}\n"),
+    ("introduction", "\n◎简　　介  \n\n　　{}\n"),
+    ("awards", "\n◎获奖情况  \n\n{}\n"),
 ]
 
 bangumi_format = [
-    ("cover_img", "{}\n\n"),
+    ("cover_img", "[img]{}[/img]\n\n"),
     ("story", "[b]Story: [/b]\n\n{}\n\n"),
     ("staff", "[b]Staff: [/b]\n\n{}\n\n"),
     ("cast", "[b]Cast: [/b]\n\n{}\n\n"),
@@ -45,8 +48,20 @@ support_list = [
     ("bangumi", re.compile("(https?://)?(bgm\.tv|bangumi\.tv|chii\.in)/subject/(?P<sid>\d+)/?")),
 ]
 
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                  'Chrome/61.0.3163.100 Safari/537.36 '
+}
 
-class Gen(NetBase):
+
+def get_page(url: str, _json=False, _bs=False, **kwargs):
+    kwargs.setdefault("headers", headers)
+    page = requests.get(url, **kwargs)
+    page.encoding = "utf-8"
+    return page.json() if _json else (BeautifulSoup(page.text, "lxml") if _bs else page.text)
+
+
+class Gen(object):
     site = sid = url = ret = None
     img_list = []  # 临时存储图片信息
 
@@ -70,145 +85,130 @@ class Gen(NetBase):
         }
 
     def gen(self):
-        getattr(self, "_gen_{}".format(self.site))()
+        if not self.ret.get("error"):
+            try:
+                getattr(self, "_gen_{}".format(self.site))()
+                self.ret["img"] = self.img_list
+                self.ret["success"] = True if not self.ret.get("error") else False
+            except Exception:
+                self.ret["error"] = "Internal error, please connect @Rhilip, thank you."
         return self.ret
 
     def _gen_douban(self):
-        api_douban = "https://api.douban.com/v2/movie/subject/{}"
-        raw_data_json = self.get_source(api_douban.format(self.sid), json=True)  # 通过豆瓣公开API获取Json格式的数据
-        if raw_data_json.get("msg"):
-            self.ret.update({"error": raw_data_json.get("msg")})
+        douban_link = "https://movie.douban.com/subject/{}/".format(self.sid)
+        douban_page = get_page(douban_link, _bs=True)
+        if douban_page.title.text == "页面不存在":
+            self.ret["error"] = "The corresponding resource does not exist."
         else:
-            alt = raw_data_json.get("alt")  # 通过API获取豆瓣链接（而不是自拼
-            raw_data_page = self.get_source(alt, bs=True)  # 获取相应页面（用来获取API中未提供的信息），并用BeautifulSoup处理
+            data = {}
+            # 对主页面进行解析
+            data["chinese_title"] = douban_page.title.text.replace("(豆瓣)", "").strip()
+            data["foreign_title"] = (douban_page.find("span", property="v:itemreviewed").text
+                                     .replace(data["chinese_title"], '').strip())
 
-            # -*- 清洗数据 -*-
-            self.ret.update({"id": self.sid, "alt": alt})
+            def fetch(node):
+                return node.next_element.next_element.strip()
 
-            # 可以从raw_json中直接（或简单处理就）转移到返回数据中的信息
-            _raw_title = raw_data_json.get("title")
-            _aka = raw_data_json.get("aka")
+            aka_anchor = douban_page.find("span", class_="pl", text=re.compile("又名"))
+            data["aka"] = "/".join(sorted(fetch(aka_anchor).split(' / '))) if aka_anchor else ""
 
-            _title = [_raw_title]
-            # 排除aka中的非中文字段
-            for t in _aka:
-                if re.search("[\u4E00-\u9FA5]", t) and t != _raw_title:
-                    _title.append(t)
+            if data["foreign_title"]:
+                data["trans_title"] = data["chinese_title"] + (('/' + data["aka"]) if data["aka"] else "")
+                data["this_title"] = data["foreign_title"]
+            else:
+                data["trans_title"] = data["aka"] if data["aka"] else ""
+                data["this_title"] = data["chinese_title"]
 
-            self.ret.update({
-                "title": " / ".join(_title),
-                "original_title": raw_data_json.get("original_title"),
-                "year": raw_data_json.get("year"),
-                "countries": " / ".join(raw_data_json.get("countries")),
-                "summary": raw_data_json.get("summary").replace("\n", "\n　　"),
-                "genres": " / ".join(raw_data_json.get("genres"))  # 在API中最多提供三个，会被再次获取值覆盖
-            })
+            title = []
+            for t in (((data["this_title"] + "/") if data["this_title"] else "") + data["trans_title"]).split("/"):
+                if re.search("[\u4E00-\u9FA5]", t):
+                    title.append(t)
+            data["title"] = "/".join(title)
 
-            # 从页面中的info面板中获取信息
-            info_tag = raw_data_page.find("div", id="info")
-            info_tag_str = info_tag.get_text()
+            data["year"] = douban_page.find("span", class_="year").text[1:-1]  # 年代
 
-            # 获取封面图（虽然没什么用）
-            cover_img_tag = raw_data_page.find("img", src=re.compile("doubanio"))
-            if cover_img_tag:
-                # https://img1.doubanio.com/view/photo/raw/public/p494268647.jpg
-                # https://img1.doubanio.com/view/movie_poster_cover/lpst/public/p494268647.jpg
-                cover_img = re.sub("^.+img(\d).+p(\d+).+$", r"https://img\1.doubanio.com/view/photo/raw/public/p\2.jpg",
-                                   cover_img_tag["src"])
-                self.img_list.append(cover_img)
-                self.ret.update({"cover_img": cover_img})
+            region_anchor = douban_page.find("span", class_="pl", text=re.compile("制片国家/地区"))
+            data["region"] = "/".join(fetch(region_anchor).split(" / ")) if region_anchor else ""  # 产地
 
-            for pat, key in [("类型", "genres"), ("语言", "lang"),
-                             ("上映日期", "pubdate"), ("IMDb链接", "imdb_id"), ("片长", "length")]:
-                _search = re.search(pat + ": (.+)", info_tag_str)
-                _up_data = ""
-                if _search:
-                    _up_data = _search.group(1).strip()
-                self.ret.update({key: _up_data})
+            def list_clean(l):
+                return l.text.strip()
 
-            if self.ret.get("imdb_id"):  # 该影片在豆瓣上存在IMDb链接
-                _imdb_link = "http://www.imdb.com/title/{}/".format(self.ret["imdb_id"])
-                _imdb_rate = ""
+            data["genre"] = "/".join(map(list_clean, douban_page.find_all("span", property="v:genre")))  # 类别
+            language_anchor = douban_page.find("span", class_="pl", text=re.compile("语言"))
+            data["language"] = "/".join(fetch(language_anchor).split(" / ")) if language_anchor else ""  # 语言
+
+            # 上映日期
+            data["playdate"] = "/".join(
+                sorted(map(list_clean, douban_page.find_all("span", property="v:initialReleaseDate"))))
+
+            imdb_link_anchor = douban_page.find("a", text=re.compile("tt\d+"))
+            data["imdb_link"] = imdb_link_anchor.attrs["href"] if imdb_link_anchor else ""  # IMDb链接
+            data["imdb_id"] = imdb_link_anchor.text  # IMDb号
+
+            episodes_anchor = douban_page.find("span", class_="pl", text=re.compile("集数"))
+            data["episodes"] = fetch(episodes_anchor) if episodes_anchor else ""  # 集数
+
+            # 片长
+            duration_anchor = douban_page.find("span", class_="pl", text=re.compile("单集片长"))
+            if duration_anchor:
+                data["duration"] = fetch(duration_anchor)
+            else:
+                data["duration"] = douban_page.find("span", property="v:runtime").text.strip()
+
+            # 请求其他资源
+            if data["imdb_link"]:  # 该影片在豆瓣上存在IMDb链接
+                imdb_source = ("https://p.media-imdb.com/static-content/documents/v1/title/{}/ratings%3Fjsonp="
+                               "imdb.rating.run:imdb.api.title.ratings/data.json".format(data["imdb_id"]))
                 try:
-                    imdb_source = "https://p.media-imdb.com/static-content/documents/v1/title/{}/ratings%3Fjsonp=imdb.rating.run:imdb.api.title.ratings/data.json".format(
-                        self.ret["imdb_id"])
-                    imdb_jsonp = self.get_source(imdb_source)  # 通过IMDb的API获取信息
+                    imdb_jsonp = get_page(imdb_source)  # 通过IMDb的API获取信息
                     if re.search("imdb.rating.run\((.+)\)", imdb_jsonp):
                         imdb_json = json.loads(re.search("imdb.rating.run\((.+)\)", imdb_jsonp).group(1))
                         imdb_average_rating = imdb_json["resource"]["rating"]
                         imdb_votes = imdb_json["resource"]["ratingCount"]
                         if imdb_average_rating and imdb_votes:
-                            _imdb_rate = "{}/10 from {} users".format(imdb_average_rating, imdb_votes)
-                except (AttributeError, KeyError):
+                            data["imdb_rating"] = "{}/10 from {} users".format(imdb_average_rating, imdb_votes)
+                except Exception:
                     pass
 
-                self.ret.update({"imdb_rate": _imdb_rate, "imdb_link": _imdb_link})
-
-            douban_rate = db_rate_count = ""
-            try:  # 获取豆瓣评分信息
-                douban_rate = raw_data_json.get("rating").get("average")
-                db_rate_count = raw_data_json.get("ratings_count")
-            except AttributeError:  # 如果通过豆瓣API获取不到评分，则抛出Error，并从`/subject/:d/collections` 获取
-                rate_text = self.get_source("https://movie.douban.com/subject/{}/collections".format(self.sid))
-                rate_search = re.search("(\d+)人参与评价", rate_text)
-                if rate_search:
-                    douban_rate = rate_search.group(1)
-                    db_rate_count = re.search(">(\d\.\d)</strong", rate_text).group(1)
-            finally:
-                self.ret.update({"douban_rate": "{}/10 from {} users".format(douban_rate, db_rate_count),
-                                 "douban_link": "https://movie.douban.com/subject/{}".format(self.sid)
-                                 })
-
-            # 获取导演信息及主演信息（当页面显示数多于API，则用页面显示，否则为API数据）
-            api_douban_celebrity = "https://api.douban.com/v2/movie/celebrity/{}"
-
-            for tp, rel in [("directors", "v:directedBy"), ("casts", "v:starring")]:
-                _temp_list = []
-                data_from_json = raw_data_json.get(tp)  # API中获取的信息
-                data_from_page = info_tag.find_all("a", rel=rel)  # 页面中获取的信息
-
-                if len(data_from_page) > len(data_from_json):  # 当页面中信息大于API信息时，构建自己的信息字典列表
-                    total_data = []
-                    for tp_tag in data_from_page:
-                        name_info = tp_tag.get_text()
-                        if_id_info = re.search("/celebrity/(\d+)", tp_tag["href"])
-                        id_info = if_id_info.group(1) if if_id_info else None
-                        total_data.append({"name": name_info, "id": id_info})
-                else:  # 否则用API提供的信息字典列表
-                    total_data = data_from_json
-
-                for role in total_data:
-                    role_name = role.get("name")
-                    role_id = role.get("id")
-                    if role_id:  # TODO 这里是查询最消耗时间的地方（特别是主演和演员信息多时），是否可以用Queue+Thread优化？
-                        role_json = self.get_source(api_douban_celebrity.format(role_id), json=True)
-                        if role_json.get("name_en"):
-                            role_name += "  " + role_json.get("name_en")
-                    _temp_list.append(role_name)
-                self.ret.update({tp: _temp_list})
-
             # 获取获奖情况
-            awards_url = "https://movie.douban.com/subject/{}/awards/"
-            awards_page = self.get_source(awards_url.format(self.sid), bs=True)
-            awards = ""
-            for awards_tag in awards_page.find_all("div", class_="awards"):
-                _temp_awards = ""
-                _temp_awards += "　　" + awards_tag.find("h2").get_text(strip=True) + "\n"
-                for specific in awards_tag.find_all("ul"):
-                    _temp_awards += "　　" + specific.get_text(" ", strip=True) + "\n"
+            awards_page = get_page("https://movie.douban.com/subject/{}/awards".format(self.sid), _bs=True)
 
-                awards += _temp_awards + "\n"
-            self.ret.update({"awards": awards})
+            def awards_clean(raw):
+                raw = re.sub("[ \n]", "", raw)
+                raw = re.sub("</li><li>", "</li> <li>", raw)
+                raw = re.sub("</a><span", "</a> <span", raw)
+                raw = re.sub("<(div|ul)[^>]*>", "\n", raw)
+                raw = re.sub("<[^>]+>", "", raw)
+                raw = re.sub("&nbsp;", " ", raw)
+                raw = re.sub(" +\n", "\n", raw)
+                return raw.strip()
 
+            data["awards"] = awards_clean(str(awards_page.find("div", class_="article")))
+
+            # 豆瓣评分，简介，海报，导演，编剧，演员，标签
+            douban_api_json = get_page('https://api.douban.com/v2/movie/{}'.format(self.sid), _json=True)
+            douban_average_rating = douban_api_json["rating"]["average"]
+            douban_votes = douban_api_json["rating"]["numRaters"]
+            data["douban_rating"] = "{}/10 from {} users".format(douban_average_rating, douban_votes)
+            data["introduction"] = re.sub("^None$", "暂无相关剧情介绍", douban_api_json["summary"])
+            data["poster"] = poster = re.sub("s(_ratio_poster|pic)", r"l\1", douban_api_json["image"])
+            self.img_list.append(poster)
+
+            data["director"] = " / ".join(douban_api_json["attrs"]["director"]) if douban_api_json["attrs"][
+                "director"] else ""
+            data["writer"] = " / ".join(douban_api_json["attrs"]["writer"]) if douban_api_json["attrs"][
+                "writer"] else ""
+            data["cast"] = "\n　　　　　　".join(douban_api_json["attrs"]["cast"]) if douban_api_json["attrs"]["cast"] else ""
+            data["tags"] = " | ".join(map(lambda member: member["name"], douban_api_json["tags"]))
+
+            self.ret.update(data)
             # -*- 组合数据 -*-
             descr = ""
             for key, ft in douban_format:
-                data = self.ret.get(key)
-                if data:
-                    if isinstance(data, list):
-                        data = "\n　　　　　　".join(data)
-                    descr += ft.format(data)
-            self.ret.update({"img": self.img_list, "format": descr, "success": True})
+                _data = data.get(key)
+                if _data:
+                    descr += ft.format(_data)
+            self.ret["format"] = descr
 
     def _gen_imdb(self):
         # TODO 根据tt号先在豆瓣搜索，如果有则直接使用豆瓣解析结果，如果没有，则转而从imdb上解析数据。
@@ -216,13 +216,13 @@ class Gen(NetBase):
 
     def _gen_bangumi(self):
         api_bangumi = "https://api.bgm.tv/subject/{}?responseGroup=large"
-        raw_data_json = self.get_source(api_bangumi.format(self.sid), json=True)  # 通过API获取Json格式的数据
+        raw_data_json = get_page(api_bangumi.format(self.sid), json=True)  # 通过API获取Json格式的数据
 
         if raw_data_json.get("error"):
             self.ret.update({"error": raw_data_json.get("error")})
         else:
             alt = raw_data_json.get("url")
-            raw_data_page = self.get_source(alt, bs=True)  # 获取相应页面（用来获取API中未提供的信息），并用BeautifulSoup处理
+            raw_data_page = get_page(alt, bs=True)  # 获取相应页面（用来获取API中未提供的信息），并用BeautifulSoup处理
 
             # -*- 清洗数据 -*-
             self.ret.update({"id": self.sid, "alt": alt})
@@ -270,9 +270,11 @@ class Gen(NetBase):
                     descr += ft.format(data)
             descr += "(来源于 {} )".format(self.ret.get("alt"))
 
-            self.ret.update({"img": self.img_list, "format": descr, "success": True})
+            self.ret.update({"format": descr})
 
 
 if __name__ == '__main__':
-    douban = Gen("https://movie.douban.com/subject/1308450/").gen()
-    print(douban.get("format"))
+    from pprint import pprint
+
+    pprint(Gen("https://movie.douban.com/subject/1308452130/").gen())  # not exist
+    pprint(Gen("https://movie.douban.com/subject/1308450/").gen())
