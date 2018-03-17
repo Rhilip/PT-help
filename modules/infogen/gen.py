@@ -216,13 +216,13 @@ class Gen(object):
 
     def _gen_bangumi(self):
         api_bangumi = "https://api.bgm.tv/subject/{}?responseGroup=large"
-        raw_data_json = get_page(api_bangumi.format(self.sid), json=True)  # 通过API获取Json格式的数据
+        raw_data_json = get_page(api_bangumi.format(self.sid), _json=True)  # 通过API获取Json格式的数据
 
         if raw_data_json.get("error"):
             self.ret.update({"error": raw_data_json.get("error")})
         else:
             alt = raw_data_json.get("url")
-            raw_data_page = get_page(alt, bs=True)  # 获取相应页面（用来获取API中未提供的信息），并用BeautifulSoup处理
+            raw_data_page = get_page(alt, _bs=True)  # 获取相应页面（用来获取API中未提供的信息），并用BeautifulSoup处理
 
             # -*- 清洗数据 -*-
             self.ret.update({"id": self.sid, "alt": alt})
@@ -254,12 +254,12 @@ class Gen(object):
                 if cast.get("actors"):
                     cast_actors = "\, ".join([actors.get("name") for actors in cast.get("actors")])
                 _cast.append("{}: {}".format(cast_name, cast_actors))
-                self.ret.update({"cast": _cast})
+                self.ret["cast"] = _cast
 
             _staff = []
             for staff_tag in raw_data_page.find("ul", id="infobox").find_all("li")[4:4 + 15]:
                 _staff.append(staff_tag.get_text())
-                self.ret.update({"staff": _staff})
+                self.ret["staff"] = _staff
 
             descr = ""
             for key, ft in bangumi_format:
@@ -276,5 +276,8 @@ class Gen(object):
 if __name__ == '__main__':
     from pprint import pprint
 
-    pprint(Gen("https://movie.douban.com/subject/1308452130/").gen())  # not exist
-    pprint(Gen("https://movie.douban.com/subject/1308450/").gen())
+    pprint(Gen("http://jdaklfjadfad.com/adfad").gen())  # No support link
+    pprint(Gen("https://movie.douban.com/subject/1308452130/").gen())  # Douban not exist
+    # pprint(Gen("https://movie.douban.com/subject/1308450/").gen())   # Douban Normal
+    pprint(Gen("https://bgm.tv/subject/2071342495").gen())  # Bangumi not exist
+    pprint(Gen("https://bgm.tv/subject/207195").gen())  # Bangumi Normal
