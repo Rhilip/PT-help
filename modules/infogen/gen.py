@@ -41,8 +41,8 @@ bangumi_format = [
 ]
 
 support_list = [
-    ("douban", re.compile("(https?://)?movie\.douban\.com/subject/(?P<sid>\d+)/?")),
-    # ("imdb", re.compile("(https?://)?www\.imdb\.com/title/(?P<sid>tt\d+)")),
+    ("douban", re.compile("(https?://)?movie\.douban\.com/(subject|movie)/(?P<sid>\d+)/?")),
+    ("imdb", re.compile("(https?://)?www\.imdb\.com/title/(?P<sid>tt\d+)")),
     # ("3dm", re.compile("(https?://)?bbs\.3dmgame\.com/thread-(?P<sid>\d+)(-1-1\.html)?")),
     # ("steam", re.compile("(https?://)?store\.steampowered\.com/app/(?P<sid>\d+)/?")),
     ("bangumi", re.compile("(https?://)?(bgm\.tv|bangumi\.tv|chii\.in)/subject/(?P<sid>\d+)/?")),
@@ -65,15 +65,18 @@ class Gen(object):
     site = sid = url = ret = None
     img_list = []  # 临时存储图片信息
 
-    def __init__(self, url):
+    def __init__(self, url: str):
         self.clear()
+        self.pat(url)
+
+    def pat(self, url: str):
         for site, pat in support_list:
             search = pat.search(url)
             if search:
                 self.sid = search.group("sid")
                 self.site = site
         if not self.site:
-            self.ret.update({"error": "No support link."})
+            self.ret["error"] = "No support link."
 
     def clear(self):
         self.site = self.sid = self.url = None
@@ -87,7 +90,6 @@ class Gen(object):
 
     def gen(self, _debug=False):
         if not self.ret.get("error"):
-
             try:
                 getattr(self, "_gen_{}".format(self.site))()
                 self.ret["img"] = self.img_list
@@ -208,8 +210,13 @@ class Gen(object):
         self.ret.update(data)
 
     def _gen_imdb(self):
-        # TODO 根据tt号先在豆瓣搜索，如果有则直接使用豆瓣解析结果，如果没有，则转而从imdb上解析数据。
-        pass
+        douban_imdb_api = get_page("https://api.douban.com/v2/movie/imdb/{}".format(self.sid), _json=True)
+        if douban_imdb_api.get("alt"):
+            # 根据tt号先在豆瓣搜索，如果有则直接使用豆瓣解析结果
+            self.pat(douban_imdb_api["alt"])
+            self._gen_douban()
+        else:  # TODO 如果没有，则转而从imdb上解析数据。
+            self.ret["error"] = "Not support Now."
 
     def _gen_bangumi(self):
         api_bangumi = "https://api.bgm.tv/subject/{}?responseGroup=large"
@@ -277,5 +284,6 @@ if __name__ == '__main__':
     pprint(Gen("https://movie.douban.com/subject/1308452130/").gen())  # Douban not exist
     pprint(Gen("https://movie.douban.com/subject/3541415/").gen(_debug=True))  # Douban Normal Foreign
     pprint(Gen("https://movie.douban.com/subject/1297880/").gen(_debug=True))  # Douban Normal Chinese
+    pprint(Gen("http://www.imdb.com/title/tt4925292/").gen(_debug=True))  # Imdb through Douban
     pprint(Gen("https://bgm.tv/subject/2071342495").gen())  # Bangumi not exist
     pprint(Gen("https://bgm.tv/subject/207195").gen(_debug=True))  # Bangumi Normal
