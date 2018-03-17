@@ -101,12 +101,12 @@ class Gen(object):
     def _gen_douban(self):
         douban_link = "https://movie.douban.com/subject/{}/".format(self.sid)
         douban_page = get_page(douban_link, _bs=True)
+        data = {"douban_link": douban_link}
         if douban_page.title.text == "页面不存在":
             self.ret["error"] = "The corresponding resource does not exist."
         else:
-            data = {}
             # 对主页面进行解析
-            data["chinese_title"] = douban_page.title.text.replace("(豆瓣)", "").strip()
+            data["chinese_title"] = (douban_page.title.text.replace("(豆瓣)", "").strip())
             data["foreign_title"] = (douban_page.find("span", property="v:itemreviewed").text
                                      .replace(data["chinese_title"], '').strip())
 
@@ -191,7 +191,6 @@ class Gen(object):
             data["cast"] = douban_api_json["attrs"]["cast"] if douban_api_json["attrs"]["cast"] else ""
             data["tags"] = list(map(lambda member: member["name"], douban_api_json["tags"]))
 
-            self.ret.update(data)
             # -*- 组合数据 -*-
             descr = ""
             for key, ft in douban_format:
@@ -206,6 +205,9 @@ class Gen(object):
                         _data = join_fix.join(_data)
                     descr += ft.format(_data)
             self.ret["format"] = descr
+
+        # 将清洗的数据一并发出
+        self.ret.update(data)
 
     def _gen_imdb(self):
         # TODO 根据tt号先在豆瓣搜索，如果有则直接使用豆瓣解析结果，如果没有，则转而从imdb上解析数据。
