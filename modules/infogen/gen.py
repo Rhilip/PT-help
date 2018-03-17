@@ -163,19 +163,17 @@ class Gen(object):
                     pass
 
             # 获取获奖情况
+            awards = ""
             awards_page = get_page("https://movie.douban.com/subject/{}/awards".format(self.sid), _bs=True)
+            for awards_tag in awards_page.find_all("div", class_="awards"):
+                _temp_awards = ""
+                _temp_awards += "　　" + awards_tag.find("h2").get_text(strip=True) + "\n"
+                for specific in awards_tag.find_all("ul"):
+                    _temp_awards += "　　" + specific.get_text(" ", strip=True) + "\n"
 
-            def awards_clean(raw):
-                raw = re.sub("[ \n]", "", raw)
-                raw = re.sub("</li><li>", "</li> <li>", raw)
-                raw = re.sub("</a><span", "</a> <span", raw)
-                raw = re.sub("<(div|ul)[^>]*>", "\n", raw)
-                raw = re.sub("<[^>]+>", "", raw)
-                raw = re.sub("&nbsp;", " ", raw)
-                raw = re.sub(" +\n", "\n", raw)
-                return raw.strip()
+                awards += _temp_awards + "\n"
 
-            data["awards"] = awards_clean(str(awards_page.find("div", class_="article")))
+            data["awards"] = awards
 
             # 豆瓣评分，简介，海报，导演，编剧，演员，标签
             douban_api_json = get_page('https://api.douban.com/v2/movie/{}'.format(self.sid), _json=True)
