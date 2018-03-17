@@ -7,7 +7,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 douban_format = [
     # (key name in dict. the format of key, string format) with order
@@ -81,17 +81,21 @@ class Gen(object):
         self.ret = {
             "success": False,
             "error": None,
-            "copyright": "Powered by @Rhilip. With Gen Version `{}`".format(__version__)
+            "copyright": "Powered by @Rhilip. With Gen Version `{}`".format(__version__),
+            "version": __version__
         }
 
-    def gen(self):
+    def gen(self, _debug=False):
         if not self.ret.get("error"):
+
             try:
                 getattr(self, "_gen_{}".format(self.site))()
                 self.ret["img"] = self.img_list
                 self.ret["success"] = True if not self.ret.get("error") else False
-            except Exception:
+            except Exception as err:
                 self.ret["error"] = "Internal error, please connect @Rhilip, thank you."
+                if _debug:
+                    raise Exception("Internal error").with_traceback(err.__traceback__)
         return self.ret
 
     def _gen_douban(self):
@@ -110,47 +114,35 @@ class Gen(object):
                 return node.next_element.next_element.strip()
 
             aka_anchor = douban_page.find("span", class_="pl", text=re.compile("又名"))
-            data["aka"] = "/".join(sorted(fetch(aka_anchor).split(' / '))) if aka_anchor else ""
+            data["aka"] = sorted(fetch(aka_anchor).split(' / ')) if aka_anchor else []
 
             if data["foreign_title"]:
-                data["trans_title"] = data["chinese_title"] + (('/' + data["aka"]) if data["aka"] else "")
-                data["this_title"] = data["foreign_title"]
+                trans_title = data["chinese_title"] + (('/' + "/".join(data["aka"])) if data["aka"] else "")
+                this_title = data["foreign_title"]
             else:
-                data["trans_title"] = data["aka"] if data["aka"] else ""
-                data["this_title"] = data["chinese_title"]
+                trans_title = "/".join(data["aka"]) if data["aka"] else ""
+                this_title = data["chinese_title"]
 
-            title = []
-            for t in (((data["this_title"] + "/") if data["this_title"] else "") + data["trans_title"]).split("/"):
-                if re.search("[\u4E00-\u9FA5]", t):
-                    title.append(t)
-            data["title"] = "/".join(title)
-
-            data["year"] = douban_page.find("span", class_="year").text[1:-1]  # 年代
+            data["trans_title"] = trans_title.split("/")
+            data["this_title"] = this_title.split("/")
 
             region_anchor = douban_page.find("span", class_="pl", text=re.compile("制片国家/地区"))
-            data["region"] = "/".join(fetch(region_anchor).split(" / ")) if region_anchor else ""  # 产地
-
-            def list_clean(l):
-                return l.text.strip()
-
-            data["genre"] = "/".join(map(list_clean, douban_page.find_all("span", property="v:genre")))  # 类别
             language_anchor = douban_page.find("span", class_="pl", text=re.compile("语言"))
-            data["language"] = "/".join(fetch(language_anchor).split(" / ")) if language_anchor else ""  # 语言
-
-            # 上映日期
-            data["playdate"] = "/".join(
-                sorted(map(list_clean, douban_page.find_all("span", property="v:initialReleaseDate"))))
-
+            episodes_anchor = douban_page.find("span", class_="pl", text=re.compile("集数"))
+            duration_anchor = douban_page.find("span", class_="pl", text=re.compile("单集片长"))
             imdb_link_anchor = douban_page.find("a", text=re.compile("tt\d+"))
+
+            data["year"] = douban_page.find("span", class_="year").text[1:-1]  # 年代
+            data["region"] = fetch(region_anchor).split(" / ") if region_anchor else []  # 产地
+            data["genre"] = list(map(lambda l: l.text.strip(), douban_page.find_all("span", property="v:genre")))  # 类别
+            data["language"] = fetch(language_anchor).split(" / ") if language_anchor else[]  # 语言
+            data["playdate"] = sorted(map(lambda l: l.text.strip(),  # 上映日期
+                                          douban_page.find_all("span", property="v:initialReleaseDate")))
             data["imdb_link"] = imdb_link_anchor.attrs["href"] if imdb_link_anchor else ""  # IMDb链接
             data["imdb_id"] = imdb_link_anchor.text  # IMDb号
-
-            episodes_anchor = douban_page.find("span", class_="pl", text=re.compile("集数"))
             data["episodes"] = fetch(episodes_anchor) if episodes_anchor else ""  # 集数
 
-            # 片长
-            duration_anchor = douban_page.find("span", class_="pl", text=re.compile("单集片长"))
-            if duration_anchor:
+            if duration_anchor:  # 片长
                 data["duration"] = fetch(duration_anchor)
             else:
                 data["duration"] = douban_page.find("span", property="v:runtime").text.strip()
@@ -194,12 +186,10 @@ class Gen(object):
             data["poster"] = poster = re.sub("s(_ratio_poster|pic)", r"l\1", douban_api_json["image"])
             self.img_list.append(poster)
 
-            data["director"] = " / ".join(douban_api_json["attrs"]["director"]) if douban_api_json["attrs"][
-                "director"] else ""
-            data["writer"] = " / ".join(douban_api_json["attrs"]["writer"]) if douban_api_json["attrs"][
-                "writer"] else ""
-            data["cast"] = "\n　　　　　　".join(douban_api_json["attrs"]["cast"]) if douban_api_json["attrs"]["cast"] else ""
-            data["tags"] = " | ".join(map(lambda member: member["name"], douban_api_json["tags"]))
+            data["director"] = douban_api_json["attrs"]["director"] if douban_api_json["attrs"]["director"] else []
+            data["writer"] = douban_api_json["attrs"]["writer"] if douban_api_json["attrs"]["writer"] else []
+            data["cast"] = douban_api_json["attrs"]["cast"] if douban_api_json["attrs"]["cast"] else ""
+            data["tags"] = list(map(lambda member: member["name"], douban_api_json["tags"]))
 
             self.ret.update(data)
             # -*- 组合数据 -*-
@@ -207,6 +197,13 @@ class Gen(object):
             for key, ft in douban_format:
                 _data = data.get(key)
                 if _data:
+                    if isinstance(_data, list):
+                        join_fix = " / "
+                        if key == "cast":
+                            join_fix = "\n　　　　　　"
+                        elif key == "tags":
+                            join_fix = " | "
+                        _data = join_fix.join(_data)
                     descr += ft.format(_data)
             self.ret["format"] = descr
 
@@ -276,8 +273,9 @@ class Gen(object):
 if __name__ == '__main__':
     from pprint import pprint
 
-    pprint(Gen("http://jdaklfjadfad.com/adfad").gen())  # No support link
+    pprint(Gen("http://jdaklvhgfad.com/adfad").gen())  # No support link
     pprint(Gen("https://movie.douban.com/subject/1308452130/").gen())  # Douban not exist
-    # pprint(Gen("https://movie.douban.com/subject/1308450/").gen())   # Douban Normal
+    pprint(Gen("https://movie.douban.com/subject/3541415/").gen(_debug=True))  # Douban Normal Foreign
+    pprint(Gen("https://movie.douban.com/subject/1297880/").gen(_debug=True))  # Douban Normal Chinese
     pprint(Gen("https://bgm.tv/subject/2071342495").gen())  # Bangumi not exist
-    pprint(Gen("https://bgm.tv/subject/207195").gen())  # Bangumi Normal
+    pprint(Gen("https://bgm.tv/subject/207195").gen(_debug=True))  # Bangumi Normal

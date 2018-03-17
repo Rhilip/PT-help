@@ -20,57 +20,68 @@ PT站点用简介生成工具
 | -------------|:--------------:|:--------------:|:--------------:|:------|
 | url | 资源网址 | string | Y | 具体接收链接形式见下表 |
 
-> 注：接口同时支持使用GET形式请求，参数同POST，但不建议使用
+> 注：接口同时支持使用GET形式请求，参数同POST，但不建议使用；如果无参数会被301到此说明页面
 
 #### 可接收的url列表
 | 站点类型 | 网址示例 |
 |-------------|:--------------|
 | 豆瓣 Douban | https://movie.douban.com/subject/:d |
-| 番组计划| 	https://bgm.tv/subject/:d |
-| 番组计划| 	http://bangumi.tv/subject/:d |
-| 番组计划| 	http://chii.in/subject/:d |
+| 番组计划| 	https://bgm.tv/subject/:d , http://bangumi.tv/subject/:d , http://chii.in/subject/:d |
 
 ### 5) 请求返回结果:
+
+#### 共有字段
+
+|字段名称       |字段说明         |类型            |
+| -------------|:--------------:|:--------------:|
+| cost | 请求开销时间 | float | 
+| success | 请求成功情况 | bool |
+| error | 请求错误信息 | string |
+| copyright | 版权说明信息 | string |
+| version | 版本信息 | string |
+| img | 图片列表 | list |
+
 
 #### 豆瓣链接
 
 ```json
 {
-    "alt": "https://movie.douban.com/subject/3008672/", 
-    "awards": "  第83届奥斯卡金像奖(2011)\n...........", 
-    "casts": [
-        "哈维尔·巴登  Javier Bardem", 
-        "马里塞尔·阿尔瓦雷斯  Maricel Álvarez", 
-        "布兰卡·波蒂略  Blanca Portillo", 
-        "鲁文·奥昌迪亚诺  Rubén Ochandiano"
-    ], 
-    "copyright": "Powered by @Rhilip. With Gen Version `0.1.0`", 
-    "countries": "墨西哥 / 西班牙", 
-    "cover_img": "https://img3.doubanio.com/view/photo/raw/public/p553292146.jpg", 
-    "directors": [
-        "亚利桑德罗·冈萨雷斯·伊纳里图  Alejandro González Iñárritu"
-    ], 
-    "douban_link": "https://movie.douban.com/subject/3008672", 
-    "douban_rate": "8/10 from 12531 users", 
-    "error": null, 
-    "format": "◎译  名 美错 / 最后的美丽(台) / 美丽末日(港)\n◎片  名 Biutiful.........", 
-    "genres": "剧情", 
-    "id": "3008672", 
-    "imdb_id": "tt1164999", 
-    "imdb_link": "http://www.imdb.com/title/tt1164999/", 
-    "imdb_rate": "7.5/10 from 74531 users", 
-    "img": [
-        "https://img3.doubanio.com/view/photo/raw/public/p553292146.jpg", 
-        "https://images-na.ssl-images-amazon.com/images/M/MV5BMzI4OTQ0MDQyNl5BMl5BanBnXkFtZTcwODY5MjQwNA@@._V1_.jpg"
-    ], 
-    "lang": "英语 / 西班牙语 / 法语 / 汉语普通话", 
-    "length": "148分钟", 
-    "original_title": "Biutiful", 
-    "pubdate": "2010-10-15(西班牙)", 
-    "success": true, 
-    "summary": "乌西巴尔（哈维尔·巴登 Javier Barden ..........", 
-    "title": "美错 / 最后的美丽(台) / 美丽末日(港)", 
-    "year": "2010"
+ "aka": ["全面启动(台)", "奠基", "心灵犯案", "潜行凶间(港)", "记忆迷阵", "记忆魔方"],
+ "awards": "第83届奥斯卡金像奖  (2011)\n.........",
+ "cast": ["莱昂纳多·迪卡普里奥 Leonardo DiCaprio",
+          "约瑟夫·高登-莱维特 Joseph Gordon-Levitt",
+          "艾伦·佩吉 Ellen Page",
+          "汤姆·哈迪 Tom Hardy",
+          "渡边谦 Ken Watanabe (I)",
+          "迪利普·劳 Dileep Rao",
+          "希里安·墨菲 Cillian Murphy",
+          "汤姆·贝伦杰 Tom Berenger"],
+ "chinese_title": "盗梦空间",
+ "copyright": "Powered by @Rhilip. With Gen Version `0.2.1`",
+ "director": ["克里斯托弗·诺兰 Christopher Nolan"],
+ "douban_rating": "9.3/10 from 837657 users",
+ "duration": "148分钟",
+ "episodes": "",
+ "error": null,
+ "foreign_title": "Inception",
+ "format": "[img]https://img3.doubanio.com/view/photo/l_ratio_poster/public/p513344864.jpg[/img]\n\n◎译    名  盗梦空间.....",
+ "genre": ["剧情", "科幻", "悬疑", "冒险"],
+ "imdb_id": "tt1375666",
+ "imdb_link": "http://www.imdb.com/title/tt1375666",
+ "imdb_rating": "8.8/10 from 1685906 users",
+ "img": ["https://img3.doubanio.com/view/photo/l_ratio_poster/public/p513344864.jpg"],
+ "introduction": "道姆·柯布（莱昂纳多·迪卡普里奥 Leonardo DiCaprio 饰）与同事阿瑟（约瑟夫·戈登-莱维特 Joseph.....",
+ "language": ["英语", "日语", "法语"],
+ "playdate": ["2010-07-16(美国)", "2010-09-01(中国大陆)"],
+ "poster": "https://img3.doubanio.com/view/photo/l_ratio_poster/public/p513344864.jpg",
+ "region": ["美国", "英国"],
+ "success": true,
+ "tags": ["科幻", "悬疑", "美国", "心理", "剧情", "经典", "哲学", "2010"],
+ "this_title": ["Inception"],
+ "trans_title": ["盗梦空间", "全面启动(台)", "奠基", "心灵犯案", "潜行凶间(港)", "记忆迷阵", "记忆魔方"],
+ "version": "0.2.1",
+ "writer": ["克里斯托弗·诺兰 Christopher Nolan"],
+ "year": "2010"
 }
 ```
 
@@ -123,4 +134,8 @@ PT站点用简介生成工具
 
 #### error字段可能值
 
-主要由上层资源站点提供，当输入的链接格式不在上表支持范围内，会抛出`No support link.`
+1. `No support link.`: 输入的链接格式不在上表支持范围内
+2. `The corresponding resource does not exist.`: 资源不存在
+3. 其他error字段主要由上层资源站点提供。请参见：
+  - Douban： [豆瓣Api V2（测试版）](https://developers.douban.com/wiki/?title=api_v2)
+  - Bangumi: [bangumi/api](https://github.com/bangumi/api)
