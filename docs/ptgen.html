@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="Dashboard for PT Site">
+    <meta name="author" content="Rhilip">
+
+    <title>PT Gen</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <style type="text/css">
+        /* Move down content because we have a fixed navbar that is 50px tall */
+        body {
+            padding-top: 50px;
+        }
+
+        /*
+         * Top navigation
+         * Hide default border to remove 1px line.
+         */
+        .navbar-fixed-top {
+            border: 0;
+        }
+
+        /* Main content */
+        .main {
+            padding: 20px;
+            margin-top: 0;
+        }
+
+        @media (min-width: 768px) {
+            .main {
+                padding-right: 40px;
+                padding-left: 40px;
+            }
+        }
+
+        #input_value {
+            width: 320px;
+        }
+
+        .zero-clipboard {
+            position: relative;
+        }
+
+        .btn-clipboard {
+            position: absolute;
+            top: 8px;
+            right: 16px;
+            z-index: 10;
+            display: block;
+            padding: 5px 8px;
+            font-size: 12px;
+            color: #767676;
+            cursor: pointer;
+            background-color: #fff;
+            border: 1px solid #e1e1e8;
+            border-radius: 0 4px 0 4px;
+        }
+    </style>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">PT Gen</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="//github.com/Rhilip/PT-help/blob/master/modules/infogen/README.md" target="_blank">Docs</a>
+                </li>
+                <li><a href="//blog.rhilip.info" target="_blank">Powered By @Rhilip</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 main">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label class="sr-only" for="input_value">Input value</label>
+                    <input type="text" class="form-control" placeholder="link" id="input_value"/>
+                </div>
+                <button class="btn btn-success" id="query_btn">查询</button>
+            </form>
+            <hr>
+            <div>
+                <div class="zero-clipboard">
+                    <button class="btn btn-clipboard" data-clipboard-target="#movie_info">复制</button>
+                </div>
+                <textarea class="form-control" rows=22 id="movie_info"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcss.com/clipboard.js/2.0.0/clipboard.min.js"></script>
+
+<script>
+    new ClipboardJS('.btn-clipboard');
+
+
+    $(function () {
+        var query_btn = $("#query_btn");
+        query_btn.click(function () {
+            $.ajax({
+                type: "get",
+                url: "https://api.rhilip.info/tool/movieinfo/gen",
+                data: {
+                    url: $("#input_value").val()
+                },
+                dataType: "json",
+                beforeSend: function () {
+                    query_btn.attr("disabled", true);
+                    query_btn.html("查询中");
+                },
+                success: function (data) {
+                    $("#movie_info").val(data["format"]);
+                },
+                error: function () {
+                    alert("Error occured!");
+                },
+                complete: function () {
+                    query_btn.removeAttr("disabled");
+                    query_btn.html("查询");
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>
