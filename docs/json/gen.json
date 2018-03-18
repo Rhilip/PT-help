@@ -1,0 +1,13 @@
+{
+  "version": "0.1.0",
+  "update_log": [
+    "2017.10.14 - 仿照Movieinfogen格式上线后端解析，并根据BYRBT内部讨论做相关修改",
+    "2018.01.30 - 旧IMDb查询接口失效，改用OMDb接口",
+    "2018.03.17 - 根据 `https://greasyfork.org/zh-CN/scripts/38878-电影信息查询脚本` 脚本逻辑重写Douban查询方法",
+    "2018.03.18 - 上线前端页面初版"
+  ],
+  "sample": {
+    "douban": "",
+    "bangumi": ""
+  }
+}

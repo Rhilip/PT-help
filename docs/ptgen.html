@@ -13,6 +13,9 @@
     <!-- Bootstrap core CSS -->
     <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- Latest compiled and minified CSS for bootstrap-table -->
+    <link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+
     <!-- Custom styles for this template -->
     <style type="text/css">
         /* Move down content because we have a fixed navbar that is 50px tall */
@@ -42,7 +45,7 @@
         }
 
         #input_value {
-            width: 320px;
+            width: 400px;
         }
 
         .zero-clipboard {
@@ -96,25 +99,37 @@
     </div>
 </nav>
 
-<div class="container-fluid">
+<div class="container-fluid main">
     <div class="row">
-        <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 main">
+        <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
             <form class="form-inline">
                 <div class="form-group">
                     <label class="sr-only" for="input_value">Input value</label>
-                    <input type="text" class="form-control" placeholder="link" id="input_value"/>
+                    <input type="text" class="form-control" placeholder="名称或豆瓣、IMDb、Bangumi链接" id="input_value"/>
                 </div>
                 <button class="btn btn-success" id="query_btn">查询</button>
             </form>
-            <hr>
-            <div>
-                <div class="zero-clipboard">
-                    <button class="btn btn-clipboard" data-clipboard-target="#movie_info">复制</button>
-                </div>
-                <textarea class="form-control" rows=22 id="movie_info"></textarea>
-            </div>
         </div>
+
+        <div id="gen_help" class="col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2" style="display: none">
+            <hr>
+            <table id="gen_help_table"></table>
+        </div>
+        <div id="gen_out" class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
+            <hr>
+            <div class="zero-clipboard">
+                <button class="btn btn-clipboard" data-clipboard-target="#movie_info">复制</button>
+            </div>
+            <textarea class="form-control" rows=22 id="movie_info"></textarea>
+        </div>
+        <!--
+        <div id="gen_version" class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
+            <hr>
+            示例
+        </div>
+        -->
     </div>
+
 </div>
 
 <!-- Bootstrap core JavaScript
@@ -123,39 +138,56 @@
 <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="https://cdn.bootcss.com/clipboard.js/2.0.0/clipboard.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
 
-<script>
-    new ClipboardJS('.btn-clipboard');
+<script>   // 页面信息填充
+// TODO Version and Version Log
+// TODO Sample
+</script>
 
+<script>   // 脚本查询相关
+var query_btn = $("#query_btn");
 
-    $(function () {
-        var query_btn = $("#query_btn");
-        query_btn.click(function () {
-            $.ajax({
-                type: "get",
-                url: "https://api.rhilip.info/tool/movieinfo/gen",
-                data: {
-                    url: $("#input_value").val()
-                },
-                dataType: "json",
-                beforeSend: function () {
-                    query_btn.attr("disabled", true);
-                    query_btn.html("查询中");
-                },
-                success: function (data) {
-                    $("#movie_info").val(data["success"] ? data["format"] : data["error"]);
-                },
-                error: function () {
-                    alert("Error occured!");
-                },
-                complete: function () {
-                    query_btn.removeAttr("disabled");
-                    query_btn.html("查询");
-                }
+query_btn.disable = function () {
+    query_btn.attr("disabled", true);
+    query_btn.html("查询中");
+};
+
+query_btn.enable = function () {
+    query_btn.removeAttr("disabled");
+    query_btn.html("查询");
+};
+
+function switch_help_out(tag) {
+    $("#gen_" + tag).show();
+    $("#gen_" + (tag === "help" ? "out" : "help")).hide();
+}
+
+$(function () {
+    query_btn.click(function () {
+        query_btn.disable();
+
+        var input_value = $("#input_value").val();
+        if (/^http/.test(input_value)) {
+            switch_help_out("out");
+
+            $.getJSON("https://api.rhilip.info/tool/movieinfo/gen", {
+                url: input_value
+            }).success(function (data) {
+                $("#movie_info").val(data["success"] ? data["format"] : data["error"]);
+            }).error(function () {
+                alert("Error occured!");
+            }).complete(function () {
+                query_btn.enable();
             });
-            return false;
+        } else {
+            // TODO switch_help_out("help");
+        }
         });
     });
+</script>
+<script>   // 页面复制相关
+new ClipboardJS('.btn-clipboard');
 </script>
 </body>
 </html>
