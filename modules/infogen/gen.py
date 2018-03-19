@@ -186,9 +186,9 @@ class Gen(object):
             data["poster"] = poster = re.sub("s(_ratio_poster|pic)", r"l\1", douban_api_json["image"])
             self.img_list.append(poster)
 
-            data["director"] = douban_api_json["attrs"]["director"] if douban_api_json["attrs"]["director"] else []
-            data["writer"] = douban_api_json["attrs"]["writer"] if douban_api_json["attrs"]["writer"] else []
-            data["cast"] = douban_api_json["attrs"]["cast"] if douban_api_json["attrs"]["cast"] else ""
+            data["director"] = douban_api_json["attrs"]["director"] if "director" in douban_api_json["attrs"] else []
+            data["writer"] = douban_api_json["attrs"]["writer"] if "writer" in douban_api_json["attrs"] else []
+            data["cast"] = douban_api_json["attrs"]["cast"] if "cast" in douban_api_json["attrs"] else ""
             data["tags"] = list(map(lambda member: member["name"], douban_api_json["tags"]))
 
             # -*- 组合数据 -*-
