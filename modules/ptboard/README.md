@@ -28,10 +28,13 @@ Pt站点高级搜索
 | limit | 获取数 | int | N | 默认为50，最大为200 |
 
 #### Site列表
+
+> 仅允许以下字段（准确）或其他在API中显示的站点名称(site字段)
+
 | 站点类型 | 允许字段 |
 |-------------|:--------------|
-| 国内教育网站 | BYR, 6V (Not Live Update), NPU, WHU, NWSUAF6, XAUAT6, ZX, NYPT, SJTU, CUGB, ~~Antsoul~~, HUDBT|
-| 国内公网站点| HDSKY, Hyperay, HDChina, HDHome, HDTime, HDU, JoyHD, CHDBits, Ourbits, OpenCD, SolaGS, TTHD, KeepFrds, TCCF, U2, CMCT, MTeam, GZTown, TTG, HDCity, CCFBits, HD4FANS|
+| 国内教育网站 | BYR, 6V (Not Live Update), NPU, WHU, NWSUAF6, XAUAT6, ZX, NYPT, SJTU, CUGB, ~~Antsoul(Closed)~~, HUDBT, TJUPT, DUTPT |
+| 国内公网站点| HDSKY, ~~Hyperay(Remove by site's opinion)~~ , HDChina, HDHome, HDTime, HDU, JoyHD, CHDBits, Ourbits, OpenCD, SolaGS, TTHD, KeepFrds, TCCF, U2, CMCT, MTeam, GZTown, TTG, HDStreet, HDCity, CCFBits, HD4FANS, CHCDVD, TLFBits, BTSCHOOL, TVHome |
 | 国外站点| - |
 | PreDB| PreDB |
 
@@ -49,16 +52,14 @@ Pt站点高级搜索
           "pubDate": 1505709168,                          
           "sid": 275274,                              
           "site": "HDChina",                                
-          "title": "The.Strain.S04.720p.HDTV.x264-Scene",   
-          "uid": 42844                                     
+          "title": "The.Strain.S04.720p.HDTV.x264-Scene"                                 
       },
       {
           "link": "http://nanyangpt.com/details.php?id=42969",
           "pubDate": 1505706340,
           "sid": 42969,
           "site": "NYPT",
-          "title": "[血族/嗜血菌株][The.Strain.S04E10.720p.HDTV.x264-FLEET][S04E10]",
-          "uid": 40994
+          "title": "[血族/嗜血菌株][The.Strain.S04E10.720p.HDTV.x264-FLEET][S04E10]"
       }
   ], 
   "success": true,   
@@ -83,14 +84,4 @@ Pt站点高级搜索
 | sid | 种子序号 | int |
 | site | 发布站点 | string |
 | title | 种子名称 | string |
-| uid | 数据库记录顺序 | int |
 
-#### error字段可能值
-
- > 该部分由 `module.token.get_token_record` 提供，并可能返回以下信息。
- 
-| 返回信息 | 字段说明 |
-|-------------|:--------------|
-| No token. | 请求字段中不存在token信息 |
-| This token is not exist in database. | 数据库中无该token记录 |
-| The quote of this token is exhaustion | 对应token使用尽配额 |

@@ -7,6 +7,7 @@ import pymysql
 from flask import Flask
 from flaskext.mysql import MySQL
 from flask_cors import CORS
+from flask_cache import Cache
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object('config')
@@ -24,5 +25,6 @@ class Database(MySQL):
 
 
 mysql = Database(app=app, autocommit=True)
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 CORS(app)
