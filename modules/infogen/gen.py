@@ -7,7 +7,8 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
+__author__ = "Rhilip"
 
 douban_format = [
     # (key name in dict. the format of key, string format) with order
@@ -54,11 +55,11 @@ headers = {
 }
 
 
-def get_page(url: str, _json=False, _bs=False, **kwargs):
+def get_page(url: str, json_=False, bs_=False, **kwargs):
     kwargs.setdefault("headers", headers)
     page = requests.get(url, **kwargs)
     page.encoding = "utf-8"
-    return page.json() if _json else (BeautifulSoup(page.text, "lxml") if _bs else page.text)
+    return page.json() if json_ else (BeautifulSoup(page.text, "lxml") if bs_ else page.text)
 
 
 class Gen(object):
@@ -84,7 +85,7 @@ class Gen(object):
         self.ret = {
             "success": False,
             "error": None,
-            "copyright": "Powered by @Rhilip. With Gen Version `{}`".format(__version__),
+            "copyright": "Powered by @{}".format(__author__),
             "version": __version__
         }
 
@@ -95,14 +96,14 @@ class Gen(object):
                 self.ret["img"] = self.img_list
                 self.ret["success"] = True if not self.ret.get("error") else False
             except Exception as err:
-                self.ret["error"] = "Internal error, please connect @Rhilip, thank you."
+                self.ret["error"] = "Internal error, please connect @{}, thank you.".format(__author__)
                 if _debug:
                     raise Exception("Internal error").with_traceback(err.__traceback__)
         return self.ret
 
     def _gen_douban(self):
         douban_link = "https://movie.douban.com/subject/{}/".format(self.sid)
-        douban_page = get_page(douban_link, _bs=True)
+        douban_page = get_page(douban_link, bs_=True)
         data = {"douban_link": douban_link}
         if douban_page.title.text == "页面不存在":
             self.ret["error"] = "The corresponding resource does not exist."
@@ -141,7 +142,7 @@ class Gen(object):
             data["playdate"] = sorted(map(lambda l: l.text.strip(),  # 上映日期
                                           douban_page.find_all("span", property="v:initialReleaseDate")))
             data["imdb_link"] = imdb_link_anchor.attrs["href"] if imdb_link_anchor else ""  # IMDb链接
-            data["imdb_id"] = imdb_link_anchor.text  # IMDb号
+            data["imdb_id"] = imdb_link_anchor.text if imdb_link_anchor else ""  # IMDb号
             data["episodes"] = fetch(episodes_anchor) if episodes_anchor else ""  # 集数
 
             if duration_anchor:  # 片长
@@ -166,7 +167,7 @@ class Gen(object):
 
             # 获取获奖情况
             awards = ""
-            awards_page = get_page("https://movie.douban.com/subject/{}/awards".format(self.sid), _bs=True)
+            awards_page = get_page("https://movie.douban.com/subject/{}/awards".format(self.sid), bs_=True)
             for awards_tag in awards_page.find_all("div", class_="awards"):
                 _temp_awards = ""
                 _temp_awards += "　　" + awards_tag.find("h2").get_text(strip=True) + "\n"
@@ -178,7 +179,7 @@ class Gen(object):
             data["awards"] = awards
 
             # 豆瓣评分，简介，海报，导演，编剧，演员，标签
-            douban_api_json = get_page('https://api.douban.com/v2/movie/{}'.format(self.sid), _json=True)
+            douban_api_json = get_page('https://api.douban.com/v2/movie/{}'.format(self.sid), json_=True)
             douban_average_rating = douban_api_json["rating"]["average"]
             douban_votes = douban_api_json["rating"]["numRaters"]
             data["douban_rating"] = "{}/10 from {} users".format(douban_average_rating, douban_votes)
@@ -210,23 +211,23 @@ class Gen(object):
         self.ret.update(data)
 
     def _gen_imdb(self):
-        douban_imdb_api = get_page("https://api.douban.com/v2/movie/imdb/{}".format(self.sid), _json=True)
+        douban_imdb_api = get_page("https://api.douban.com/v2/movie/imdb/{}".format(self.sid), json_=True)
         if douban_imdb_api.get("alt"):
             # 根据tt号先在豆瓣搜索，如果有则直接使用豆瓣解析结果
             self.pat(douban_imdb_api["alt"])
             self._gen_douban()
         else:  # TODO 如果没有，则转而从imdb上解析数据。
-            self.ret["error"] = "Not support Now."
+            self.ret["error"] = "Can't find this imdb_id in Douban."
 
     def _gen_bangumi(self):
         api_bangumi = "https://api.bgm.tv/subject/{}?responseGroup=large"
-        raw_data_json = get_page(api_bangumi.format(self.sid), _json=True)  # 通过API获取Json格式的数据
+        raw_data_json = get_page(api_bangumi.format(self.sid), json_=True)  # 通过API获取Json格式的数据
 
         if raw_data_json.get("error"):
             self.ret.update({"error": raw_data_json.get("error")})
         else:
             alt = raw_data_json.get("url")
-            raw_data_page = get_page(alt, _bs=True)  # 获取相应页面（用来获取API中未提供的信息），并用BeautifulSoup处理
+            raw_data_page = get_page(alt, bs_=True)  # 获取相应页面（用来获取API中未提供的信息），并用BeautifulSoup处理
 
             # -*- 清洗数据 -*-
             self.ret.update({"id": self.sid, "alt": alt})
@@ -280,10 +281,12 @@ class Gen(object):
 if __name__ == '__main__':
     from pprint import pprint
 
-    pprint(Gen("http://jdaklvhgfad.com/adfad").gen())  # No support link
-    pprint(Gen("https://movie.douban.com/subject/1308452130/").gen())  # Douban not exist
-    pprint(Gen("https://movie.douban.com/subject/3541415/").gen(_debug=True))  # Douban Normal Foreign
-    pprint(Gen("https://movie.douban.com/subject/1297880/").gen(_debug=True))  # Douban Normal Chinese
-    pprint(Gen("http://www.imdb.com/title/tt4925292/").gen(_debug=True))  # Imdb through Douban
-    pprint(Gen("https://bgm.tv/subject/2071342495").gen())  # Bangumi not exist
-    pprint(Gen("https://bgm.tv/subject/207195").gen(_debug=True))  # Bangumi Normal
+    pprint(Gen("https://movie.douban.com/subject/10563794/").gen(_debug=True))
+
+    # pprint(Gen("http://jdaklvhgfad.com/adfad").gen())  # No support link
+    # pprint(Gen("https://movie.douban.com/subject/1308452130/").gen())  # Douban not exist
+    # pprint(Gen("https://movie.douban.com/subject/3541415/").gen(_debug=True))  # Douban Normal Foreign
+    # pprint(Gen("https://movie.douban.com/subject/1297880/").gen(_debug=True))  # Douban Normal Chinese
+    # pprint(Gen("http://www.imdb.com/title/tt4925292/").gen(_debug=True))  # Imdb through Douban
+    # pprint(Gen("https://bgm.tv/subject/2071342495").gen())  # Bangumi not exist
+    # pprint(Gen("https://bgm.tv/subject/207195").gen(_debug=True))  # Bangumi Normal
