@@ -12,8 +12,6 @@
 
     <!-- Bootstrap core CSS -->
     <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Latest compiled and minified CSS for bootstrap-table -->
     <link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
@@ -130,6 +128,9 @@
                         <li>You must have account when searching in A Private Tracker, and logged in (Check the login
                             status in the new tab).
                         </li>
+                        <li>For more help, Please visit <a href="https://github.com/Rhilip/PT-help/issues/2"
+                                                           target="_blank">[Rhilip/PT-help/issue #2]</a>.
+                        </li>
                     </ol>
                 </div>
             </div>
@@ -164,7 +165,7 @@
                                     <h4 class="panel-title">
                                         <a role="button" data-toggle="collapse" data-parent="#accordion"
                                            href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                            Choose The Advance Search Site
+                                            Choose The Search Site
                                         </a>
                                     </h4>
                                 </div>
@@ -235,13 +236,13 @@
                                                 <img id="wechat_qr"
                                                      src="https://blog.rhilip.info/usr/uploads/my/wechat.jpg"
                                                      alt="WeChat Pay" class="img-responsive">
-                                                <p class="text-center">微信打赏</p></div>
+                                                <p class="text-center">By WeChat</p></div>
                                             <div id="alipay" style="display: inline-block;    padding-left: 7px;"
                                                  class="col-md-6">
                                                 <img id="alipay_qr"
                                                      src="https://blog.rhilip.info/usr/uploads/my/alipay.jpg"
                                                      alt="Alipay" class="img-responsive">
-                                                <p class="text-center">支付宝打赏</p>
+                                                <p class="text-center">By Alipay</p>
                                             </div>
                                         </div>
                                     </div>
@@ -284,47 +285,11 @@
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
-<!-- Latest compiled and minified JavaScript for bootstrap-table -->
 <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-switch/3.3.4/js/bootstrap-switch.min.js"></script>
 
 <script>
-    /** Format Title with it's Link
-     * @return {string}
-     */
-    function LinkFormatter(value, index) {
-        return '<a href="' + index.link + '" target="_blank" rel="noreferer nofollow">' + index.name + '</a>'
-    }
-
-    function SizeFormatter(bytes) {
-        var ret;
-        var kilobyte = 1024;
-        var megabyte = 1024 * 1024;
-        var gigabyte = 1024 * 1024 * 1024;
-        var terabyte = 1024 * 1024 * 1024 * 1024;
-
-        if ((bytes >= 0) && (bytes < kilobyte)) {
-            ret = bytes + ' B';
-        } else if ((bytes >= kilobyte) && (bytes < megabyte)) {
-            ret = (bytes / kilobyte).toFixed(2) + ' KB';
-        } else if ((bytes >= megabyte) && (bytes < gigabyte)) {
-            ret = (bytes / megabyte).toFixed(2) + ' MB';
-        } else if ((bytes >= gigabyte) && (bytes < terabyte)) {
-            ret = (bytes / gigabyte).toFixed(2) + ' GB';
-        } else if (bytes >= terabyte) {
-            ret = (bytes / terabyte).toFixed(2) + ' TB';
-        }
-        return ret
-    }
-
-    /**
-     * @return {string}
-     */
-    function TimeStampFormatter(data) {
-        var unixTimestamp = new Date(data);
-        return unixTimestamp.toLocaleString();
-    }
-
+    /** Script for Main Search Result Table */
     $('#table').bootstrapTable({
         classes: "table table-hover table-striped",
         striped: true,
@@ -343,14 +308,19 @@
                 field: 'name',
                 title: 'Name',
                 align: 'center',
-                formatter: LinkFormatter
+                formatter: function (value, row) {
+                    return '<a href="' + row.link + '" target="_blank" rel="noreferer nofollow">' + row.name + '</a>'
+                }
             }, {
                 field: 'pubdate',
                 title: 'Publish Date',
                 align: 'center',
                 valign: 'middle',
                 class: 'data-inline',
-                formatter: TimeStampFormatter,
+                formatter: function (data) {
+                    var unixTimestamp = new Date(data);
+                    return unixTimestamp.toLocaleString();
+                },
                 sortable: 'true'
             }, {
                 field: 'size',
@@ -358,7 +328,26 @@
                 align: 'center',
                 valign: 'middle',
                 class: 'data-inline',
-                formatter: SizeFormatter,
+                formatter: function (bytes) {
+                    var ret;
+                    var kilobyte = 1024;
+                    var megabyte = 1024 * 1024;
+                    var gigabyte = 1024 * 1024 * 1024;
+                    var terabyte = 1024 * 1024 * 1024 * 1024;
+
+                    if ((bytes >= 0) && (bytes < kilobyte)) {
+                        ret = bytes + ' B';
+                    } else if ((bytes >= kilobyte) && (bytes < megabyte)) {
+                        ret = (bytes / kilobyte).toFixed(2) + ' KB';
+                    } else if ((bytes >= megabyte) && (bytes < gigabyte)) {
+                        ret = (bytes / megabyte).toFixed(2) + ' MB';
+                    } else if ((bytes >= gigabyte) && (bytes < terabyte)) {
+                        ret = (bytes / gigabyte).toFixed(2) + ' GB';
+                    } else if (bytes >= terabyte) {
+                        ret = (bytes / terabyte).toFixed(2) + ' TB';
+                    }
+                    return ret
+                },
                 sortable: 'true'
             }, {
                 field: 'seeders',
@@ -383,10 +372,13 @@
         pagination: true,
         sidePagination: "client",
         pageSize: 50,
-        pageList: [10, 25, 50, 100, 200],
+        pageList: [10, 25, 50, 100, 200, "ALL"],
         escape: true
     });
+</script>
 
+<script>
+    /** Script for Search Site Setting */
     var btn_save_site = $("#save-site");
 
     btn_save_site.click(function () {

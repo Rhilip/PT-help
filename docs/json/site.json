@@ -1,5 +1,257 @@
 {
   "name": "Site List for PT-search",
+  "definition": {
+    "site_type": [
+      "jyw",
+      "gw",
+      "wz",
+      "bt"
+    ],
+    "temple": [
+      "NexusPHP",
+      "TTG",
+      "NPU",
+      "ZX",
+      "HDChina",
+      "HDCity",
+      "HDStreet",
+      "HDRoute",
+      "Other",
+      "None"
+    ]
+  },
+  "site": [
+    {
+      "name": "BYR",
+      "type": "jyw",
+      "temple": "NexusPHP",
+      "setting": {
+        "search_prefix": "https://bt.byr.cn/torrents.php?search="
+      }
+    },
+    {
+      "name": "NPU",
+      "type": "jyw",
+      "temple": "NPU",
+      "search_prefix": "https://npupt.com/torrents.php?search="
+    },
+    {
+      "name": "WHU",
+      "type": "jyw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://pt.whu.edu.cn/torrents.php?search="
+    },
+    {
+      "name": "NWSUAF6",
+      "type": "jyw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://pt.nwsuaf6.edu.cn/torrents.php?search="
+    },
+    {
+      "name": "XAUAT6",
+      "type": "jyw",
+      "temple": "NexusPHP",
+      "search_prefix": "http://pt.xauat6.edu.cn/torrents.php?search="
+    },
+    {
+      "name": "ZX",
+      "type": "jyw",
+      "temple": "NexusPHP",
+      "search_prefix": "http://pt.zhixing.bjtu.edu.cn/search/x"
+    },
+    {
+      "name": "NYPT",
+      "type": "jyw",
+      "temple": "NexusPHP",
+      "search_prefix": "http://nanyangpt.com/torrents.php?search="
+    },
+    {
+      "name": "SJTU",
+      "type": "jyw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://pt.sjtu.edu.cn/torrents.php?search="
+    },
+    {
+      "name": "HUDBT",
+      "type": "jyw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://hudbt.hust.edu.cn/torrents.php?search="
+    },
+    {
+      "name": "TJUPT",
+      "type": "jyw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://tjupt.org/torrents.php?search="
+    },
+    {
+      "name": "HDSKY",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://hdsky.me/torrents.php?search="
+    },
+    {
+      "name": "Hyperay",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://www.hyperay.org/torrents.php?search="
+    },
+    {
+      "name": "HDChina",
+      "type": "gw",
+      "temple": "HDChina",
+      "search_prefix": "https://hdchina.org/torrents.php?search="
+    },
+    {
+      "name": "HDHome",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://hdhome.org/torrents.php?search="
+    },
+    {
+      "name": "HDHome(Live)",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://hdhome.org/live.php?search="
+    },
+    {
+      "name": "HDTime",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://hdtime.org/torrents.php?search="
+    },
+    {
+      "name": "HDU",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://pt.hdupt.com/torrents.php?search="
+    },
+    {
+      "name": "JoyHD",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://www.joyhd.net/torrents.php?search="
+    },
+    {
+      "name": "CHDBits",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://chdbits.co/torrents.php?search="
+    },
+    {
+      "name": "Ourbits",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://ourbits.club/torrents.php?search="
+    },
+    {
+      "name": "OpenCD",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://www.open.cd/torrents.php?search="
+    },
+    {
+      "name": "SolaGS",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://solags.org/torrents.php?search="
+    },
+    {
+      "name": "TTHD",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "http://tthd.org/torrents.php?search="
+    },
+    {
+      "name": "KeepFrds",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://pt.keepfrds.com/torrents.php?search="
+    },
+    {
+      "name": "TCCF",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://et8.org/torrents.php?search="
+    },
+    {
+      "name": "U2",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://u2.dmhy.org/torrents.php?search="
+    },
+    {
+      "name": "CMCT",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://hdcmct.org/torrents.php?search="
+    },
+    {
+      "name": "MTeam",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://tp.m-team.cc/torrents.php?search="
+    },
+    {
+      "name": "MTeam(Adult)",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://tp.m-team.cc/adult.php?search="
+    },
+    {
+      "name": "GZTown",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://pt.gztown.net/torrents.php?search="
+    },
+    {
+      "name": "TTG(Media)",
+      "type": "gw",
+      "temple": "TTG",
+      "search_prefix": "https://bt.byr.cn/torrents.php?search="
+    },
+    {
+      "name": "TTG(Gamez)",
+      "type": "gw",
+      "temple": "TTG",
+      "search_prefix": "https://bt.byr.cn/torrents.php?search="
+    },
+    {
+      "name": "HDStreet",
+      "type": "gw",
+      "temple": "HDStreet",
+      "search_prefix": "http://hdstreet.club/torrents.php?search="
+    },
+    {
+      "name": "HDCity",
+      "type": "gw",
+      "temple": "HDCity",
+      "search_prefix": "https://hdcity.work/pt?iwannaseethis="
+    },
+    {
+      "name": "HD4FANS",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "https://pt.hd4fans.org/torrents.php?search="
+    },
+    {
+      "name": "TLFBits",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "http://pt.eastgame.org/torrents.php?search="
+    },
+    {
+      "name": "BTSCHOOL",
+      "type": "gw",
+      "temple": "NexusPHP",
+      "search_prefix": "http://pt.btschool.net/torrents.php?search="
+    },
+    {
+      "name": "HDRoute",
+      "type": "gw",
+      "temple": "HDRoute",
+      "search_prefix": "http://hdroute.org/browse.php?s="
+    }
+  ],
   "jyw": [
     "BYR",
     "6V",
