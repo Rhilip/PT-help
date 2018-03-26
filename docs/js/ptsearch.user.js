@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180326
+// @version      20180326.1
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -201,8 +201,8 @@ $(document).ready(function () {
             });
         }
 
-        function NPU(search_prefix) {    // NPUPT : https://npupt.com/
-            Get_Search_Page("NPU", search_prefix, function (res, doc, body, page) {
+        function NPU(site, search_prefix) {    // NPUPT : https://npupt.com/
+            Get_Search_Page(site, search_prefix, function (res, doc, body, page) {
                 // TODO Fix
                 var tr_list = page.find("#torrents_table tr");
                 for (var i = 1; i < tr_list.length; i += 3) {
@@ -212,7 +212,7 @@ $(document).ready(function () {
                     var _tag_size = torrent_data_raw.find("center");
 
                     table_append({
-                        "site": "NPU",
+                        "site": site,
                         "name": _tag_name.attr("title") || _tag_name.text(),
                         "link": "https://npupt.com/" + _tag_name.attr("href"),
                         "pubdate": Date.parse(_date),
@@ -225,8 +225,8 @@ $(document).ready(function () {
             });
         }
 
-        function ZX(search_prefix) {
-            Get_Search_Page("ZX", search_prefix, function (res, doc, body, page) {
+        function ZX(site, search_prefix) {
+            Get_Search_Page(site, search_prefix, function (res, doc, body, page) {
                 var torrent_list_table = page.find(".torrenttable tr");
                 writelog("Get " + torrent_list_table.length + " records in Site ZX.");
                 for (var i = 1; i < torrent_list_table.length; i++) {
@@ -255,7 +255,7 @@ $(document).ready(function () {
                     }
 
                     table_append({
-                        "site": "ZX",
+                        "site": site,
                         "name": _tag_name.text(),
                         "link": "http://pt.zhixing.bjtu.edu.cn" + _tag_name.attr("href"),
                         "pubdate": _date,
@@ -268,8 +268,8 @@ $(document).ready(function () {
             });
         }
 
-        function HDChina(search_prefix) {
-            Get_Search_Page("HDChina", search_prefix, function (res, doc, body, page) {
+        function HDChina(site, search_prefix) {
+            Get_Search_Page(site, search_prefix, function (res, doc, body, page) {
                 var tr_list = page.find(".torrent_list tr:odd");
                 writelog("Get " + tr_list.length + " records in Site HDChina.");
                 for (var i = 0; i < tr_list.length; i++) {
@@ -289,7 +289,7 @@ $(document).ready(function () {
                     var _tag_completed = torrent_data_raw.find(".t_completed");
 
                     table_append({
-                        "site": "HDChina",
+                        "site": site,
                         "name": _tag_name.attr("title") || _tag_name.text(),
                         "link": "https://hdchina.org/" + _tag_name.attr("href"),
                         "pubdate": Date.parse(_date),
@@ -302,8 +302,8 @@ $(document).ready(function () {
             });
         }
 
-        function HDCity(search_prefix) {
-            Get_Search_Page("HDCity", search_prefix, function (res, doc, body, page) {
+        function HDCity(site, search_prefix) {
+            Get_Search_Page(site, search_prefix, function (res, doc, body, page) {
                 var tr_list = page.find("div[class^='text'][style='line-height:1rem;']");
                 writelog("Get " + tr_list.length + " records in Site HDCity.");
                 for (var i = 0; i < tr_list.length; i++) {
@@ -324,7 +324,7 @@ $(document).ready(function () {
                     var _size = _tag_size.text().match(/\[([.\d]+? [KMGT]B)/)[1];
 
                     table_append({
-                        "site": "HDCity",
+                        "site": site,
                         "name": _tag_name.text(),
                         "link": "https://hdcity.work/" + _tag_name.attr("href"),
                         "pubdate": Date.parse(_date),
@@ -337,8 +337,8 @@ $(document).ready(function () {
             });
         }
 
-        function HDStreet(search_prefix) {
-            Get_Search_Page("HDStreet", search_prefix, function (res, doc, body, page) {
+        function HDStreet(site, search_prefix) {
+            Get_Search_Page(site, search_prefix, function (res, doc, body, page) {
                 // 继承自蚂蚁的使用大量colspan,rowspan的表格处理
                 var tr_list = page.find(".torrents > tbody > tr:gt(1)");    // 前两行都是表题栏，不要
                 writelog("Get " + tr_list.length / 2 + " records in Site HDStreet.");
@@ -368,7 +368,7 @@ $(document).ready(function () {
                     var _tag_completed = torrent_data_raw_1.find("a[href^='viewsnatches.php']");
 
                     table_append({
-                        "site": "HDStreet",
+                        "site": site,
                         "name": _tag_name.attr("title") || _tag_name.text(),
                         "link": "http://hdstreet.club/" + _tag_name.attr("href"),
                         "pubdate": Date.parse(_date),
@@ -381,9 +381,9 @@ $(document).ready(function () {
             });
         }
 
-        function HDRoute(search_prefix) {
+        function HDRoute(site, search_prefix) {
             // TODO 注意HDR的未进行测试，不可用
-            Get_Search_Page("HDRoute", search_prefix, function (res, doc) {
+            Get_Search_Page(site, search_prefix, function (res, doc) {
                 var tr_list = doc.querySelectorAll("dl[id^='dl_torrent']");  // 所有种子均在id开头为dl_torrent的dl标签下
                 writelog("Get " + tr_list.length + " records in Site HDRoute.");
                 for (var i = 0; i < tr_list.length; i++) {   // 遍历记录
@@ -400,7 +400,7 @@ $(document).ready(function () {
                     var _leechers = torrent_data_raw.find("a[href*='list_peers']").eq(1);
 
                     table_append({
-                        "site": "HDRoute",
+                        "site": site,
                         "name": _title_chs + " | " + _title_eng,
                         "link": torrent_data_raw.find("div.torrent_detail_icon > a").attr("href"),
                         "pubdate": Date.parse(_date),
@@ -429,8 +429,8 @@ $(document).ready(function () {
         NexusPHP("TJUPT", "https://tjupt.org/torrents.php?search=");
 
         // 教育网不能使用通用NexusPHP解析的站点
-        NPU("https://npupt.com/torrents.php?search=");
-        ZX("http://pt.zhixing.bjtu.edu.cn/search/x");
+        NPU("NPU", "https://npupt.com/torrents.php?search=");
+        ZX("ZX", "http://pt.zhixing.bjtu.edu.cn/search/x");
         // NexusPHP("CUGB", "http://pt.cugb.edu.cn/torrents.php?search=");
 
         // 公网通用模板解析
@@ -458,13 +458,13 @@ $(document).ready(function () {
         NexusPHP("BTSCHOOL", "http://pt.btschool.net/torrents.php?search=");
 
         // 公网不能使用通用NexusPHP解析的站点
-        HDChina("https://hdchina.org/torrents.php?search=");
+        HDChina("HDChina", "https://hdchina.org/torrents.php?search=");
         TTG("TTG(Media)", "https://totheglory.im/browse.php?c=M&search_field=");
         TTG("TTG(Gamez)", "https://totheglory.im/browse.php?c=G&search_field=");
 
-        HDCity("https://hdcity.work/pt?iwannaseethis=");
-        HDStreet("http://hdstreet.club/torrents.php?search=");
-        HDRoute("http://hdroute.org/browse.php?s=");
+        HDCity("HDCity", "https://hdcity.work/pt?iwannaseethis=");
+        HDStreet("HDStreet", "http://hdstreet.club/torrents.php?search=");
+        HDRoute("HDRoute", "http://hdroute.org/browse.php?s=");
 
         // TODO CCFBits, (I May not support this site due to bad dom.)
 
