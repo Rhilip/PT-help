@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180326.1
+// @version      20180327
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -19,6 +19,7 @@ if (GM_info && GM_info.script) {
 }
 
 var time_regex = /(\d{4}-\d{2}-\d{2}[^\d]+?\d{2}:\d{2}:\d{2})/;
+var time_regen_replace = /-(\d{2})[^\d]+?(\d{2}):/;
 
 /**
  * @return {number}
@@ -126,6 +127,10 @@ $(document).ready(function () {
             Get_Search_Page(site, search_prefix, function (res, doc, body, page) {
                 var url_prefix = /pt\.whu\.edu\.cn|whupt\.net|hudbt\.hust\.edu\.cn/.test(res.finalUrl) ? "" : (res.finalUrl.match(/(https?:\/\/[^\/]+?\/).+/) || ['', ''])[1];
                 writelog("Using The normal parser for NexusPHP in Site: " + site);
+                if (/没有种子|用准确的关键字重试/.test(res.responseText)) {
+                    writelog("No any torrent find in Site " + site + ".");
+                    return;
+                }
                 var tr_list = page.find(torrent_table_selector || "table.torrents:last > tbody > tr:gt(0)");
                 writelog("Get " + tr_list.length + " records in Site " + site + ".");
                 for (var i = 0; i < tr_list.length; i++) {
@@ -139,7 +144,7 @@ $(document).ready(function () {
                         return /(\d{4}-\d{2}-\d{2}[^\d]+?\d{2}:\d{2}:\d{2})|[分时天月年]/.test($(this).html());
                     }).last();
                     if (_tag_date && _tag_date.html()) {
-                        _date = (_tag_date.html().match(time_regex) || ["", "0000-00-00 00:00:00"])[1].replace(/-(\d{2})[^\d]+?(\d{2}):/, "-$1 $2:");
+                        _date = (_tag_date.html().match(time_regex) || ["", "0000-00-00 00:00:00"])[1].replace(time_regen_replace, "-$1 $2:");
                     }
 
                     var _tag_size = _tag_date.next("td");
@@ -175,9 +180,9 @@ $(document).ready(function () {
 
                     var _tag_date, _date;
                     _tag_date = torrent_data_raw.find("td").filter(function () {
-                        return time_regex.test($(this).text());
+                        return time_regex.test($(this).html());
                     });
-                    _date = _tag_date.text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
+                    _date = _tag_date.html().match(time_regex)[1].replace(time_regen_replace, "-$1 $2:");
 
                     var _tag_size = torrent_data_raw.find("td").filter(function () {
                         return /[kMGT]B$/.test($(this).text());
@@ -195,7 +200,7 @@ $(document).ready(function () {
                         "size": FileSizetoLength(_tag_size.text()),
                         "seeders": _tag_seeders.text().replace(',', '') || 0,
                         "leechers": _tag_leechers.text().replace(',', '') || 0,
-                        "completed": _tag_completed.text().match(/\d+/)[0].replace(',', '')
+                        "completed": (_tag_completed.text().match(/\d+/) || ["0"])[0].replace(',', '')
                     });
                 }
             });
