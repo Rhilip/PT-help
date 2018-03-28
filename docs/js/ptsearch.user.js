@@ -74,7 +74,6 @@ $(document).ready(function () {
         var search_site = localStorage.getItem('selected_name').split(',') || [];   // Search Site
         // Get Config
         var config_log = $("#config-log").prop("checked"); // Logging
-        var config_not_check_login = $("#config-not-check-login").prop("checked"); // Login Check
 
         if (!$('#config-keep-old').prop('checked')) {
             table.bootstrapTable('removeAll');  // 清空已有表格信息
@@ -99,7 +98,7 @@ $(document).ready(function () {
                     method: 'GET',
                     url: search_prefix + search_text,
                     onload: function (res) {
-                        if (!config_not_check_login && res.finalUrl.search("login") > -1) {
+                        if (/(login|verify|returnto)[.=]/.test(res.finalUrl)) {
                             writelog("May Not Login in Site " + site + ". With finalUrl: " + res.finalUrl);
                         } else {
                             writelog("Get Search Pages Success in Site " + site + ".");
@@ -423,9 +422,6 @@ $(document).ready(function () {
 
         // 开始各站点遍历
         writelog("Script Version: " + script_version + ", Choose Site List: " + search_site.toString() + ", With Search Keywords: " + search_text);
-        if (config_not_check_login) {
-            writelog("Login Check is disable by your settings.");
-        }
         // 教育网通用模板解析
         NexusPHP("BYR", "https://bt.byr.cn/torrents.php?search=");
         NexusPHP("WHU", "https://pt.whu.edu.cn/torrents.php?search=");
