@@ -286,7 +286,6 @@
 <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
-<script src="https://cdn.bootcss.com/bootstrap-switch/3.3.4/js/bootstrap-switch.min.js"></script>
 
 <script>
     /** Script for Main Search Result Table */
@@ -384,7 +383,7 @@
     btn_save_site.click(function () {
         // 获取用户选择搜索的网站
         var selected_site = [];
-        $('#check-site input:checked').each(function () {
+        $('div#check-site input:checked').each(function () {
             selected_site.push($(this).attr('name'));
         });
 
@@ -399,7 +398,7 @@
         localStorage.setItem('config', JSON.stringify(config));
     });
 
-    $.get("./json/site.json", function (data) {
+    function set_site(data) {
         var type_list = ["jyw", "gw", "wz", "bt"];  // 与json文件对应的站点类型
         for (var i = 0; i < type_list.length; i++) {
             var type_name = type_list[i];
@@ -418,11 +417,11 @@
         var last_selected_name_raw = localStorage.getItem('selected_name') || "BYR";
         var last_selected_name = last_selected_name_raw.split(',');
         for (var last_selected_var_i = 0; last_selected_var_i < last_selected_name.length; last_selected_var_i++) {
-            $('#check-site input[name="' + last_selected_name[last_selected_var_i] + '"]').prop('checked', true);
+            $('div#check-site input[name="' + last_selected_name[last_selected_var_i] + '"]').prop('checked', true);
         }
 
         // 从localStorage中获取存储的设置
-        var config = JSON.parse(window.localStorage.getItem("config"));
+        var config = JSON.parse(localStorage.getItem("config"));
         if (config) {
             for (var c in config) {
                 $("input#" + c).prop("checked", config[c]);
@@ -430,7 +429,25 @@
         }
 
         btn_save_site.click();
+    }
+
+    $.get("./json/site.json", function (data) {
+        set_site(data);
     });
+
+    /*
+    if (!localStorage.getItem("site")) {
+        $.get("./json/site.json", function (data) {
+            set_site(data);
+            localStorage.setItem("site",JSON.stringify(data));
+        });
+    } else {
+        var data = JSON.parse(localStorage.getItem("site"));
+        set_site(data);
+
+    }
+    */
+
 </script>
 </body>
 </html>

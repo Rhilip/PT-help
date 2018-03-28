@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180327
+// @version      20180328
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -208,12 +208,15 @@ $(document).ready(function () {
 
         function NPU(site, search_prefix) {    // NPUPT : https://npupt.com/
             Get_Search_Page(site, search_prefix, function (res, doc, body, page) {
-                // TODO Fix
                 var tr_list = page.find("#torrents_table tr");
                 for (var i = 1; i < tr_list.length; i += 3) {
                     var torrent_data_raw = tr_list.eq(i);
                     var _tag_name = torrent_data_raw.find("a[href*='hit']");
-                    var _date = torrent_data_raw.find("span[title*='-'][title*=':'][title^='20']").attr("title") || $.trim(torrent_data_raw.find("div.small").text()) || torrent_data_raw.text().match(/(\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}:\d{2})/)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
+                    var _tag_date = torrent_data_raw.find("div.small").filter(function () {
+                        return time_regex.test($(this).html());
+                    });
+                    var _date = (_tag_date.html().match(time_regex) || ["", "0000-00-00 00:00:00"] )[1].replace(time_regen_replace, "-$1 $2:");
+
                     var _tag_size = torrent_data_raw.find("center");
 
                     table_append({
