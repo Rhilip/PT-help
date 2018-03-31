@@ -420,6 +420,51 @@ $(document).ready(function () {
             });
         }
 
+        function CCFBits(site, search_prefix) {
+            Get_Search_Page(site, search_prefix, function (res, doc, body, page) {
+                var url_prefix = "http://ccfbits.org/";
+                if (/没有找到匹配种子!/.test(res.responseText)) {
+                    writelog("No any torrent find in Site " + site + ".");
+                    return;
+                }
+                var tr_list = page.find("table.mainouter > tbody > tr:nth-child(2) > td > table:last > tbody> tr:gt(0)");
+                writelog("Get " + tr_list.length + " records in Site " + site + ".");
+                for (var i = 0; i < tr_list.length; i++) {
+                    var torrent_data_raw = tr_list.eq(i);
+                    var _tag_name = torrent_data_raw.find("a[href*='hit']");
+
+                    // 确定日期tag，因用户在站点设置中配置及站点优惠信息的情况的存在，此处dom结构会有不同
+                    // 此外多数站点对于 seeders, leechers, completed 没有额外的定位信息，故要依赖于正确的日期tag
+                    var _tag_date, _date = "0000-00-00 00:00:00";
+                    _tag_date = torrent_data_raw.find("> td").filter(function () {
+                        return time_regex.test($(this).html());
+                    }).last();
+                    if (_tag_date && _tag_date.html()) {
+                        _date = (_tag_date.html().match(time_regex) || ["", "0000-00-00 00:00:00"])[1].replace(time_regen_replace, "-$1 $2:");
+                    }
+
+                    var _tag_seeders = torrent_data_raw.find("a[href$='toseeders=1']");  // torrent_data_raw.find("a[href$='#seeders']")
+                    var _tag_leechers = torrent_data_raw.find("a[href$='todlers=1']");  // torrent_data_raw.find("a[href$='#leechers']")
+                    var _tag_completed = torrent_data_raw.find("a[href^='snatches']");  // torrent_data_raw.find("a[href^='viewsnatches']")
+
+                    var _tag_completed_size = _tag_completed.parent("td");
+                    var _size = (_tag_completed_size.text().match(/^[\d.]+ [kMG]B/) || ["0 GB"])[0];
+
+                    table_append({
+                        "site": site,
+                        "name": _tag_name.attr("title") || _tag_name.text(),
+                        "link": url_prefix + _tag_name.attr("href"),
+                        "pubdate": Date.parse(_date),
+                        "size": FileSizetoLength(_size),
+                        "seeders": _tag_seeders.text().replace(',', '') || 0,  // 获取不到正常信息的时候置0
+                        "leechers": _tag_leechers.text().replace(',', '') || 0,
+                        "completed": _tag_completed.text().replace(',', '').replace("次", "").trim() || 0
+                    });
+                }
+            });
+
+        }
+
         // 开始各站点遍历
         writelog("Script Version: " + script_version + ", Choose Site List: " + search_site.toString() + ", With Search Keywords: " + search_text);
         // 教育网通用模板解析
@@ -469,8 +514,7 @@ $(document).ready(function () {
         HDCity("HDCity", "https://hdcity.work/pt?iwannaseethis=");
         HDStreet("HDStreet", "http://hdstreet.club/torrents.php?search=");
         HDRoute("HDRoute", "http://hdroute.org/browse.php?s=");
-
-        // TODO CCFBits, (I May not support this site due to bad dom.)
+        CCFBits("CCFBits", "http://ccfbits.org/browse.php?search=");
 
         // 外网站点
 
