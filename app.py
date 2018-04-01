@@ -25,6 +25,6 @@ class Database(MySQL):
 
 
 mysql = Database(app=app, autocommit=True)
-cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+cache = Cache(app)
 
 CORS(app)
