@@ -7,7 +7,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 __author__ = "Rhilip"
 
 douban_format = [
@@ -184,8 +184,8 @@ class Gen(object):
 
             # 豆瓣评分，简介，海报，导演，编剧，演员，标签
             douban_api_json = get_page('https://api.douban.com/v2/movie/{}'.format(self.sid), json_=True)
-            douban_average_rating = douban_api_json["rating"]["average"]
-            douban_votes = douban_api_json["rating"]["numRaters"]
+            douban_average_rating = douban_api_json["rating"]["average"] or 0  # Set default douban rating value
+            douban_votes = douban_api_json["rating"]["numRaters"] or 0
             data["douban_rating"] = "{}/10 from {} users".format(douban_average_rating, douban_votes)
             data["introduction"] = re.sub("^None$", "暂无相关剧情介绍", douban_api_json["summary"])
             data["poster"] = poster = re.sub("s(_ratio_poster|pic)", r"l\1", douban_api_json["image"])
@@ -295,4 +295,4 @@ if __name__ == '__main__':
 
     # Old test to fix problem
     # pprint(Gen("https://movie.douban.com/subject/10563794/").gen(_debug=True))
-    pprint(Gen("https://www.imdb.com/title/tt0083662/").gen(_debug=True))
+    pprint(Gen("https://www.imdb.com/title/tt0083662/").gen(_debug=True))  # Fix without duration and douban rate

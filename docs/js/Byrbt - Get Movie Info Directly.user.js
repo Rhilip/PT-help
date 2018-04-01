@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Byrbt : Get Movie Info Directly
 // @namespace   http://blog.rhilip.info
-// @version     20180308
+// @version     20180401
 // @description 从其他信息站点（Douban、Bangumi）获取种子简介信息，并辅助表单信息填写与美化
 // @author      Rhilip
 // @include     /^https?:\/\/(bt\.byr\.cn|byr\.rhilip\.info)\/upload\.php\?type=40(8|1|4)/
@@ -377,8 +377,8 @@ CKEDITOR.on('instanceReady', function (evt) {
                             dataType: 'jsonp',
                             jsonpCallback: 'callback',
                             success: function (json) {
-                                douban_average_rating = json.rating.average;
-                                douban_votes = json.rating.numRaters.toLocaleString();
+                                douban_average_rating = json.rating.average || 0;
+                                douban_votes = json.rating.numRaters.toLocaleString() || 0;
                                 douban_rating = douban_average_rating + '/10 from ' + douban_votes + ' users';
                                 introduction = json.summary.replace(/^None$/g, '暂无相关剧情介绍');
                                 poster = json.image.replace(/s(_ratio_poster|pic)/g, 'l$1');
@@ -514,6 +514,7 @@ CKEDITOR.on('instanceReady', function (evt) {
 
 /**
  * Created by Rhilip on 10/12/2017.
+ * 20180401: 增加默认douban的评分值，防止无评分时出现`/10 from users`的情况
  * 20180308: 修复Firefox下不能正常填入简介的Bug。
  * 20180305：补充Bangumi相关解析，修改豆瓣链接异步获取的监听方法。
  * 20180303: 根据 `https://greasyfork.org/zh-CN/scripts/38878-电影信息查询脚本` 脚本重写。
