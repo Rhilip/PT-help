@@ -11,6 +11,8 @@ from .gen import Gen
 
 getinfo_blueprint = Blueprint('infogen', __name__, url_prefix="/movieinfo")
 
+docs_url = "https://github.com/Rhilip/PT-help/blob/master/modules/infogen/README.md"
+
 
 @getinfo_blueprint.route("/gen", methods=["GET", "POST"])
 def gen():
@@ -39,4 +41,4 @@ def gen():
         data["cost"] = time.time() - t0
         return jsonify(data)
     else:
-        return redirect("https://git.io/vFvmP", code=301)
+        return redirect(docs_url, code=301)

@@ -18,8 +18,8 @@ PT站点用简介生成工具
 #### GET or POST 参数:
 |字段名称       |字段说明         |类型            |必填            |说明     |
 | -------------|:--------------:|:--------------:|:--------------:|:------|
-| url | 资源网址 | string | Y | 具体接收链接形式见下表 |
-| nocache | 禁用数据库缓存 | string | N | 任何值均会导致数据库缓存失效，建议传入`nocache=1` |
+| url | 资源网址 | string | Y | 具体接收链接形式见下表，无该值时会被重定向(301)到本页 |
+| nocache | 禁用缓存 | string | N | 任何值均会导致已有缓存失效，如需禁用建议传入`nocache=1` |
 
 #### 可接收的url列表
 | 站点类型 | 网址示例 |
@@ -27,7 +27,7 @@ PT站点用简介生成工具
 | 豆瓣 Douban | https://movie.douban.com/subject/:d |
 | 番组计划| 	https://bgm.tv/subject/:d , http://bangumi.tv/subject/:d , http://chii.in/subject/:d |
 
-### 5) 请求返回结果:
+### 5) 请求返回结果示例:
 
 #### 共有字段
 
