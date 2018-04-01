@@ -132,23 +132,27 @@ class Gen(object):
             region_anchor = douban_page.find("span", class_="pl", text=re.compile("制片国家/地区"))
             language_anchor = douban_page.find("span", class_="pl", text=re.compile("语言"))
             episodes_anchor = douban_page.find("span", class_="pl", text=re.compile("集数"))
-            duration_anchor = douban_page.find("span", class_="pl", text=re.compile("单集片长"))
             imdb_link_anchor = douban_page.find("a", text=re.compile("tt\d+"))
 
             data["year"] = douban_page.find("span", class_="year").text[1:-1]  # 年代
             data["region"] = fetch(region_anchor).split(" / ") if region_anchor else []  # 产地
             data["genre"] = list(map(lambda l: l.text.strip(), douban_page.find_all("span", property="v:genre")))  # 类别
-            data["language"] = fetch(language_anchor).split(" / ") if language_anchor else[]  # 语言
+            data["language"] = fetch(language_anchor).split(" / ") if language_anchor else []  # 语言
             data["playdate"] = sorted(map(lambda l: l.text.strip(),  # 上映日期
                                           douban_page.find_all("span", property="v:initialReleaseDate")))
             data["imdb_link"] = imdb_link_anchor.attrs["href"] if imdb_link_anchor else ""  # IMDb链接
             data["imdb_id"] = imdb_link_anchor.text if imdb_link_anchor else ""  # IMDb号
             data["episodes"] = fetch(episodes_anchor) if episodes_anchor else ""  # 集数
 
-            if duration_anchor:  # 片长
-                data["duration"] = fetch(duration_anchor)
-            else:
-                data["duration"] = douban_page.find("span", property="v:runtime").text.strip()
+            duration_anchor = douban_page.find("span", class_="pl", text=re.compile("单集片长"))
+            runtime_anchor = douban_page.find("span", property="v:runtime")
+
+            duration = ""  # 片长
+            if duration_anchor:
+                duration = fetch(duration_anchor)
+            elif runtime_anchor:
+                duration = runtime_anchor.text.strip()
+            data["duration"] = duration
 
             # 请求其他资源
             if data["imdb_link"]:  # 该影片在豆瓣上存在IMDb链接
@@ -281,8 +285,6 @@ class Gen(object):
 if __name__ == '__main__':
     from pprint import pprint
 
-    pprint(Gen("https://movie.douban.com/subject/10563794/").gen(_debug=True))
-
     # pprint(Gen("http://jdaklvhgfad.com/adfad").gen())  # No support link
     # pprint(Gen("https://movie.douban.com/subject/1308452130/").gen())  # Douban not exist
     # pprint(Gen("https://movie.douban.com/subject/3541415/").gen(_debug=True))  # Douban Normal Foreign
@@ -290,3 +292,7 @@ if __name__ == '__main__':
     # pprint(Gen("http://www.imdb.com/title/tt4925292/").gen(_debug=True))  # Imdb through Douban
     # pprint(Gen("https://bgm.tv/subject/2071342495").gen())  # Bangumi not exist
     # pprint(Gen("https://bgm.tv/subject/207195").gen(_debug=True))  # Bangumi Normal
+
+    # Old test to fix problem
+    # pprint(Gen("https://movie.douban.com/subject/10563794/").gen(_debug=True))
+    pprint(Gen("https://www.imdb.com/title/tt0083662/").gen(_debug=True))
