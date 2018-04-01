@@ -2,13 +2,11 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2017-2020 Rhilip <rhilipruan@gmail.com>
 
-import json
 import time
 
-from pymysql import escape_string
 from flask import Blueprint, request, jsonify, redirect
 
-from app import mysql, app
+from app import cache
 from .gen import Gen
 
 getinfo_blueprint = Blueprint('infogen', __name__, url_prefix="/movieinfo")
@@ -16,33 +14,29 @@ getinfo_blueprint = Blueprint('infogen', __name__, url_prefix="/movieinfo")
 
 @getinfo_blueprint.route("/gen", methods=["GET", "POST"])
 def gen():
-    if request.method == "POST":
-        url = request.form["url"]
-    elif request.method == "GET":
-        url = request.args.get("url")
-    else:
-        url = ""
+    def get_key(key):
+        ret = ""
+        if request.method == "POST":
+            ret = request.form[key]
+        elif request.method == "GET":
+            ret = request.args.get(key)
+        return ret
+
+    url = get_key("url")
+    nocache = get_key("nocache")
 
     if url:
         t0 = time.time()
-        _gen = Gen(url=url)
 
-        row, db_data = mysql.exec(
-            "SELECT * FROM `api`.`gen_info` WHERE `site`='{}' AND `sid`='{}'".format(_gen.site, _gen.sid),
-            r_dict=True, ret_row=True
-        )
+        @cache.memoize(timeout=86400)
+        def gen_data(uri):
+            return Gen(url=uri).gen()
 
-        if int(row) == 0:  # 数据库无该缓存数据
-            data = _gen.gen()
-            if data["success"] and not app.config["DEBUG"]:  # 正确获取的情况下缓存请求结果
-                mysql.exec(
-                    "INSERT INTO `api`.`gen_info` (`site`, `sid`, `data`)"
-                    " VALUES ('{}', '{}', '{}')".format(_gen.site, _gen.sid, escape_string(json.dumps(data)))
-                )
-        else:
-            data = json.loads(db_data.get("data"))
+        if nocache:
+            cache.delete_memoized(gen_data, url)
 
-        data.update({"cost": time.time() - t0})
+        data = gen_data(url)
+        data["cost"] = time.time() - t0
         return jsonify(data)
     else:
         return redirect("https://git.io/vFvmP", code=301)
