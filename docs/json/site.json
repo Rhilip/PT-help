@@ -16,6 +16,7 @@
       "HDCity",
       "HDStreet",
       "HDRoute",
+      "CCFBits",
       "Other",
       "None"
     ]
@@ -232,6 +233,12 @@
       "type": "gw",
       "temple": "NexusPHP",
       "search_prefix": "https://pt.hd4fans.org/torrents.php?search="
+    },
+    {
+      "name": "CCFBits",
+      "type": "gw",
+      "temple": "CCFBits",
+      "search_prefix": "http://ccfbits.org/browse.php?search="
     },
     {
       "name": "TLFBits",

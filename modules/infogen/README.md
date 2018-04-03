@@ -7,7 +7,7 @@ PT站点用简介生成工具
 
 > https://api.rhilip.info/tool/movieinfo/gen
 
-### 2) 调用方式：HTTP post
+### 2) 调用方式：HTTP get|post
 
 ### 3) 接口描述：
 
@@ -15,7 +15,7 @@ PT站点用简介生成工具
 
 ### 4) 请求参数:
 
-#### GET or POST 参数:
+#### 参数:
 |字段名称       |字段说明         |类型            |必填            |说明     |
 | -------------|:--------------:|:--------------:|:--------------:|:------|
 | url | 资源网址 | string | Y | 具体接收链接形式见下表，无该值时会被重定向(301)到本页 |
@@ -39,6 +39,7 @@ PT站点用简介生成工具
 | copyright | 版权说明信息 | string |
 | version | 版本信息 | string |
 | img | 图片列表 | list |
+| format | 以BBcode格式整理的完整可用简介 | string |
 
 
 #### 豆瓣链接
@@ -134,7 +135,5 @@ PT站点用简介生成工具
 #### error字段可能值
 
 1. `No support link.`: 输入的链接格式不在上表支持范围内
-2. `The corresponding resource does not exist.`: 资源不存在
-3. 其他error字段主要由上层资源站点提供。请参见：
-  - Douban： [豆瓣Api V2（测试版）](https://developers.douban.com/wiki/?title=api_v2)
-  - Bangumi: [bangumi/api](https://github.com/bangumi/api)
+2. `The corresponding resource does not exist.`: 资源不存在（或资源不能公开访问）
+3. `Internal error, please connect @{author}, thank you.`: 内部处理错误

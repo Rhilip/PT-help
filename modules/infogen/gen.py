@@ -7,7 +7,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 __author__ = "Rhilip"
 
 douban_format = [
@@ -35,10 +35,11 @@ douban_format = [
 ]
 
 bangumi_format = [
-    ("cover_img", "[img]{}[/img]\n\n"),
+    ("cover", "[img]{}[/img]\n\n"),
     ("story", "[b]Story: [/b]\n\n{}\n\n"),
     ("staff", "[b]Staff: [/b]\n\n{}\n\n"),
     ("cast", "[b]Cast: [/b]\n\n{}\n\n"),
+    ("alt", "(来源于 {} )\n")
 ]
 
 support_list = [
@@ -85,6 +86,7 @@ class Gen(object):
         self.ret = {
             "success": False,
             "error": None,
+            "format": "",
             "copyright": "Powered by @{}".format(__author__),
             "version": __version__
         }
@@ -224,75 +226,66 @@ class Gen(object):
             self.ret["error"] = "Can't find this imdb_id in Douban."
 
     def _gen_bangumi(self):
-        api_bangumi = "https://api.bgm.tv/subject/{}?responseGroup=large"
-        raw_data_json = get_page(api_bangumi.format(self.sid), json_=True)  # 通过API获取Json格式的数据
+        bangumi_link = "https://bgm.tv/subject/{}".format(self.sid)
+        bangumi_characters_link = "https://bgm.tv/subject/{}/characters".format(self.sid)
 
-        if raw_data_json.get("error"):
-            self.ret.update({"error": raw_data_json.get("error")})
+        bangumi_page = get_page(bangumi_link, bs_=True)
+        if str(bangumi_page).find("出错了") > -1:
+            self.ret["error"] = "The corresponding resource does not exist."
         else:
-            alt = raw_data_json.get("url")
-            raw_data_page = get_page(alt, bs_=True)  # 获取相应页面（用来获取API中未提供的信息），并用BeautifulSoup处理
+            data = {"id": self.sid, "alt": bangumi_link}
 
-            # -*- 清洗数据 -*-
-            self.ret.update({"id": self.sid, "alt": alt})
+            # 对页面进行划区
+            cover_staff_another = bangumi_page.find("div", id="bangumiInfo")
+            cover_another = cover_staff_another.find("img")
+            staff_another = cover_staff_another.find("ul", id="infobox")
+            story_another = bangumi_page.find("div", id="subject_summary")
+            # cast_another = bangumi_page.find("ul", id="browserItemList")
 
-            # Bangumi的封面图
-            cover_img = ""
-            for quality in ["large", "common", "medium", "small", "grid"]:
-                try:
-                    cover_img = raw_data_json["images"][quality]
-                except AttributeError:
-                    pass
-                else:
-                    self.img_list.append(cover_img)
-                    break
+            data["cover"] = re.sub("/cover/[lcmsg]/", "/cover/l/", "https:" + cover_another["src"])  # Cover
+            data["story"] = story_another.get_text()  # Story
+            data["staff"] = list(map(lambda tag: tag.get_text(), staff_another.find_all("li")[4:4 + 15]))  # Staff
 
-            air_date = re.sub("(\d{4})-(\d{2})-(\d{2})", r"\1.\2", raw_data_json.get("air_date"))
+            bangumi_characters_page = get_page(bangumi_characters_link, bs_=True)
 
-            # 可以从raw_json中直接（或经过简单处理后）转移到返回数据中的信息
-            self.ret.update({"cover_img": cover_img,
-                             "story": raw_data_json["summary"],
-                             "title": raw_data_json.get("name_cn"),
-                             "air_date": air_date
-                             })
+            cast_actors = bangumi_characters_page.select("div#columnInSubjectA > div.light_odd > div.clearit")
 
-            _cast = []
-            for cast in raw_data_json.get("crt"):
-                cast_name = cast.get("name_cn") or cast.get("name")
-                cast_actors = ""
-                if cast.get("actors"):
-                    cast_actors = "\, ".join([actors.get("name") for actors in cast.get("actors")])
-                _cast.append("{}: {}".format(cast_name, cast_actors))
-                self.ret["cast"] = _cast
+            def cast_clean(tag):
+                h2 = tag.find("h2")
+                char = (h2.find("span", class_="tip") or h2.find("a")).get_text().replace("/", "").strip()
+                cv = "、".join(map(lambda p: (p.find("small").get_text() or p.find("a").get_text()).strip(),
+                                  tag.select("> div.clearit > p")))
+                return "{}:{}".format(char, cv)
 
-            _staff = []
-            for staff_tag in raw_data_page.find("ul", id="infobox").find_all("li")[4:4 + 15]:
-                _staff.append(staff_tag.get_text())
-                self.ret["staff"] = _staff
+            data["cast"] = list(map(cast_clean, cast_actors))[:9]  # Cast
 
             descr = ""
             for key, ft in bangumi_format:
-                data = self.ret.get(key)
-                if data:
-                    if isinstance(data, list):
-                        data = "\n".join(data)
-                    descr += ft.format(data)
-            descr += "(来源于 {} )".format(self.ret.get("alt"))
+                _data = data.get(key)
+                if _data:
+                    if isinstance(_data, list):
+                        _data = "\n".join(_data)
+                    descr += ft.format(_data)
+            data["format"] = descr
 
-            self.ret.update({"format": descr})
+            self.ret.update(data)
 
 
 if __name__ == '__main__':
-    from pprint import pprint
+    test_link_list = [
+        # "http://jdaklvhgfad.com/adfad",  # No support link
+        # "https://movie.douban.com/subject/1308452130/",  # Douban not exist
+        # "https://movie.douban.com/subject/3541415/",  # Douban Normal Foreign
+        # "https://movie.douban.com/subject/1297880/",  # Douban Normal Chinese
+        # "http://www.imdb.com/title/tt4925292/",    # Imdb through Douban
+        # "https://bgm.tv/subject/2071342495",  # Bangumi not exist
+        # "https://bgm.tv/subject/207195",  # Bangumi Normal
+        # "https://bgm.tv/subject/212279/",  # Bangumi Multiple characters
+        # "https://www.imdb.com/title/tt0083662/",  # Fix without duration and douban rate
+    ]
 
-    # pprint(Gen("http://jdaklvhgfad.com/adfad").gen())  # No support link
-    # pprint(Gen("https://movie.douban.com/subject/1308452130/").gen())  # Douban not exist
-    # pprint(Gen("https://movie.douban.com/subject/3541415/").gen(_debug=True))  # Douban Normal Foreign
-    # pprint(Gen("https://movie.douban.com/subject/1297880/").gen(_debug=True))  # Douban Normal Chinese
-    # pprint(Gen("http://www.imdb.com/title/tt4925292/").gen(_debug=True))  # Imdb through Douban
-    # pprint(Gen("https://bgm.tv/subject/2071342495").gen())  # Bangumi not exist
-    # pprint(Gen("https://bgm.tv/subject/207195").gen(_debug=True))  # Bangumi Normal
-
-    # Old test to fix problem
-    # pprint(Gen("https://movie.douban.com/subject/10563794/").gen(_debug=True))
-    pprint(Gen("https://www.imdb.com/title/tt0083662/").gen(_debug=True))  # Fix without duration and douban rate
+    for link in test_link_list:
+        print("Test link: {}".format(link))
+        gen = Gen(link).gen(_debug=True)
+        print("Format text:\n", gen["format"])
+        print("--------------------")
