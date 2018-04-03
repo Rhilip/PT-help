@@ -168,7 +168,9 @@ $(function () {
         query_btn.disable();
 
         var input_value = $("#input_value").val();
-        if (/^http/.test(input_value)) {
+        if (!input_value) {
+            alert("不允许空链接提交");
+        } else if (/^http/.test(input_value)) {
             switch_help_out("out");
 
             $.getJSON("https://api.rhilip.info/tool/movieinfo/gen", {
