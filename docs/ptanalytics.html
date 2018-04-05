@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Pt Analytics</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <style>
+        /* Sticky footer styles
+-------------------------------------------------- */
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+
+        body {
+            /* Margin bottom by footer height */
+            margin-bottom: 60px;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            /* Set the fixed height of the footer here */
+            height: 60px;
+            background-color: #f5f5f5;
+        }
+
+        /* Custom page CSS
+        -------------------------------------------------- */
+        /* Not required for template or sticky footer method. */
+
+        body > .container {
+            padding: 60px 15px 0;
+        }
+
+        .container .text-muted {
+            margin: 20px 0;
+        }
+
+        .footer > .container {
+            padding-right: 15px;
+            padding-left: 15px;
+        }
+
+        code {
+            font-size: 80%;
+        }
+
+    </style>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<!-- Fixed navbar -->
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">Pt Analytics</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Begin page content -->
+<div class="container">
+    <h2>Site: </h2>
+    <div id="site_select"></div>
+    <h2>Year Range：</h2>
+    <div id="date_range_select"></div>
+    <hr/>
+    <h2>Output: </h2>
+    <h3>Yearly Heatmap</h3>
+    <div id="heatmao" style="width:100%; height:400px"></div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <p class="text-muted">Powered By <a href="https://blog.rhilip.info/" target="_blank">@Rhilip</a></p>
+    </div>
+</footer>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcss.com/echarts/4.0.4/echarts.js"></script>
+
+<script>
+    const KEY_FROM_LOCAL_STORAGE = 'analytics_data';
+
+    function table_render() {
+        let raw = localStorage.getItem(KEY_FROM_LOCAL_STORAGE);
+        if (!raw) return;
+        let raw_data = (JSON.parse(raw)).data;
+
+        // Site and Year select
+        let site = $("div#site_select input:checked").attr("value") || "BYR";
+        let year = $("div#date_range_select input:checked").attr("value") || "2017";
+        let year_reg = new RegExp(year);
+
+        let push_data_dic = raw_data.filter(dic => dic.site === site && year_reg.test(dic.date));
+
+        let myChart = echarts.init(document.getElementById('heatmao'));
+        let option = {
+            visualMap: {
+                show: false,
+                min: 0,
+                max: Math.max(...push_data_dic.map(dic => dic.count))
+            },
+            calendar: {
+                range: year
+            },
+            series: {
+                type: 'heatmap',
+                coordinateSystem: 'calendar',
+                data: push_data_dic.map(dic => [dic.date, dic.count])
+            }
+        };
+        myChart.setOption(option);
+    }
+
+    function select_render(res) {
+        let data = res.data;
+
+        function radio_gen(it, name) {
+            let ret = "";
+            it.forEach((x) => {
+                ret += `<label class="radio-inline">` +
+                    `<input type="radio" name="${name}" id="option${x}" value="${x}"> ${x}` +
+                    `</label>`;
+            });
+            return ret;
+        }
+
+        $("div#site_select").html(() => {
+            let site_list = new Set(data.map(x => x.site)); // 获取所有Site列表
+            return radio_gen(site_list, "site-select");
+        });
+        $("div#date_range_select").html(() => {
+            let year_list = Array.from(new Array(9), (x, i) => i + 2010);  // 时间列表(手动定义
+            return radio_gen(year_list, "date-select");
+        });
+    }
+
+    if (!localStorage.getItem(KEY_FROM_LOCAL_STORAGE)) {
+        $.getJSON("https://api.rhilip.info/tool/ptanalytics", null, function (res) {
+            localStorage.setItem(KEY_FROM_LOCAL_STORAGE, JSON.stringify(res));
+            select_render(res);
+        });
+    } else {
+        let raw = localStorage.getItem(KEY_FROM_LOCAL_STORAGE);
+        select_render(JSON.parse(raw));
+    }
+
+
+    $("input").change(() => table_render());
+</script>
+</body>
+</html>
