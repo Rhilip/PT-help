@@ -165,14 +165,12 @@ function switch_help_out(tag) {
 
 $(function () {
     query_btn.click(function () {
-        query_btn.disable();
-
         var input_value = $("#input_value").val();
         if (!input_value) {
-            alert("不允许空链接提交");
+            alert("Empty link is not allowed.");
         } else if (/^http/.test(input_value)) {
-            switch_help_out("out");
-
+            // switch_help_out("out");
+            query_btn.disable();
             $.getJSON("https://api.rhilip.info/tool/movieinfo/gen", {
                 url: input_value
             }).success(function (data) {

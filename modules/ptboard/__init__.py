@@ -34,7 +34,7 @@ def warp_str(string):
     return "({})".format(string)
 
 
-@ptboard_blueprint.route("/ptboard")
+@ptboard_blueprint.route("/ptboard", methods=["GET"])
 def ptboard():
     ret = {
         "success": False,
@@ -115,4 +115,25 @@ def ptboard():
     })
 
     ret["cost"] = time.time() - t0
+    return jsonify(ret)
+
+
+@ptboard_blueprint.route("/ptanalytics", methods=["GET"])
+def pt_analytics():
+    t0 = time.time()
+    ret = {
+        "success": False,
+        "error": None
+    }
+
+    @cache.cached(timeout=3600)
+    def get_raw():
+        raw_list = mysql.exec('SELECT FROM_UNIXTIME(`pubDate`,"%Y-%m-%d") AS date, site, COUNT(*) AS `count`'
+                              'FROM `api`.`ptboard_record` GROUP BY date', fetch_all=True, r_dict=True)
+        return {"data": raw_list, "update": time.time()}
+
+    ret.update(get_raw())
+    ret["success"] = True
+    ret["cost"] = time.time() - t0
+
     return jsonify(ret)
