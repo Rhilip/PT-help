@@ -161,7 +161,7 @@
     }
 
     if (!localStorage.getItem(KEY_FROM_LOCAL_STORAGE)) {
-        $.getJSON("https://api.rhilip.info/tool/ptanalytics", null, function (res) {
+        $.getJSON("https://api.rhilip.info/ptanalytics.json", null, function (res) {
             localStorage.setItem(KEY_FROM_LOCAL_STORAGE, JSON.stringify(res));
             select_render(res);
         });

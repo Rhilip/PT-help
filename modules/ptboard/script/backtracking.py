@@ -34,7 +34,7 @@ site_config = [
         "name": "NexusPHP",  # 站点名称
         "rss_url": "https://nexusphp.com/torrentrss.php",  # 站点RSS地址（如需passkey认证请带上）
         "rows": 50,  # 单次请求数
-        "max_torrent": 125, # 该站点最大种子号
+        "max_torrent": 125,  # 该站点最大种子号
         "start_torrent": 0,  # 种子起始范围（仅用来限定，适用于爬取到一半进程停止的情况重爬）
         "end_torrent": 9999999,  # 种子结束范围（仅用来限定）
         "search_type": "rss",  # 回爬方式 ENUM("list", "id", "rss")
@@ -66,8 +66,6 @@ site_config = [
     },
 ]
 
-
-
 # -*- 结束配置
 
 # 构造数据库连接池
@@ -79,6 +77,7 @@ headers = {
     'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"
 }
 feedparser.USER_AGENT = 'FlexGet/2.10.61 (www.flexget.com)'
+
 
 def cookies_raw2jar(raw: str) -> dict:
     """
@@ -139,7 +138,7 @@ def backtracking_list(site):
             # 种子编号
             _tid = int(re.search("details\.php\?id=(?P<id>\d+)&hit=1", tid_tag["href"]).group("id"))
             if _tid in range(site['start_torrent'], site['end_torrent']):
-            # 种子标题
+                # 种子标题
                 try:
                     _title = tid_tag["title"]
                     # title = tid_tag.parent.get_text(" | ", strip=True)
@@ -189,9 +188,10 @@ def backtracking_id(site):
 
         time.sleep(2)
 
+
 def backtracking_rss(site):
     for startindex in range(0, site['max_torrent'] + site['rows'], site['rows']):
-        feed_data = requests.get(site["rss_url"],params={'rows': site['rows'], 'startindex': startindex})
+        feed_data = requests.get(site["rss_url"], params={'rows': site['rows'], 'startindex': startindex})
         print(feed_data.url)
         feed = feedparser.parse(feed_data.text)
         feed_entries = feed.entries
@@ -211,11 +211,12 @@ def backtracking_rss(site):
                     else:
                         _timestamp = time.time()
 
-                    # re.sub("&?passkey=[0-9a-zA-Z]{32}", "", item.link)
+                        # re.sub("&?passkey=[0-9a-zA-Z]{32}", "", item.link)
 
                 wrap_insert(site=site['name'], sid=_tid, title=_title, link=item.link, pubdate=_timestamp, t=t0)
         else:
             break
+
 
 if __name__ == "__main__":
     t = time.time()
