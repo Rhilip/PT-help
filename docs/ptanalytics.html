@@ -85,12 +85,12 @@
     <div id="overview"></div>
     <h3>Yearly Heatmap</h3>
     <div id="heatmap_yearly"></div>
-    <h3></h3>
 </div>
 
 <footer class="footer">
     <div class="container">
-        <p class="text-muted">Powered By <a href="https://blog.rhilip.info/" target="_blank">@Rhilip</a></p>
+        <p class="text-muted text-right">Powered By <a href="https://blog.rhilip.info/" target="_blank">@Rhilip</a> with
+            <a href="ptboard.html">Pt-Board</a> Database.</p>
     </div>
 </footer>
 
@@ -113,34 +113,26 @@
         return ret;
     }
 
+    function daysBetween(one, another) {
+        return Math.round(Math.abs((+one) - (+another)) / 8.64e7);
+    }
+
     function table_render() {
         let raw = localStorage.getItem(KEY_FROM_LOCAL_STORAGE);
         if (!raw) return;
         let raw_data = (JSON.parse(raw)).data;
 
-        // Site and Year select
+        // Site select and it's Data
         let site = $("div#site_select input:checked").attr("value") || "BYR";
         let push_data_dic = raw_data.filter(dic => dic.site === site);
 
         // Overview
-        function daysBetween(one, another) {
-            return Math.round(Math.abs((+one) - (+another)) / 8.64e7);
-        }
-
-        let ov_total = push_data_dic.map(dic => dic.count).reduce((a, b) => {  // Total Record Torrent Number
-            return a + b;
-        });
+        let ov_total = push_data_dic.map(dic => dic.count).reduce((a, b) => a + b);
         let ov_first_date = push_data_dic[0].date;
         let ov_last_date = push_data_dic[push_data_dic.length - 1].date;
         let ov_date_f2l = daysBetween(Date.parse(ov_first_date), Date.parse(ov_last_date));
         let ov_date_f2n = daysBetween(Date.parse(ov_first_date), Date.now());
-        let ov_max_day_data = push_data_dic.reduce((a, b) => {
-            if (b.count > a.count) {
-                return b;
-            } else {
-                return a;
-            }
-        });
+        let ov_max_day_data = push_data_dic.reduce((a, b) => b.count > a.count ? b : a);
         let year_set = Array.from(new Set(push_data_dic.map(dic => dic.date.slice(0, 4)))).sort();
 
         $("div#overview").html(`
@@ -148,12 +140,13 @@
   <dt>Site</dt><dd><mark>${site}</mark></dd>
   <dt>Status</dt>
   <dd>Last for <mark>${ov_date_f2l}</mark> Days (From <mark>${ov_first_date}</mark> To <mark>${ov_last_date}</mark>),
-      However of which <mark>${ov_date_f2l - push_data_dic.length + 1}</mark> days was recorded as <strong>"no Torrent published"</strong>.
+      However of which <mark>${ov_date_f2l - push_data_dic.length + 1}</mark> days was recorded as <strong>"No Torrent Released"</strong>.
   </dd>
   <dt>Total Record Torrents</dt>
   <dd><mark>${ov_total}</mark> Torrents <strong>(recorded in Pt-Board Database)</strong>.</dd>
   <dt>Torrent Publish</dt>
-  <dd>Average <mark>${(ov_total / push_data_dic.length).toFixed(2)}</mark> torrents per day <strong>(Without no torrent publish day)</strong>,<br>
+  <dd>Average <mark>${(ov_total / push_data_dic.length).toFixed(2)}</mark> torrents per day <strong>(Without no torrent publish days)</strong>,<br>
+      Average <mark>${(ov_total / ov_date_f2l).toFixed(2)}</mark> torrents per day <strong>(Last days)</strong>,<br>
       Average <mark>${(ov_total / ov_date_f2n).toFixed(2)}</mark> torrents per day <strong>(Till Now)</strong>,<br>
       Max torrent publish numbers appears at  <mark>${ov_max_day_data.date}</mark> with <mark>${ov_max_day_data.count}</mark> torrents.<br>
   </dd>
@@ -164,12 +157,11 @@
 
         year_set.forEach((x) => {
             let myChart = echarts.init(document.getElementById(`heatmap${x}`));
-            let option = {
+            let push_data_dic_correct = push_data_dic.filter(dic => dic.date.slice(0, 4) === x);  // Get correct year data
+            myChart.setOption({
                 visualMap: {
                     min: 0,
-                    max: push_data_dic.filter(dic => dic.date.slice(0, 4) === x)  // Get correct year data
-                        .map(dic => dic.count)   // Get count data from raw dict
-                        .reduce((a, b) => Math.max(a, b)),  // Get max num Use Array.reduce()
+                    max: push_data_dic_correct.map(dic => dic.count).reduce((a, b) => Math.max(a, b)),
                     calculable: true,
                     orient: 'horizontal',
                     left: 'center',
@@ -181,7 +173,7 @@
                 series: {
                     type: 'heatmap',
                     coordinateSystem: 'calendar',
-                    data: push_data_dic.map(dic => [dic.date, dic.count])
+                    data: push_data_dic_correct.map(dic => [dic.date, dic.count])
                 },
                 tooltip: {
                     position: 'top',
@@ -190,21 +182,17 @@
                         return format + ': ' + p.data[1];
                     }
                 },
-            };
-            myChart.setOption(option);
+            });
         })
     }
 
     $.getJSON("https://api.rhilip.info/json/ptanalytics.json", null, function (res) {
         let data = res.data;
 
-        $("div#site_select").html(() => {
-            let ret = "";
-            new Set(data.map(x => x.site)).forEach((x) => {  // 获取所有Site列表
-                ret += `<label class="radio-inline"><input type="radio" name="site" id="option${x}" value="${x}">${x}</label>`;
-            });
-            return ret;
-        });
+        $("div#site_select").html(it2str(
+            new Set(data.map(x => x.site)),
+            '<label class="radio-inline"><input type="radio" name="site" id="option${}" value="${}">${}</label>'
+        ));
 
         localStorage.setItem(KEY_FROM_LOCAL_STORAGE, JSON.stringify(res));
         $("input").change(() => table_render());
