@@ -42,7 +42,9 @@ t0 = time.time()
 
 ret = {"update": t0}
 ret["data"] = mysql.exec('SELECT FROM_UNIXTIME(`pubDate`,"%Y-%m-%d") AS date, site, COUNT(*) AS `count`'
-                         'FROM `api`.`ptboard_record` GROUP BY date, site', fetch_all=True, r_dict=True)
+                         'FROM `api`.`ptboard_record` '
+                         'WHERE `site` !="PreDB" '
+                         'GROUP BY date, site', fetch_all=True, r_dict=True)
 ret["cost"] = time.time() - t0
 
 with open(json_file, "w") as outfile:

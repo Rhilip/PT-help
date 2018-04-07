@@ -81,6 +81,8 @@
     <h2>Site: </h2>
     <div id="site_select"></div>
     <hr/>
+    <h3>Overview</h3>
+    <div id="overview"></div>
     <h3>Yearly Heatmap</h3>
     <div id="heatmap_yearly"></div>
     <h3></h3>
@@ -120,20 +122,58 @@
         let site = $("div#site_select input:checked").attr("value") || "BYR";
         let push_data_dic = raw_data.filter(dic => dic.site === site);
 
-        // HeatMap
-        let year_set = new Set(push_data_dic.map(dic => dic.date.slice(0, 4)));
-        $("div#heatmap_yearly").html(() => {
+        // Overview
+        function daysBetween(one, another) {
+            return Math.round(Math.abs((+one) - (+another)) / 8.64e7);
+        }
 
-            return it2str(year_set, '<div id="heatmap${}" style="width:100%; height:200px"></div>')
+        let ov_total = push_data_dic.map(dic => dic.count).reduce((a, b) => {  // Total Record Torrent Number
+            return a + b;
         });
+        let ov_first_date = push_data_dic[0].date;
+        let ov_last_date = push_data_dic[push_data_dic.length - 1].date;
+        let ov_date_f2l = daysBetween(Date.parse(ov_first_date), Date.parse(ov_last_date));
+        let ov_date_f2n = daysBetween(Date.parse(ov_first_date), Date.now());
+        let ov_max_day_data = push_data_dic.reduce((a, b) => {
+            if (b.count > a.count) {
+                return b;
+            } else {
+                return a;
+            }
+        });
+        let year_set = Array.from(new Set(push_data_dic.map(dic => dic.date.slice(0, 4)))).sort();
+
+        $("div#overview").html(`
+<dl class="dl-horizontal text-overflow">
+  <dt>Site</dt><dd><mark>${site}</mark></dd>
+  <dt>Status</dt>
+  <dd>Last for <mark>${ov_date_f2l}</mark> Days (From <mark>${ov_first_date}</mark> To <mark>${ov_last_date}</mark>),
+      However of which <mark>${ov_date_f2l - push_data_dic.length}</mark> days was recorded as <strong>"no Torrent publish"</strong>.
+  </dd>
+  <dt>Total Record Torrents</dt>
+  <dd><mark>${ov_total}</mark> Torrents <strong>(recorded in Pt-Board Database)</strong>.</dd>
+  <dt>Torrent Publish</dt>
+  <dd>Average <mark>${(ov_total / push_data_dic.length).toFixed(2)}</mark> torrents per day <strong>(Without no torrent publish day)</strong>,<br>
+      Average <mark>${(ov_total / ov_date_f2n).toFixed(2)}</mark> torrents per day <strong>(Till Now)</strong>,<br>
+      Max torrent publish numbers appears at  <mark>${ov_max_day_data.date}</mark> with <mark>${ov_max_day_data.count}</mark> torrents.<br>
+  </dd>
+</dl><hr>`);
+
+        // HeatMap
+        $("div#heatmap_yearly").html(it2str(year_set, '<div id="heatmap${}" style="width:100%; height:220px"></div><hr>'));
 
         year_set.forEach((x) => {
             let myChart = echarts.init(document.getElementById(`heatmap${x}`));
             let option = {
                 visualMap: {
-                    show: false,
                     min: 0,
-                    max: Math.max(...push_data_dic.map(dic => dic.count))
+                    max: push_data_dic.filter(dic => dic.date.slice(0, 4) === x)  // Get correct year data
+                        .map(dic => dic.count)   // Get count data from raw dict
+                        .reduce((a, b) => Math.max(a, b)),  // Get max num Use Array.reduce()
+                    calculable: true,
+                    orient: 'horizontal',
+                    left: 'center',
+                    top: 'top'
                 },
                 calendar: {
                     range: x
@@ -145,7 +185,7 @@
                 },
                 tooltip: {
                     position: 'top',
-                    formatter: function (p) {
+                    formatter: p => {
                         let format = echarts.format.formatTime('yyyy-MM-dd', p.data[0]);
                         return format + ': ' + p.data[1];
                     }
@@ -159,16 +199,21 @@
         let data = res.data;
 
         $("div#site_select").html(() => {
-            let site_list = new Set(data.map(x => x.site)); // 获取所有Site列表
-            return it2str(site_list, '<label class="radio-inline"><input type="radio" name="site" id="option${x}" value="${}"> ${}</label>');
+            let ret = "";
+            new Set(data.map(x => x.site)).forEach((x) => {  // 获取所有Site列表
+                ret += `<label class="radio-inline"><input type="radio" name="site" id="option${x}" value="${x}">${x}</label>`;
+            });
+            return ret;
         });
 
         localStorage.setItem(KEY_FROM_LOCAL_STORAGE, JSON.stringify(res));
+        $("input").change(() => table_render());
+        $("input[name='site'][value='BYR']").click();
     });
 
 
 
-    $("input").change(() => table_render());
+
 </script>
 </body>
 </html>
