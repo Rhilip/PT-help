@@ -83,8 +83,11 @@
     <hr/>
     <h3>Overview</h3>
     <div id="overview"></div>
+    <hr/>
     <h3>Yearly Heatmap</h3>
     <div id="heatmap_yearly"></div>
+    <h3>Time Distribution (Monthly)</h3>
+    <div id="time_distribution" style="width:100%; height:460px"></div>
 </div>
 
 <footer class="footer">
@@ -117,6 +120,10 @@
         return Math.round(Math.abs((+one) - (+another)) / 8.64e7);
     }
 
+    function leapYear(year) {
+        return !(year % (year % 100 ? 4 : 400));
+    }
+
     function table_render() {
         let raw = localStorage.getItem(KEY_FROM_LOCAL_STORAGE);
         if (!raw) return;
@@ -135,30 +142,47 @@
         let ov_max_day_data = push_data_dic.reduce((a, b) => b.count > a.count ? b : a);
         let year_set = Array.from(new Set(push_data_dic.map(dic => dic.date.slice(0, 4)))).sort();
 
-        $("div#overview").html(`
-<dl class="dl-horizontal text-overflow">
-  <dt>Site</dt><dd><mark>${site}</mark></dd>
-  <dt>Status</dt>
-  <dd>Last for <mark>${ov_date_f2l}</mark> Days (From <mark>${ov_first_date}</mark> To <mark>${ov_last_date}</mark>),
-      However of which <mark>${ov_date_f2l - push_data_dic.length + 1}</mark> days was recorded as <strong>"No Torrent Released"</strong>.
-  </dd>
-  <dt>Total Record Torrents</dt>
-  <dd><mark>${ov_total}</mark> Torrents <strong>(recorded in Pt-Board Database)</strong>.</dd>
-  <dt>Torrent Publish</dt>
-  <dd>Average <mark>${(ov_total / push_data_dic.length).toFixed(2)}</mark> torrents per day <strong>(Without no torrent publish days)</strong>,<br>
-      Average <mark>${(ov_total / ov_date_f2l).toFixed(2)}</mark> torrents per day <strong>(Last days)</strong>,<br>
-      Average <mark>${(ov_total / ov_date_f2n).toFixed(2)}</mark> torrents per day <strong>(Till Now)</strong>,<br>
-      Max torrent publish numbers appears at  <mark>${ov_max_day_data.date}</mark> with <mark>${ov_max_day_data.count}</mark> torrents.<br>
-  </dd>
-</dl><hr>`);
+        $("div#overview").html(() => {
+            let base = `
+            <dl class="dl-horizontal text-overflow">
+              <dt>Site</dt><dd><mark>${site}</mark></dd>
+              <dt>Status</dt>
+              <dd>Last for <mark>${ov_date_f2l}</mark> Days (From <mark>${ov_first_date}</mark> To <mark>${ov_last_date}</mark>),
+                  However of which <mark>${ov_date_f2l - push_data_dic.length + 1}</mark> days was recorded as <strong>"No Torrent Released"</strong>.
+              </dd>
+              <dt>Total Record Torrents</dt>
+              <dd><mark>${ov_total}</mark> Torrents <strong>(recorded in Pt-Board Database)</strong>.</dd>
+              <dt>Torrent Publish</dt>
+              <dd>Average <mark>${(ov_total / push_data_dic.length).toFixed(2)}</mark> torrents per day <strong>(Without no torrent publish days)</strong>,<br>
+                  Average <mark>${(ov_total / ov_date_f2l).toFixed(2)}</mark> torrents per day <strong>(Last days)</strong>,<br>
+                  Average <mark>${(ov_total / ov_date_f2n).toFixed(2)}</mark> torrents per day <strong>(Till Now)</strong>,<br>
+                  Max torrent publish numbers appears at  <mark>${ov_max_day_data.date}</mark> with <mark>${ov_max_day_data.count}</mark> torrents.<br>
+              </dd>`;
+
+            base += `<dt>Yearly Status</dt><dd>`;
+            year_set.forEach((x) => {
+                let yearly_dic = push_data_dic.filter(dic => dic.date.slice(0, 4) === x);  // Get correct year data
+                let yearly_dic_count = yearly_dic.map(dic => dic.count).reduce((a, b) => a + b);
+                base += `<strong>${x}</strong>: Total Online days:  <mark>${yearly_dic.length}
+                         (${(yearly_dic.length / (leapYear(x) ? 366 : 365) * 100).toFixed(2)} %)</mark>,
+                         With Recorded Torrents: <mark>${yearly_dic_count}</mark>,
+                         Average <mark>${(yearly_dic_count / yearly_dic.length).toFixed(2)}</mark> (Online days),
+                         <mark>${(yearly_dic_count / (leapYear(x) ? 366 : 365)).toFixed(2)}</mark> (Total Year)
+                         torrents per day
+                         <br>
+                `;
+            });
+            base += '</dd></dl>';
+            return base
+        });
 
         // HeatMap
         $("div#heatmap_yearly").html(it2str(year_set, '<div id="heatmap${}" style="width:100%; height:220px"></div><hr>'));
 
         year_set.forEach((x) => {
-            let myChart = echarts.init(document.getElementById(`heatmap${x}`));
+            let YearlyHeatmapChart = echarts.init(document.getElementById(`heatmap${x}`));
             let push_data_dic_correct = push_data_dic.filter(dic => dic.date.slice(0, 4) === x);  // Get correct year data
-            myChart.setOption({
+            YearlyHeatmapChart.setOption({
                 visualMap: {
                     min: 0,
                     max: push_data_dic_correct.map(dic => dic.count).reduce((a, b) => Math.max(a, b)),
@@ -183,7 +207,84 @@
                     }
                 },
             });
-        })
+        });
+
+        let month_list = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+        let month_data = month_list.map((x) => {
+            let rObj = {};
+            let month_data = push_data_dic.filter(dic => dic.date.slice(5, 7) === x);
+            rObj["month"] = x;
+            rObj["count"] = month_data.map(dic => dic.count).reduce((a, b) => a + b);
+            rObj["average"] = (rObj["count"] / month_data.length).toFixed(2);
+            return rObj;
+        });
+
+        let colors = ['#5793f3', '#d14a61'];
+
+        let option = {
+            color: colors,
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross'
+                }
+            },
+            legend: {
+                data: ['Count', 'Average']
+            },
+            xAxis: {
+                type: 'category',
+                axisTick: {
+                    alignWithLabel: true
+                },
+                data: month_data.map(x => x.month + "月")
+            },
+            yAxis: [
+                {
+                    type: 'value',
+                    name: 'Count',
+                    min: 0,
+                    max: parseInt(Math.max(...month_data.map(x => x.count)) * 1.25),
+                    position: 'right',
+                    axisLine: {
+                        lineStyle: {
+                            color: colors[0]
+                        }
+                    },
+                },
+                {
+                    type: 'value',
+                    name: 'Average',
+                    min: 0,
+                    max: parseInt(Math.max(...month_data.map(x => x.average)) * 1.25),
+                    position: 'left',
+                    axisLine: {
+                        lineStyle: {
+                            color: colors[1]
+                        }
+                    }
+                }
+            ],
+            series: [
+                {
+                    name: 'Count',
+                    type: 'bar',
+                    data: month_data.map(x => x.count)
+                },
+                {
+                    name: 'Average',
+                    type: 'line',
+                    yAxisIndex: 1,
+                    data: month_data.map(x => x.average)
+                }
+            ]
+        };
+
+        let TimeDistributionChart = echarts.init(document.getElementById(`time_distribution`));
+        TimeDistributionChart.setOption(option)
+
+
+
     }
 
     $.getJSON("https://api.rhilip.info/json/ptanalytics.json", null, function (res) {
