@@ -84,6 +84,9 @@
     <h3>Overview</h3>
     <div id="overview"></div>
     <hr/>
+    <h3>Total Recorded Data View</h3>
+    <div id="total_line" style="width:100%; height:460px"></div>
+    <hr/>
     <h3>Yearly Heatmap</h3>
     <div id="heatmap_yearly"></div>
     <h3>Time Distribution (Monthly)</h3>
@@ -103,9 +106,12 @@
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script src="https://cdn.bootcss.com/echarts/4.0.4/echarts.js"></script>
+<script src="https://cdn.bootcss.com/echarts/4.0.4/echarts.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.22.0/moment.min.js"></script>
+<script src="https://cdn.bootcss.com/moment-range/3.1.1/moment-range.min.js"></script>
 
 <script>
+    window['moment-range'].extendMoment(moment);
     const KEY_FROM_LOCAL_STORAGE = 'analytics_data';
 
     function it2str(it, str_temp) {
@@ -116,8 +122,8 @@
         return ret;
     }
 
-    function daysBetween(one, another) {
-        return Math.round(Math.abs((+one) - (+another)) / 8.64e7);
+    function daysBetween(start, end) {
+        return Math.round(moment.range(start, end).valueOf() / 8.64e7);
     }
 
     function leapYear(year) {
@@ -176,6 +182,58 @@
             return base
         });
 
+        // Total Recorded Data View
+        let date_range_gen = moment.range(ov_first_date, ov_last_date);
+        let date_range = Array.from(date_range_gen.by("day")).map(m => m.format('YYYY-MM-DD'));
+
+        let raw_date = push_data_dic.map(dic => dic.date);
+        let raw_count = push_data_dic.map(dic => dic.count);
+
+        let TotalLineChart = echarts.init(document.getElementById(`total_line`));
+        TotalLineChart.setOption({
+            tooltip: {
+                trigger: 'axis',
+                position: function (pt) {
+                    return [pt[0], '10%'];
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: date_range
+            },
+            yAxis: {
+                type: 'value',
+                max: 'dataMax',
+            },
+            dataZoom: {
+                start: 90,
+                end: 100
+            },
+            series: {
+                name: 'Count',
+                type: 'line',
+                smooth: true,
+                itemStyle: {
+                    normal: {
+                        color: 'rgb(255, 70, 131)'
+                    }
+                },
+                areaStyle: {
+                    normal: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: 'rgb(255, 158, 68)'
+                        }, {
+                            offset: 1,
+                            color: 'rgb(255, 70, 131)'
+                        }])
+                    }
+                },
+                data: date_range.map(date => raw_count[raw_date.indexOf(date)] || 0)
+            }
+        });
+
         // HeatMap
         $("div#heatmap_yearly").html(it2str(year_set, '<div id="heatmap${}" style="width:100%; height:220px"></div><hr>'));
 
@@ -209,6 +267,8 @@
             });
         });
 
+        // Time DistributionChart
+        let colors = ['#5793f3', '#d14a61'];
         let month_list = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
         let month_data = month_list.map((x) => {
             let rObj = {};
@@ -219,9 +279,8 @@
             return rObj;
         });
 
-        let colors = ['#5793f3', '#d14a61'];
-
-        let option = {
+        let TimeDistributionChart = echarts.init(document.getElementById(`time_distribution`));
+        TimeDistributionChart.setOption({
             color: colors,
             tooltip: {
                 trigger: 'axis',
@@ -278,13 +337,7 @@
                     data: month_data.map(x => x.average)
                 }
             ]
-        };
-
-        let TimeDistributionChart = echarts.init(document.getElementById(`time_distribution`));
-        TimeDistributionChart.setOption(option)
-
-
-
+        })
     }
 
     $.getJSON("https://api.rhilip.info/json/ptanalytics.json", null, function (res) {
@@ -299,10 +352,6 @@
         $("input").change(() => table_render());
         $("input[name='site'][value='BYR']").click();
     });
-
-
-
-
 </script>
 </body>
 </html>
