@@ -26,6 +26,7 @@ PT站点用简介生成工具
 |-------------|:--------------|
 | 豆瓣 Douban | https://movie.douban.com/subject/:d |
 | 番组计划| 	https://bgm.tv/subject/:d , http://bangumi.tv/subject/:d , http://chii.in/subject/:d |
+| Steam | https://steamcommunity.com/app/:d , http://store.steampowered.com/app/:d , http://store.steampowered.com/app/:d/:s |
 
 ### 5) 请求返回结果示例:
 

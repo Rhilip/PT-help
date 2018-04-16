@@ -7,7 +7,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-__version__ = "0.2.4"
+__version__ = "0.3.0"
 __author__ = "Rhilip"
 
 douban_format = [
@@ -42,26 +42,42 @@ bangumi_format = [
     ("alt", "(来源于 {} )\n")
 ]
 
+steam_format = [
+    ("cover", "[img]{}[/img]\n\n"),
+    ('detail', "{}\n"),
+    ('review', "{}\n\n"),
+    ('descr', "【游戏简介】\n\n{}\n\n"),
+    ('sysreq', "【配置需求】\n\n{}\n\n"),
+    ('screenshot', "【游戏截图】\n\n{}\n\n"),
+]
+
 support_list = [
     ("douban", re.compile("(https?://)?movie\.douban\.com/(subject|movie)/(?P<sid>\d+)/?")),
     ("imdb", re.compile("(https?://)?www\.imdb\.com/title/(?P<sid>tt\d+)")),
     # ("3dm", re.compile("(https?://)?bbs\.3dmgame\.com/thread-(?P<sid>\d+)(-1-1\.html)?")),
-    # ("steam", re.compile("(https?://)?store\.steampowered\.com/app/(?P<sid>\d+)/?")),
+    ("steam", re.compile("(https?://)?(store\.)?steam(powered|community)\.com/app/(?P<sid>\d+)/?")),
     ("bangumi", re.compile("(https?://)?(bgm\.tv|bangumi\.tv|chii\.in)/subject/(?P<sid>\d+)/?")),
 ]
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                  'Chrome/61.0.3163.100 Safari/537.36 '
+                  'Chrome/61.0.3163.100 Safari/537.36 ',
+    "Accept-Language": "en,zh-CN;q=0.9,zh;q=0.8"
 }
 
 
-def get_page(url: str, json_=False, bs_=False, **kwargs):
+def get_page(url: str, json_=False, bs_=False, text_=False, **kwargs):
     kwargs.setdefault("headers", headers)
     page = requests.get(url, **kwargs)
     page.encoding = "utf-8"
-    return page.json() if json_ else (BeautifulSoup(page.text, "lxml") if bs_ else page.text)
-
+    if json_:
+        return page.json()
+    elif bs_:
+        return BeautifulSoup(page.text, "lxml")
+    elif text_:
+        return page.text
+    else:
+        return page
 
 class Gen(object):
     site = sid = url = ret = None
@@ -161,7 +177,7 @@ class Gen(object):
                 imdb_source = ("https://p.media-imdb.com/static-content/documents/v1/title/{}/ratings%3Fjsonp="
                                "imdb.rating.run:imdb.api.title.ratings/data.json".format(data["imdb_id"]))
                 try:
-                    imdb_jsonp = get_page(imdb_source)  # 通过IMDb的API获取信息
+                    imdb_jsonp = get_page(imdb_source, text_=True)  # 通过IMDb的API获取信息
                     if re.search("imdb.rating.run\((.+)\)", imdb_jsonp):
                         imdb_json = json.loads(re.search("imdb.rating.run\((.+)\)", imdb_jsonp).group(1))
                         imdb_average_rating = imdb_json["resource"]["rating"]
@@ -223,7 +239,82 @@ class Gen(object):
             self.pat(douban_imdb_api["alt"])
             self._gen_douban()
         else:  # TODO 如果没有，则转而从imdb上解析数据。
-            self.ret["error"] = "Can't find this imdb_id in Douban."
+            self.ret["error"] = "Can't find this imdb_id({}) in Douban.".format(self.sid)
+
+    def _gen_steam(self):
+        session = requests.Session()
+        session.headers.update(headers)
+        session.cookies.update({"mature_content": "/"})  # 避免 Steam 年龄认证（直接点击类）
+
+        steam_chs_url = "http://store.steampowered.com/app/{}/?l=schinese".format(self.sid)
+        steam_page = session.get(steam_chs_url)
+        if re.search("(欢迎来到|Welcome to) Steam", steam_page.text):  # 不存在的资源会被302到首页，故检查标题或r.history
+            self.ret["error"] = "The corresponding resource does not exist."
+        else:
+            if re.search("DoAgeGateSubmit\(\)", steam_page.text):  # 出现 Steam 年龄认证 (年龄选择类)
+                post_data = {
+                    "snr": "1_agecheck_agecheck__age-gate",
+                    "sessionid": session.cookies["sessionid"],
+                    # TODO 看看需不需要随机日期
+                    "ageDay": 1,
+                    "ageMonth": "January",
+                    "ageYear": "1979"
+                }
+                session.post("http://store.steampowered.com/agecheck/app/{}/".format(self.sid), data=post_data)
+                steam_page = session.get(steam_chs_url)
+
+            data = {}
+            steam_bs = BeautifulSoup(steam_page.text, "lxml")
+
+            # 从网页中定位数据
+            name_anchor = steam_bs.find("div", class_="apphub_AppName")  # 游戏名
+            cover_anchor = steam_bs.find("img", class_="game_header_image_full")  # 游戏封面图
+            detail_anchor = steam_bs.find("div", class_="details_block")  # 游戏基本信息
+            rate_anchor = steam_bs.find_all("div", class_="user_reviews_summary_row")  # 游戏评价
+            descr_anchor = steam_bs.find("div", id="game_area_description")  # 游戏简介
+            sysreq_anchor = steam_bs.select("div.sysreq_contents > div.game_area_sys_req")  # 系统需求
+            screenshot_anchor = steam_bs.select("div.screenshot_holder a")  # 游戏截图
+
+            # 数据清洗
+            def reviews_clean(tag):
+                subtitle = tag.find("div", class_="subtitle").get_text(strip=True)
+                summary = tag.find("span", class_="game_review_summary").get_text(strip=True)
+                reviewdesc = tag["data-tooltip-text"]
+                return "{} {} ({})".format(subtitle, summary, reviewdesc)
+
+            def sysreq_clean(tag):
+                os_dict = {"win": "Windows", "mac": "Mac OS X", "linux": "SteamOS + Linux"}
+                os_type = os_dict[tag["data-os"]]
+                sysreq_content = re.sub("([^配置]):\n", r"\1: ", tag.get_text("\n", strip=True))
+
+                return "{}\n{}".format(os_type, sysreq_content)
+
+            data["name"] = name_anchor.get_text(strip=True)
+            data["cover"] = (cover_anchor or {"src": ""})["src"]
+            data["descr"] = descr_anchor.get_text("\n", strip=True).replace("关于这款游戏\n", "")
+            data["detail"] = detail_anchor.get_text("\n", strip=True).replace(":\n", ": ").replace("\n,\n", ", ")
+            data["review"] = list(map(reviews_clean, rate_anchor))
+            data["screenshot"] = list(map(lambda dic: re.sub("^.+?url=(http.+?)\.[\dx]+(.+)$", r"\1\2", dic["href"]),
+                                          screenshot_anchor))
+            data["sysreq"] = list(map(sysreq_clean, sysreq_anchor))
+
+            # 主介绍生成
+            descr = ""
+            for key, ft in steam_format:
+                _data = data.get(key)
+                if _data:
+                    if isinstance(_data, list):
+                        join_fix = "\n"
+                        if key == "screenshot":
+                            _data = map(lambda d: "[img]{}[/img]".format(d), _data)
+                        if key == "sysreq":
+                            join_fix = "\n\n"
+                        _data = join_fix.join(_data)
+                    descr += ft.format(_data)
+            self.ret["format"] = descr
+
+            # 将清洗的数据一并发出
+            self.ret.update(data)
 
     def _gen_bangumi(self):
         bangumi_link = "https://bgm.tv/subject/{}".format(self.sid)
@@ -282,10 +373,19 @@ if __name__ == '__main__':
         # "https://bgm.tv/subject/207195",  # Bangumi Normal
         # "https://bgm.tv/subject/212279/",  # Bangumi Multiple characters
         # "https://www.imdb.com/title/tt0083662/",  # Fix without duration and douban rate
+        # "http://store.steampowered.com/app/20650135465430/",  # Steam Not Exist
+        # "http://store.steampowered.com/app/550/",  # Steam Short Link
+        # "http://store.steampowered.com/app/240720/Getting_Over_It_with_Bennett_Foddy/",  # Steam Full Link
+        # "https://steamcommunity.com/app/668630",  # Another Type of Steam Link
+        # "http://store.steampowered.com/app/420110",  # Steam Link With Age Check (One click type)
+        # "http://store.steampowered.com/app/489830/",  # Steam Link With Age Check (Birth Choose type)
     ]
 
     for link in test_link_list:
         print("Test link: {}".format(link))
         gen = Gen(link).gen(_debug=True)
-        print("Format text:\n", gen["format"])
+        if gen["success"]:
+            print("Format text:\n", gen["format"])
+        else:
+            print("Error : {}".format(gen["error"]))
         print("--------------------")
