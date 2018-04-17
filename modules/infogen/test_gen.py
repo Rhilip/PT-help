@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2017-2020 Rhilip <rhilipruan@gmail.com>
 
-from .gen import Gen
+from gen import Gen
 
 if __name__ == '__main__':
     test_link_list = [

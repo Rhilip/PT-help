@@ -7,7 +7,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 __author__ = "Rhilip"
 
 douban_format = [
@@ -44,8 +44,7 @@ bangumi_format = [
 
 steam_format = [
     ("cover", "[img]{}[/img]\n\n"),
-    ('detail', "{}\n"),
-    ('review', "{}\n\n"),
+    ('baseinfo', "【基本信息】\n\n{}\n"),
     ('descr', "【游戏简介】\n\n{}\n\n"),
     ('sysreq', "【配置需求】\n\n{}\n\n"),
     ('screenshot', "【游戏截图】\n\n{}\n\n"),
@@ -274,14 +273,37 @@ class Gen(object):
             name_anchor = steam_bs.find("div", class_="apphub_AppName")  # 游戏名
             cover_anchor = steam_bs.find("img", class_="game_header_image_full")  # 游戏封面图
             detail_anchor = steam_bs.find("div", class_="details_block")  # 游戏基本信息
+            linkbar_anchor = steam_bs.find("a", class_="linkbar")  # 官网
+            language_anchor = steam_bs.select("table.game_language_options > tr")[1:]  # 已支持语言
+            tag_anchor = steam_bs.find_all("a", class_="app_tag")  # 标签
             rate_anchor = steam_bs.find_all("div", class_="user_reviews_summary_row")  # 游戏评价
             descr_anchor = steam_bs.find("div", id="game_area_description")  # 游戏简介
             sysreq_anchor = steam_bs.select("div.sysreq_contents > div.game_area_sys_req")  # 系统需求
             screenshot_anchor = steam_bs.select("div.screenshot_holder a")  # 游戏截图
 
+            # 请求第三方资源
+            name_chs = set()  # 中文名
+
+            try:  # Thanks @Deparsoul with his Database
+                steamcn_json = get_page("https://steamdb.steamcn.com/app/{}/data.js?v=38".format(self.sid), jsonp_=True)
+            except Exception:
+                pass
+            else:
+                if "name_cn" in steamcn_json:
+                    name_chs.add(steamcn_json["name_cn"])
+
+            try:
+                enhancedsteam_json = get_page("https://api.enhancedsteam.com/"
+                                              "storepagedatacn/?appid={}".format(self.sid), json_=True)
+            except Exception:
+                pass
+            else:
+                if "chineseName" in enhancedsteam_json:
+                    name_chs.add(enhancedsteam_json["chineseName"])
+
             # 数据清洗
             def reviews_clean(tag):
-                subtitle = tag.find("div", class_="subtitle").get_text(strip=True)
+                subtitle = tag.find("div", class_="subtitle").get_text(strip=True).replace("：", ":")
                 summary = tag.find("span", class_="game_review_summary").get_text(strip=True)
                 reviewdesc = tag["data-tooltip-text"]
                 return "{} {} ({})".format(subtitle, summary, reviewdesc)
@@ -293,13 +315,41 @@ class Gen(object):
 
                 return "{}\n{}".format(os_type, sysreq_content)
 
+            def lag_clean(tag):
+                lag_checkcol_list = ["界面", "完全音频", "字幕"]
+                tag_td_list = tag.find_all("td")
+                lag_support_checkcol = []
+                lag = tag_td_list[0].get_text(strip=True)
+                if re.search("不支持", tag.text):
+                    lag_support_checkcol.append("不支持")
+                else:
+                    for i, j in enumerate(tag_td_list[1:]):
+                        if j.find("img"):
+                            lag_support_checkcol.append(lag_checkcol_list[i])
+
+                return lag + ("({})".format(", ".join(lag_support_checkcol)) if lag_support_checkcol else "")
+
+            data["cover"] = re.sub("^(.+?)(\?t=\d+)?$", r"\1", (cover_anchor or {"src": ""})["src"])
+            data["name_chs"] = list(name_chs) or []
             data["name"] = name_anchor.get_text(strip=True)
-            data["cover"] = (cover_anchor or {"src": ""})["src"]
-            data["descr"] = descr_anchor.get_text("\n", strip=True).replace("关于这款游戏\n", "")
             data["detail"] = detail_anchor.get_text("\n", strip=True).replace(":\n", ": ").replace("\n,\n", ", ")
-            data["review"] = list(map(reviews_clean, rate_anchor))
-            data["screenshot"] = list(map(lambda dic: re.sub("^.+?url=(http.+?)\.[\dx]+(.+)$", r"\1\2", dic["href"]),
-                                          screenshot_anchor))
+            data["tags"] = list(map(lambda t: t.get_text(strip=True), tag_anchor)) or []
+            data["review"] = list(map(reviews_clean, rate_anchor)) or []
+            if linkbar_anchor and re.search("访问网站", linkbar_anchor.text):
+                data["linkbar"] = re.sub("^.+?url=(.+)$", r"\1", linkbar_anchor["href"])
+            data["language"] = list(filter(lambda s: s.find("不支持") == -1, map(lag_clean, language_anchor))) or []
+
+            base_info = "中文名: {}\n".format(" / ".join(data["name_chs"])) if data.get("name_chs") else ""
+            base_info += (data["detail"] + "\n") if data.get("detail") else ""
+            base_info += "官方网站： {}\n".format(data["linkbar"]) if data.get("linkbar") else ""
+            base_info += ("游戏语种: " + " | ".join(data["language"]) + "\n") if data.get("language") else ""
+            base_info += ("标签: " + " | ".join(data["tags"]) + "\n") if data.get("tags") else ""
+            base_info += ("\n".join(data["review"]) + "\n") if data.get("review") else ""
+
+            data["baseinfo"] = base_info
+            data["descr"] = descr_anchor.get_text("\n", strip=True).replace("关于这款游戏\n", "")
+            data["screenshot"] = list(map(lambda dic: re.sub("^.+?url=(http.+?)\.[\dx]+(.+?)(\?t=\d+)?$",
+                                                             r"\1\2", dic["href"]), screenshot_anchor))
             data["sysreq"] = list(map(sysreq_clean, sysreq_anchor))
 
             # 主介绍生成
@@ -364,4 +414,3 @@ class Gen(object):
             data["format"] = descr
 
             self.ret.update(data)
-
