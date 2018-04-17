@@ -66,18 +66,24 @@ headers = {
 }
 
 
-def get_page(url: str, json_=False, bs_=False, text_=False, **kwargs):
+def get_page(url: str, json_=False, jsonp_=False, bs_=False, text_=False, **kwargs):
     kwargs.setdefault("headers", headers)
     page = requests.get(url, **kwargs)
     page.encoding = "utf-8"
+    page_text = page.text
     if json_:
         return page.json()
+    elif jsonp_:
+        start_idx = page_text.find('(')
+        end_idx = page_text.rfind(')')
+        return json.loads(page_text[start_idx + 1:end_idx])
     elif bs_:
         return BeautifulSoup(page.text, "lxml")
     elif text_:
-        return page.text
+        return page_text
     else:
         return page
+
 
 class Gen(object):
     site = sid = url = ret = None
@@ -177,14 +183,12 @@ class Gen(object):
                 imdb_source = ("https://p.media-imdb.com/static-content/documents/v1/title/{}/ratings%3Fjsonp="
                                "imdb.rating.run:imdb.api.title.ratings/data.json".format(data["imdb_id"]))
                 try:
-                    imdb_jsonp = get_page(imdb_source, text_=True)  # 通过IMDb的API获取信息
-                    if re.search("imdb.rating.run\((.+)\)", imdb_jsonp):
-                        imdb_json = json.loads(re.search("imdb.rating.run\((.+)\)", imdb_jsonp).group(1))
-                        imdb_average_rating = imdb_json["resource"]["rating"]
-                        imdb_votes = imdb_json["resource"]["ratingCount"]
-                        if imdb_average_rating and imdb_votes:
-                            data["imdb_rating"] = "{}/10 from {} users".format(imdb_average_rating, imdb_votes)
-                except Exception:
+                    imdb_json = get_page(imdb_source, jsonp_=True)  # 通过IMDb的API获取信息，（经常超时555555）
+                    imdb_average_rating = imdb_json["resource"]["rating"]
+                    imdb_votes = imdb_json["resource"]["ratingCount"]
+                    if imdb_average_rating and imdb_votes:
+                        data["imdb_rating"] = "{}/10 from {} users".format(imdb_average_rating, imdb_votes)
+                except Exception as err:
                     pass
 
             # 获取获奖情况
@@ -366,9 +370,9 @@ if __name__ == '__main__':
     test_link_list = [
         # "http://jdaklvhgfad.com/adfad",  # No support link
         # "https://movie.douban.com/subject/1308452130/",  # Douban not exist
-        # "https://movie.douban.com/subject/3541415/",  # Douban Normal Foreign
-        # "https://movie.douban.com/subject/1297880/",  # Douban Normal Chinese
-        # "http://www.imdb.com/title/tt4925292/",    # Imdb through Douban
+        "https://movie.douban.com/subject/3541415/",  # Douban Normal Foreign
+        "https://movie.douban.com/subject/1297880/",  # Douban Normal Chinese
+        "http://www.imdb.com/title/tt4925292/",  # Imdb through Douban
         # "https://bgm.tv/subject/2071342495",  # Bangumi not exist
         # "https://bgm.tv/subject/207195",  # Bangumi Normal
         # "https://bgm.tv/subject/212279/",  # Bangumi Multiple characters
