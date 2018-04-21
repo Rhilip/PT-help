@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180331
+// @version      20180421
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
 // @include      http://localhost*
-// @include      http*://rhilip.github.io/PT-help/ptsearch*
+// @include      http*://*/ptsearch*
 // @updateURL    https://github.com/Rhilip/PT-help/raw/master/docs/js/ptsearch.user.js
 // @supportURL   https://github.com/Rhilip/PT-help/issues/2
 // @connect      *
@@ -126,7 +126,7 @@ $(document).ready(function () {
             Get_Search_Page(site, search_prefix, function (res, doc, body, page) {
                 var url_prefix = /pt\.whu\.edu\.cn|whupt\.net|hudbt\.hust\.edu\.cn/.test(res.finalUrl) ? "" : (res.finalUrl.match(/(https?:\/\/[^\/]+?\/).+/) || ['', ''])[1];
                 writelog("Using The normal parser for NexusPHP in Site: " + site);
-                if (/没有种子|用准确的关键字重试/.test(res.responseText)) {
+                if (/没有种子|No [Tt]orrents?|Your search did not match anything|用准确的关键字重试/.test(res.responseText)) {
                     writelog("No any torrent find in Site " + site + ".");
                     return;
                 }
