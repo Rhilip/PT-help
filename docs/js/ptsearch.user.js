@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180503
+// @version      20180505
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -96,7 +96,7 @@ $(document).ready(function () {
                 writelog("Start Searching in Site " + site + " .");
                 GM_xmlhttpRequest({
                     method: 'GET',
-                    url: search_prefix + search_text,
+                    url: search_prefix.replace("$key$",search_text),
                     onload: function (res) {
                         if (/(login|verify|returnto)[.=]/.test(res.finalUrl)) {
                             writelog("May Not Login in Site " + site + ". With finalUrl: " + res.finalUrl);
@@ -394,26 +394,36 @@ $(document).ready(function () {
                 var tr_list = doc.querySelectorAll("dl[id^='dl_torrent']");  // 所有种子均在id开头为dl_torrent的dl标签下
                 writelog("Get " + tr_list.length + " records in Site HDRoute.");
                 for (var i = 0; i < tr_list.length; i++) {   // 遍历记录
-                    var torrent_data_raw = $(tr_list[i]);
+                    var torrent_data_raw = tr_list[i];
                     // 获取种子标题名
-                    var _tag_torrent_title = torrent_data_raw.find("div.torrent_title");
-                    var _title_chs = _tag_torrent_title.find("p.title_chs").text();
-                    var _title_eng = _tag_torrent_title.find("p.title_eng").text();
+                    var _tag_torrent_title = torrent_data_raw.querySelector("div.torrent_title");
+                    var _title_chs = _tag_torrent_title.querySelector("p.title_chs").textContent;
+                    var _title_eng = _tag_torrent_title.querySelector("p.title_eng").textContent;
 
-                    var _date = torrent_data_raw.find("div.torrent_added").text().match(time_regex)[1].replace(/-(\d{2}) ?(\d{2}):/, "-$1 $2:");
+                    var _date = torrent_data_raw.querySelector("div.torrent_added").innerHTML
+                        .match(/(\d{4}-\d{2}-\d{2}[^\d]+?\d{2}:\d{2}:\d{2})/)[1]
+                        .replace(/-(\d{2})[^\d]+?(\d{2}):/, "-$1 $2:");
 
-                    var _size = torrent_data_raw.find("div.torrent_size").text();
-                    var _seeders = torrent_data_raw.find("a[href*='list_peers']").eq(0).text();
-                    var _leechers = torrent_data_raw.find("a[href*='list_peers']").eq(1);
+                    var _size = torrent_data_raw.querySelector("div.torrent_size").textContent;
+                    var _seeders = "0";
+                    var _leechers = "0";
+                    var _seeders_selector = torrent_data_raw.querySelectorAll("a[href*='list_peers']")[0];
+                    var _leechers_selector = torrent_data_raw.querySelectorAll("a[href*='list_peers']")[1];
+                    if (_seeders_selector) {
+                        _seeders = _seeders_selector.textContent;
+                    }
+                    if (_leechers_selector) {
+                        _leechers = _leechers_selector.textContent;
+                    }
 
                     table_append({
                         "site": site,
-                        "name": _title_chs + " | " + _title_eng,
-                        "link": torrent_data_raw.find("div.torrent_detail_icon > a").attr("href"),
+                        "name": _title_chs + (_title_eng ? (" | " + _title_eng) : ""),
+                        "link": "http://hdroute.org/" + torrent_data_raw.querySelector("div.torrent_detail_icon > a").getAttribute("href"),
                         "pubdate": Date.parse(_date),
                         "size": FileSizetoLength(_size),
-                        "seeders": _seeders.replace(',', '').replace("---", 0) || 0,  // 出现 `---`表示无数据
-                        "leechers": _leechers.replace(',', '').replace("---", 0) || 0,
+                        "seeders": _seeders.replace(',', '').replace("---", "0") || 0,  // 出现 `---`表示无数据
+                        "leechers": _leechers.replace(',', '').replace("---", "0") || 0,
                         "completed": 0 // 搜索页不显示完成人数
                     });
                 }
@@ -468,53 +478,51 @@ $(document).ready(function () {
         // 开始各站点遍历
         writelog("Script Version: " + script_version + ", Choose Site List: " + search_site.toString() + ", With Search Keywords: " + search_text);
         // 教育网通用模板解析
-        NexusPHP("BYR", "https://bt.byr.cn/torrents.php?search=");
-        NexusPHP("WHU", "https://pt.whu.edu.cn/torrents.php?search=");
-        NexusPHP("NWSUAF6", "https://pt.nwsuaf6.edu.cn/torrents.php?search=");
-        NexusPHP("XAUAT6", "http://pt.xauat6.edu.cn/torrents.php?search=");
-        NexusPHP("NYPT", "http://nanyangpt.com/torrents.php?search=");
-        NexusPHP("SJTU", "https://pt.sjtu.edu.cn/torrents.php?search=");
-        NexusPHP("HUDBT", "https://hudbt.hust.edu.cn/torrents.php?search=");
-        NexusPHP("TJUPT", "https://tjupt.org/torrents.php?search=");
+        NexusPHP("BYR", "https://bt.byr.cn/torrents.php?search=$key$");
+        NexusPHP("WHU", "https://pt.whu.edu.cn/torrents.php?search=$key$");
+        NexusPHP("NWSUAF6", "https://pt.nwsuaf6.edu.cn/torrents.php?search=$key$");
+        NexusPHP("XAUAT6", "http://pt.xauat6.edu.cn/torrents.php?search=$key$");
+        NexusPHP("NYPT", "http://nanyangpt.com/torrents.php?search=$key$");
+        NexusPHP("SJTU", "https://pt.sjtu.edu.cn/torrents.php?search=$key$");
+        NexusPHP("HUDBT", "https://hudbt.hust.edu.cn/torrents.php?search=$key$");
+        NexusPHP("TJUPT", "https://tjupt.org/torrents.php?search=$key$");
 
         // 教育网不能使用通用NexusPHP解析的站点
-        NPU("NPU", "https://npupt.com/torrents.php?search=");
-        ZX("ZX", "http://pt.zhixing.bjtu.edu.cn/search/x");
+        NPU("NPU", "https://npupt.com/torrents.php?search=$key$");
+        ZX("ZX", "http://pt.zhixing.bjtu.edu.cn/search/x$key$");
         // NexusPHP("CUGB", "http://pt.cugb.edu.cn/torrents.php?search=");
 
         // 公网通用模板解析
-        NexusPHP("HDSKY", "https://hdsky.me/torrents.php?search=");
-        NexusPHP("Hyperay", "https://www.hyperay.org/torrents.php?search=");
-        NexusPHP("HDHome", "https://hdhome.org/torrents.php?search=");
-        NexusPHP("HDHome(Live)", "https://hdhome.org/live.php?search=");
-        NexusPHP("HDTime", "https://hdtime.org/torrents.php?search=");
-        NexusPHP("HDU", "https://pt.hdupt.com/torrents.php?search=");
-        NexusPHP("JoyHD", "https://www.joyhd.net/torrents.php?search=");
-        NexusPHP("CHDBits", "https://chdbits.co/torrents.php?search=");
-        NexusPHP("Ourbits", "https://ourbits.club/torrents.php?search=");
-        NexusPHP("OpenCD", "https://open.cd/torrents.php?search=");
-        NexusPHP("SolaGS", "https://solags.org/torrents.php?search=");
-        NexusPHP("TTHD", "http://tthd.org/torrents.php?search=");
-        NexusPHP("KeepFrds", "https://pt.keepfrds.com/torrents.php?search=");
-        NexusPHP("TCCF", "https://et8.org/torrents.php?search=");
-        NexusPHP("U2", "https://u2.dmhy.org/torrents.php?search=");
-        NexusPHP("CMCT", "https://hdcmct.org/torrents.php?search=");
-        NexusPHP("MTeam", "https://tp.m-team.cc/torrents.php?search=");
-        NexusPHP("MTeam(Adult)", "https://tp.m-team.cc/adult.php?search=");
-        NexusPHP("GZTown", "https://pt.gztown.net/torrents.php?search=");
-        NexusPHP("HD4FANS", "https://pt.hd4fans.org/torrents.php?search=");
-        NexusPHP("TLFBits", "http://pt.eastgame.org/torrents.php?search=");
-        NexusPHP("BTSCHOOL", "http://pt.btschool.net/torrents.php?search=");
+        NexusPHP("HDSKY", "https://hdsky.me/torrents.php?search=$key$");
+        NexusPHP("Hyperay", "https://www.hyperay.org/torrents.php?search=$key$");
+        NexusPHP("HDHome", "https://hdhome.org/torrents.php?search=$key$");
+        NexusPHP("HDHome(Live)", "https://hdhome.org/live.php?search=$key$");
+        NexusPHP("HDTime", "https://hdtime.org/torrents.php?search=$key$");
+        NexusPHP("HDU", "https://pt.hdupt.com/torrents.php?search=$key$");
+        NexusPHP("JoyHD", "https://www.joyhd.net/torrents.php?search=$key$");
+        NexusPHP("CHDBits", "https://chdbits.co/torrents.php?search=$key$");
+        NexusPHP("Ourbits", "https://ourbits.club/torrents.php?search=$key$");
+        NexusPHP("OpenCD", "https://open.cd/torrents.php?search=$key$");
+        NexusPHP("KeepFrds", "https://pt.keepfrds.com/torrents.php?search=$key$");
+        NexusPHP("TCCF", "https://et8.org/torrents.php?search=$key$");
+        NexusPHP("U2", "https://u2.dmhy.org/torrents.php?search=$key$");
+        NexusPHP("CMCT", "https://hdcmct.org/torrents.php?search=$key$");
+        NexusPHP("MTeam", "https://tp.m-team.cc/torrents.php?search=$key$");
+        NexusPHP("MTeam(Adult)", "https://tp.m-team.cc/adult.php?search=$key$");
+        NexusPHP("GZTown", "https://pt.gztown.net/torrents.php?search=$key$");
+        NexusPHP("HD4FANS", "https://pt.hd4fans.org/torrents.php?search=$key$");
+        NexusPHP("TLFBits", "http://pt.eastgame.org/torrents.php?search=$key$");
+        NexusPHP("BTSCHOOL", "http://pt.btschool.net/torrents.php?search=$key$");
 
         // 公网不能使用通用NexusPHP解析的站点
-        HDChina("HDChina", "https://hdchina.org/torrents.php?search=");
-        TTG("TTG(Media)", "https://totheglory.im/browse.php?c=M&search_field=");
-        TTG("TTG(Gamez)", "https://totheglory.im/browse.php?c=G&search_field=");
+        HDChina("HDChina", "https://hdchina.org/torrents.php?search=$key$");
+        TTG("TTG(Media)", "https://totheglory.im/browse.php?c=M&search_field=$key$");
+        TTG("TTG(Gamez)", "https://totheglory.im/browse.php?c=G&search_field=$key$");
 
-        HDCity("HDCity", "https://hdcity.work/pt?iwannaseethis=");
-        HDStreet("HDStreet", "http://hdstreet.club/torrents.php?search=");
-        HDRoute("HDRoute", "http://hdroute.org/browse.php?s=");
-        CCFBits("CCFBits", "http://ccfbits.org/browse.php?search=");
+        HDCity("HDCity", "https://hdcity.work/pt?iwannaseethis=$key$");
+        HDStreet("HDStreet", "http://hdstreet.club/torrents.php?search=$key$");
+        HDRoute("HDRoute", "http://hdroute.org/browse.php?s=$key$&dp=0&add=0&action=s&or=1&imdb=");
+        CCFBits("CCFBits", "http://ccfbits.org/browse.php?search=$key$");
 
         // 外网站点
 
