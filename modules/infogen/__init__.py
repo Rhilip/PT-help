@@ -14,16 +14,17 @@ getinfo_blueprint = Blueprint('infogen', __name__, url_prefix="/movieinfo")
 docs_url = "https://github.com/Rhilip/PT-help/blob/master/modules/infogen/README.md"
 
 
+def get_key(key):
+    ret = ""
+    if request.method == "POST":
+        ret = request.form[key]
+    elif request.method == "GET":
+        ret = request.args.get(key)
+    return ret
+
+
 @getinfo_blueprint.route("/gen", methods=["GET", "POST"])
 def gen():
-    def get_key(key):
-        ret = ""
-        if request.method == "POST":
-            ret = request.form[key]
-        elif request.method == "GET":
-            ret = request.args.get(key)
-        return ret
-
     url = get_key("url")
     nocache = get_key("nocache")
 

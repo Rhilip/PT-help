@@ -6,8 +6,9 @@ import re
 import json
 import requests
 from bs4 import BeautifulSoup
+from html2bbcode.parser import HTML2BBCode
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 __author__ = "Rhilip"
 
 douban_format = [
@@ -82,6 +83,10 @@ def get_page(url: str, json_=False, jsonp_=False, bs_=False, text_=False, **kwar
         return page_text
     else:
         return page
+
+
+def html2ubb(html: str) -> str:
+    return str(HTML2BBCode().feed(html))
 
 
 class Gen(object):
@@ -281,25 +286,14 @@ class Gen(object):
             sysreq_anchor = steam_bs.select("div.sysreq_contents > div.game_area_sys_req")  # 系统需求
             screenshot_anchor = steam_bs.select("div.screenshot_holder a")  # 游戏截图
 
-            # 请求第三方资源
-            name_chs = set()  # 中文名
-
+            # 请求第三方中文名信息
             try:  # Thanks @Deparsoul with his Database
                 steamcn_json = get_page("https://steamdb.steamcn.com/app/{}/data.js?v=38".format(self.sid), jsonp_=True)
             except Exception:
                 pass
             else:
                 if "name_cn" in steamcn_json:
-                    name_chs.add(steamcn_json["name_cn"])
-
-            try:
-                enhancedsteam_json = get_page("https://api.enhancedsteam.com/"
-                                              "storepagedatacn/?appid={}".format(self.sid), json_=True)
-            except Exception:
-                pass
-            else:
-                if "chineseName" in enhancedsteam_json:
-                    name_chs.add(enhancedsteam_json["chineseName"])
+                    data["name_chs"] = steamcn_json["name_cn"]
 
             # 数据清洗
             def reviews_clean(tag):
@@ -330,7 +324,6 @@ class Gen(object):
                 return lag + ("({})".format(", ".join(lag_support_checkcol)) if lag_support_checkcol else "")
 
             data["cover"] = re.sub("^(.+?)(\?t=\d+)?$", r"\1", (cover_anchor or {"src": ""})["src"])
-            data["name_chs"] = list(name_chs) or []
             data["name"] = name_anchor.get_text(strip=True)
             data["detail"] = detail_anchor.get_text("\n", strip=True).replace(":\n", ": ").replace("\n,\n", ", ")
             data["tags"] = list(map(lambda t: t.get_text(strip=True), tag_anchor)) or []
@@ -339,7 +332,7 @@ class Gen(object):
                 data["linkbar"] = re.sub("^.+?url=(.+)$", r"\1", linkbar_anchor["href"])
             data["language"] = list(filter(lambda s: s.find("不支持") == -1, map(lag_clean, language_anchor))) or []
 
-            base_info = "中文名: {}\n".format(" / ".join(data["name_chs"])) if data.get("name_chs") else ""
+            base_info = "中文名: {}\n".format(data["name_chs"]) if data.get("name_chs") else ""
             base_info += (data["detail"] + "\n") if data.get("detail") else ""
             base_info += "官方网站： {}\n".format(data["linkbar"]) if data.get("linkbar") else ""
             base_info += ("游戏语种: " + " | ".join(data["language"]) + "\n") if data.get("language") else ""
@@ -347,7 +340,7 @@ class Gen(object):
             base_info += ("\n".join(data["review"]) + "\n") if data.get("review") else ""
 
             data["baseinfo"] = base_info
-            data["descr"] = descr_anchor.get_text("\n", strip=True).replace("关于这款游戏\n", "")
+            data["descr"] = html2ubb(str(descr_anchor)).strip()
             data["screenshot"] = list(map(lambda dic: re.sub("^.+?url=(http.+?)\.[\dx]+(.+?)(\?t=\d+)?$",
                                                              r"\1\2", dic["href"]), screenshot_anchor))
             data["sysreq"] = list(map(sysreq_clean, sysreq_anchor))
