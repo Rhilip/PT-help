@@ -14,6 +14,8 @@ if __name__ == '__main__':
         # "https://bgm.tv/subject/2071342495",  # Bangumi not exist
         # "https://bgm.tv/subject/207195",  # Bangumi Normal
         # "https://bgm.tv/subject/212279/",  # Bangumi Multiple characters
+        # "https://bangumi.tv/subject/220312",  # Bangumi Other Domain
+        # "http://chii.in/subject/12345",  # Bangumi Other Domain
         # "https://www.imdb.com/title/tt0083662/",  # Fix without duration and douban rate
         # "http://store.steampowered.com/app/20650135465430/",  # Steam Not Exist
         # "http://store.steampowered.com/app/550/",  # Steam Short Link (Store)
@@ -21,7 +23,8 @@ if __name__ == '__main__':
         # "https://steamcommunity.com/app/668630",  # Another Type of Steam Link (Hub)
         # "http://store.steampowered.com/app/420110",  # Steam Link With Age Check (One click type)
         # "http://store.steampowered.com/app/489830/",  # Steam Link With Age Check (Birth Choose type)
-        # "https://movie.douban.com/subject/5295054/",  # Fxi without year
+        # "https://movie.douban.com/subject/5295054/",  # Fix No year error in Douban
+        # "https://bgm.tv/subject/204027",  # Fix No story error in Bangumi
     ]
 
     for link in test_link_list:

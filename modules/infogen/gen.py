@@ -382,7 +382,7 @@ class Gen(object):
             # cast_another = bangumi_page.find("ul", id="browserItemList")
 
             data["cover"] = re.sub("/cover/[lcmsg]/", "/cover/l/", "https:" + cover_another["src"])  # Cover
-            data["story"] = story_another.get_text()  # Story
+            data["story"] = story_another.get_text() if story_another else ""  # Story
             data["staff"] = list(map(lambda tag: tag.get_text(), staff_another.find_all("li")[4:4 + 15]))  # Staff
 
             bangumi_characters_page = get_page(bangumi_characters_link, bs_=True)
