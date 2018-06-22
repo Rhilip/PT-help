@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 from html2bbcode.parser import HTML2BBCode
 
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 __author__ = "Rhilip"
 
 douban_format = [
@@ -161,8 +161,9 @@ class Gen(object):
             language_anchor = douban_page.find("span", class_="pl", text=re.compile("语言"))
             episodes_anchor = douban_page.find("span", class_="pl", text=re.compile("集数"))
             imdb_link_anchor = douban_page.find("a", text=re.compile("tt\d+"))
+            year_anchor = douban_page.find("span", class_="year")
 
-            data["year"] = douban_page.find("span", class_="year").text[1:-1]  # 年代
+            data["year"] = douban_page.find("span", class_="year").text[1:-1] if year_anchor else ""  # 年代
             data["region"] = fetch(region_anchor).split(" / ") if region_anchor else []  # 产地
             data["genre"] = list(map(lambda l: l.text.strip(), douban_page.find_all("span", property="v:genre")))  # 类别
             data["language"] = fetch(language_anchor).split(" / ") if language_anchor else []  # 语言

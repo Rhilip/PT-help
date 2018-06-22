@@ -21,6 +21,7 @@ if __name__ == '__main__':
         # "https://steamcommunity.com/app/668630",  # Another Type of Steam Link (Hub)
         # "http://store.steampowered.com/app/420110",  # Steam Link With Age Check (One click type)
         # "http://store.steampowered.com/app/489830/",  # Steam Link With Age Check (Birth Choose type)
+        # "https://movie.douban.com/subject/5295054/",  # Fxi without year
     ]
 
     for link in test_link_list:
