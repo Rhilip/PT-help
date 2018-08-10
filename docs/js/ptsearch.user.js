@@ -66,6 +66,14 @@ $(document).ready(function () {
     function writelog(text) {
         search_log.append("<li>" + TimeStampFormatter(Date.now()) + " - " + text + "</li>");
     }
+    
+    // Search on enter
+    $('#keyword').on('keyup', function (e) {
+        if (e.keyCode == 13) {
+            $("#advsearch").click();
+            $(this).blur();
+        }
+    });
 
     // Begin after click `search` Button
     $("#advsearch").click(function () {
