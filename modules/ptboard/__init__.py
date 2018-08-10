@@ -36,12 +36,30 @@ def warp_str(string):
 
 @ptboard_blueprint.route("/ptboard", methods=["GET"])
 def ptboard():
+    t0 = time.time()
+
     ret = {
         "success": False,
         "error": None
     }
 
-    t0 = time.time()
+    token = request.args.get("token") or ""
+
+    @cache.memoize(timeout=86400)
+    def token_valid(token_):
+        if len(token_) != 32:
+            return False
+
+        row, data = mysql.exec("SELECT * FROM `api`.`ptboard_token` WHERE token = %s", token_, ret_row=True)
+
+        if row > 0:
+            return True
+        else:
+            return False
+
+    if not token_valid(token):
+        ret["error"] = "Token is not exist."
+        return jsonify(ret)
 
     # 1. Get user requests
     search_raw = request.args.get("search") or search_default

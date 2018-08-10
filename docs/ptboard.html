@@ -36,6 +36,7 @@
             padding: 20px;
             margin-top: 0;
         }
+
         @media (min-width: 768px) {
             .main {
                 padding-right: 40px;
@@ -137,11 +138,13 @@
                 }
             ],
             url: "https://api.rhilip.info/tool/ptboard",
+            queryParams: Updateparams,
+            responseHandler: responseHandler,
             pagination: true,
             onlyInfoPagination: true,
             sidePagination: "server",
             pageSize: 100,
-            // pageList: [10, 25, 50, 100, 200],
+            pageList: [10, 25, 50, 100, 200],
             escape: true,
             search: true,
             showRefresh: true
@@ -149,21 +152,44 @@
     }
 
     function init() {
-        initTable();
+        if (!localStorage.getItem("pt_board_token")) {
+            let token = prompt("Please input your token to access Pt-Board.", "");
+            if (token != null && token !== "" && token.length === 32) {
+                localStorage.setItem("pt_board_token", token);
+            }
+        }
+
+        if (localStorage.getItem("pt_board_token")) {
+            initTable();
+        } else {
+            window.close()
+        }
+    }
+
+    function Updateparams(params) {
+        params.token = localStorage.getItem("pt_board_token");
+        return params
+    }
+
+    function responseHandler(res) {
+        if (!res.success) {
+            alert(`Warning! ${res.error} Please refresh the page.`);
+        }
+        return res
     }
 
     /** Format Timestamp to locale time string
      * @return {string}
      */
-    function TimeStampFormatter(data){
-        var unixTimestamp = new Date(data * 1000);
+    function TimeStampFormatter(data) {
+        let unixTimestamp = new Date(data * 1000);
         return unixTimestamp.toLocaleString()
     }
 
     /** Format Title with it's Link
      * @return {string}
      */
-    function LinkFormatter(value, index){
+    function LinkFormatter(value, index) {
         return '<a href="' + index.link + '" target="_blank" rel="noreferer nofollow">' + index.title + '</a>'
     }
 
