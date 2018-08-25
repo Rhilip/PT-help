@@ -218,8 +218,8 @@ class Gen(object):
             data["awards"] = awards
 
             # 豆瓣评分，简介，海报，导演，编剧，演员，标签
-            douban_average_rating = douban_api_json["rating"]["average"] or 0  # Set default douban rating value
-            douban_votes = douban_api_json["rating"]["numRaters"] or 0
+            data["douban_rating_average"] = douban_average_rating = douban_api_json["rating"]["average"] or 0
+            data["douban_votes"] = douban_votes = douban_api_json["rating"]["numRaters"] or 0
             data["douban_rating"] = "{}/10 from {} users".format(douban_average_rating, douban_votes)
             data["introduction"] = re.sub("^None$", "暂无相关剧情介绍", douban_api_json["summary"])
             data["poster"] = poster = re.sub("s(_ratio_poster|pic)", r"l\1", douban_api_json["image"])
