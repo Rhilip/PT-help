@@ -7,7 +7,7 @@ import pymysql
 from flask import Flask
 from flaskext.mysql import MySQL
 from flask_cors import CORS
-from flask_cache import Cache
+from flask_caching import Cache
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object('config')
