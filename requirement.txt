@@ -1,0 +1,8 @@
+flask
+flask-mysql
+flask_cors
+flask_caching
+html2bbcode
+bs4
+requests
+pymysql
