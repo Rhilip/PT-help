@@ -6,3 +6,4 @@ html2bbcode
 bs4
 requests
 pymysql
+lxml
