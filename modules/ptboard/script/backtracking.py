@@ -105,8 +105,8 @@ def string_sort(string):
 
 
 insert_sql = (
-    "INSERT INTO `ptboard_record` (`sid`,`site`,`title`,`link`,`pubDate`) "
-    "VALUES ('{sid}','{site}', '{title}','{link}', '{pubDate}')"
+    "INSERT INTO `ptboard_record` (`sid`,`site`,`title`,`pubDate`) "
+    "VALUES ('{sid}','{site}', '{title}', '{pubDate}')"
 )
 
 
