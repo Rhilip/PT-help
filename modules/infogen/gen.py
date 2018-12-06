@@ -258,27 +258,14 @@ class Gen(object):
             self.ret["error"] = "Can't find this imdb_id({}) in Douban.".format(self.sid)
 
     def _gen_steam(self):
-        session = requests.Session()
-        session.headers.update(headers)
-        session.cookies.update({"mature_content": "/"})  # 避免 Steam 年龄认证（直接点击类）
-
         steam_chs_url = "http://store.steampowered.com/app/{}/?l=schinese".format(self.sid)
-        steam_page = session.get(steam_chs_url)
+        steam_page = requests.get(steam_chs_url,
+                                  # 使用cookies避免 Steam 年龄认证
+                                  cookies={"mature_content": "1", "birthtime": "157737601",
+                                           "lastagecheckage": "1-January-1975", "wants_mature_content": "1"})
         if re.search("(欢迎来到|Welcome to) Steam", steam_page.text):  # 不存在的资源会被302到首页，故检查标题或r.history
             self.ret["error"] = "The corresponding resource does not exist."
         else:
-            if re.search("DoAgeGateSubmit\(\)", steam_page.text):  # 出现 Steam 年龄认证 (年龄选择类)
-                post_data = {
-                    "snr": "1_agecheck_agecheck__age-gate",
-                    "sessionid": session.cookies["sessionid"],
-                    # TODO 看看需不需要随机日期
-                    "ageDay": 1,
-                    "ageMonth": "January",
-                    "ageYear": "1979"
-                }
-                session.post("http://store.steampowered.com/agecheck/app/{}/".format(self.sid), data=post_data)
-                steam_page = session.get(steam_chs_url)
-
             data = {}
             steam_bs = BeautifulSoup(steam_page.text, "lxml")
             # 从网页中定位数据
@@ -337,7 +324,7 @@ class Gen(object):
             data["review"] = list(map(reviews_clean, rate_anchor)) or []
             if linkbar_anchor and re.search("访问网站", linkbar_anchor.text):
                 data["linkbar"] = re.sub("^.+?url=(.+)$", r"\1", linkbar_anchor["href"])
-            data["language"] = list(filter(lambda s: s.find("不支持") == -1, map(lag_clean, language_anchor))) or []
+            data["language"] = list(filter(lambda s: s.find("不支持") == -1, map(lag_clean, language_anchor)))[:3] or []
 
             base_info = "中文名: {}\n".format(data["name_chs"]) if data.get("name_chs") else ""
             base_info += (data["detail"] + "\n") if data.get("detail") else ""
