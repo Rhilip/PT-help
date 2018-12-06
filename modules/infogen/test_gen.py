@@ -25,6 +25,7 @@ if __name__ == '__main__':
         # "http://store.steampowered.com/app/489830/",  # Steam Link With Age Check (Birth Choose type)
         # "https://movie.douban.com/subject/5295054/",  # Fix No year error in Douban
         # "https://bgm.tv/subject/204027",  # Fix No story error in Bangumi
+        # "https://store.steampowered.com/app/517630/Just_Cause_4/"  # New Age Check pass in Steam
     ]
 
     for link in test_link_list:

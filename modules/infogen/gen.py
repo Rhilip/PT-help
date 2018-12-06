@@ -334,7 +334,7 @@ class Gen(object):
             base_info += ("\n".join(data["review"]) + "\n") if data.get("review") else ""
 
             data["baseinfo"] = base_info
-            data["descr"] = html2ubb(str(descr_anchor)).strip()
+            data["descr"] = html2ubb(str(descr_anchor)).replace("[h2]关于这款游戏[/h2]", "").strip()
             data["screenshot"] = list(map(lambda dic: re.sub("^.+?url=(http.+?)\.[\dx]+(.+?)(\?t=\d+)?$",
                                                              r"\1\2", dic["href"]), screenshot_anchor))
             data["sysreq"] = list(map(sysreq_clean, sysreq_anchor))
