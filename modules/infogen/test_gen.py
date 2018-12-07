@@ -34,7 +34,7 @@ if __name__ == '__main__':
         "http://store.steampowered.com/app/420110",  # Steam Link With Age Check (One click type)
         "http://store.steampowered.com/app/489830/",  # Steam Link With Age Check (Birth Choose type)
         "https://store.steampowered.com/app/517630/Just_Cause_4/"  # New Age Check pass in Steam
-        "https://store.steampowered.com/app/968790", # Fix tag class miss
+        "https://store.steampowered.com/app/968790",  # Fix tag class miss
     ]
 
     other_link_list = [
@@ -42,11 +42,11 @@ if __name__ == '__main__':
     ]
 
     test_link_list = []
-    test_link_list.extend(douban_link_list)
-    test_link_list.extend(imdb_link_list)
-    test_link_list.extend(bgm_link_list)
-    test_link_list.extend(steam_link_list)
-    test_link_list.extend(other_link_list)
+    # test_link_list.extend(douban_link_list)
+    # test_link_list.extend(imdb_link_list)
+    # test_link_list.extend(bgm_link_list)
+    # test_link_list.extend(steam_link_list)
+    # test_link_list.extend(other_link_list)
 
     for link in test_link_list:
         print("Test link: {}".format(link))
