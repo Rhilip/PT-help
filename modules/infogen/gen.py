@@ -292,7 +292,7 @@ class Gen(object):
             # 数据清洗
             def reviews_clean(tag):
                 subtitle = tag.find("div", class_="subtitle").get_text(strip=True).replace("：", ":")
-                summary = tag.find("span", class_="game_review_summary").get_text(strip=True)
+                summary = (tag.find("span", class_="game_review_summary") or tag.find("span", itemprop="description")).get_text(strip=True)
                 reviewdesc = tag["data-tooltip-text"]
                 return "{} {} ({})".format(subtitle, summary, reviewdesc)
 
@@ -335,7 +335,7 @@ class Gen(object):
 
             data["baseinfo"] = base_info
             data["descr"] = html2ubb(str(descr_anchor)).replace("[h2]关于这款游戏[/h2]", "").strip()
-            data["screenshot"] = list(map(lambda dic: re.sub("^.+?url=(http.+?)\.[\dx]+(.+?)(\?t=\d+)?$",
+            data["screenshot"] = list(map(lambda dic: re.sub("^.+?url=(http.+?)\.[\dx]+(.+?)(\?t=\d+)?(\?.+)$",
                                                              r"\1\2", dic["href"]), screenshot_anchor))
             data["sysreq"] = list(map(sysreq_clean, sysreq_anchor))
 
