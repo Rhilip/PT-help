@@ -291,10 +291,7 @@ class Gen(object):
 
             # 数据清洗
             def reviews_clean(tag):
-                subtitle = tag.find("div", class_="subtitle").get_text(strip=True).replace("：", ":")
-                summary = (tag.find("span", class_="game_review_summary") or tag.find("span", itemprop="description")).get_text(strip=True)
-                reviewdesc = tag["data-tooltip-text"]
-                return "{} {} ({})".format(subtitle, summary, reviewdesc)
+                return tag.get_text(" ", strip=True).replace("：", ":")
 
             def sysreq_clean(tag):
                 os_dict = {"win": "Windows", "mac": "Mac OS X", "linux": "SteamOS + Linux"}

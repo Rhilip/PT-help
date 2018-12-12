@@ -35,13 +35,16 @@ if __name__ == '__main__':
         "http://store.steampowered.com/app/489830/",  # Steam Link With Age Check (Birth Choose type)
         "https://store.steampowered.com/app/517630/Just_Cause_4/"  # New Age Check pass in Steam
         "https://store.steampowered.com/app/968790",  # Fix tag class miss
+        "https://store.steampowered.com/app/734730/Ancient_Frontier_Steel_Shadows/",  # Fix no review
     ]
 
     other_link_list = [
         "http://jdaklvhgfad.com/adfad",  # No support link
     ]
 
-    test_link_list = []
+    test_link_list = [
+
+    ]
     # test_link_list.extend(douban_link_list)
     # test_link_list.extend(imdb_link_list)
     # test_link_list.extend(bgm_link_list)
