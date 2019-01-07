@@ -274,7 +274,7 @@
             let rObj = {};
             let month_data = push_data_dic.filter(dic => dic.date.slice(5, 7) === x);
             rObj["month"] = x;
-            rObj["count"] = month_data.map(dic => dic.count).reduce((a, b) => a + b);
+            rObj["count"] = month_data.map(dic => dic.count).reduce((a, b) => a + b, 0);
             rObj["average"] = (rObj["count"] / month_data.length).toFixed(2);
             return rObj;
         });
