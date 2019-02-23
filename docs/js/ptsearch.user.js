@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pt-search
 // @namespace    http://blog.rhilip.info
-// @version      20180505
+// @version      20190109
 // @description  Pt-search 配套脚本
 // @author       Rhilip
 // @run-at       document-end
@@ -487,7 +487,7 @@ $(document).ready(function () {
         writelog("Script Version: " + script_version + ", Choose Site List: " + search_site.toString() + ", With Search Keywords: " + search_text);
         // 教育网通用模板解析
         NexusPHP("BYR", "https://bt.byr.cn/torrents.php?search=$key$");
-        NexusPHP("WHU", "https://pt.whu.edu.cn/torrents.php?search=$key$");
+        NexusPHP("WHU", "https://whu.pt/torrents.php?search=$key$");
         NexusPHP("NWSUAF6", "https://pt.nwsuaf6.edu.cn/torrents.php?search=$key$");
         NexusPHP("XAUAT6", "http://pt.xauat6.edu.cn/torrents.php?search=$key$");
         NexusPHP("NYPT", "http://nanyangpt.com/torrents.php?search=$key$");
