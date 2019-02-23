@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         Byrbt : Tree View
 // @namespace    https://blog.rhilip.info
-// @version      20180304
+// @version      20190223
 // @description  将种子文件列表转换为树状图表示
 // @author       Rhilip
 // @match        http*://bt.byr.cn/details.php*
 // @icon         http://bt.byr.cn/favicon.ico
-// @require      http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js
-// @require      http://cdn.bootcss.com/jstree/3.3.3/jstree.min.js
-// @resource     customCSS http://cdn.bootcss.com/jstree/3.3.3/themes/default/style.min.css
+// @require      https://cdn.jsdelivr.net/npm/jquery@3.1.1/dist/jquery.min.js
+// @require      https://cdn.jsdelivr.net/npm/jstree@3.3.3/dist/jstree.min.js
+// @resource     customCSS https://cdn.jsdelivr.net/npm/jstree@3.3.3/dist/themes/default/style.min.css
 // @grant        GM_addStyle
 // @grant        GM_getResourceText
 // @updateURL    https://github.com/Rhilip/PT-help/raw/master/docs/js/Byrbt%20-%20Tree%20View.user.js
