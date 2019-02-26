@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 from html2bbcode.parser import HTML2BBCode
 
-__version__ = "0.3.4"
+__version__ = "0.3.5"
 __author__ = "Rhilip"
 
 douban_format = [
@@ -52,7 +52,7 @@ steam_format = [
 ]
 
 support_list = [
-    ("douban", re.compile("(https?://)?movie\.douban\.com/(subject|movie)/(?P<sid>\d+)/?")),
+    ("douban", re.compile("(https?://)?((movie|www)\.)?douban\.com/(subject|movie)/(?P<sid>\d+)/?")),
     ("imdb", re.compile("(https?://)?www\.imdb\.com/title/(?P<sid>tt\d+)")),
     # ("3dm", re.compile("(https?://)?bbs\.3dmgame\.com/thread-(?P<sid>\d+)(-1-1\.html)?")),
     ("steam", re.compile("(https?://)?(store\.)?steam(powered|community)\.com/app/(?P<sid>\d+)/?")),

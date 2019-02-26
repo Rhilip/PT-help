@@ -10,6 +10,8 @@ if __name__ == '__main__':
         "https://movie.douban.com/subject/3541415/",  # Douban Normal Foreign
         "https://movie.douban.com/subject/1297880/",  # Douban Normal Chinese
         "https://movie.douban.com/subject/5295054/",  # Fix No year error in Douban
+        "https://douban.com/subject/30395527/",  # Wide Douban Link without subdomain
+        "https://www.douban.com/subject/26970964/"  # Wide Douban Link with subdomain like `www`
     ]
 
     imdb_link_list = [
