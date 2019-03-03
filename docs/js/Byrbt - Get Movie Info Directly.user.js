@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name        Byrbt : Get Movie Info Directly
 // @namespace   http://blog.rhilip.info
-// @version     20180401
+// @version     20190303
 // @description 从其他信息站点（Douban、Bangumi）获取种子简介信息，并辅助表单信息填写与美化
 // @author      Rhilip
-// @include     /^https?:\/\/(bt\.byr\.cn|byr\.rhilip\.info)\/upload\.php\?type=40(8|1|4)/
-// @icon        http://bt.byr.cn/favicon.ico
+// @include     /^https?:\/\/(bt\.byr\.cn|byr\.rhilip\.info)\/upload\.php\?type=4(08|01|04|10)/
+// @icon        https://bt.byr.cn/favicon.ico
 // @run-at      document-end
 // @connect     *
 // @grant       GM_xmlhttpRequest
@@ -140,7 +140,7 @@ CKEDITOR.on('instanceReady', function (evt) {
         if (!descr.match("byrbt_info_gen")) {   // 如果没有发现`Gen`信息
             switch (cat) {
                 case 401:   // 剧集区
-                // 暂无QAQ （所以先用电影区的~）
+                case 410:   //纪录区
                 case 408:   // 电影区
                     descr = '<br />\n' +
                         '<fieldset style="font-family: Consolas;">\n' +
@@ -479,7 +479,7 @@ CKEDITOR.on('instanceReady', function (evt) {
                 });
             };
 
-            if ([408, 401].indexOf(cat) > -1) {    // 电影区，剧集区
+            if ([408, 401,410].indexOf(cat) > -1) {    // 电影区，剧集区，纪录区
                 Search_From_API("https://api.douban.com/v2/movie/search?q=" + subject_url, function (res, resj) {
                     var search_html = "";
                     if (resj.total !== 0) {
@@ -514,6 +514,7 @@ CKEDITOR.on('instanceReady', function (evt) {
 
 /**
  * Created by Rhilip on 10/12/2017.
+ * 20190303：增加纪录区支持
  * 20180401: 增加默认douban的评分值，防止无评分时出现`/10 from users`的情况
  * 20180308: 修复Firefox下不能正常填入简介的Bug。
  * 20180305：补充Bangumi相关解析，修改豆瓣链接异步获取的监听方法。
