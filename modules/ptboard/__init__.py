@@ -61,7 +61,7 @@ def ptboard():
         ret["error"] = "Token is not exist."
         return jsonify(ret)
 
-    mysql.exec('UPDATE `api`.`ptboard_token` set `useage_count` = `useage_count` + 1 WHERE token = $s', (token,))
+    mysql.exec('UPDATE `api`.`ptboard_token` set `useage_count` = `useage_count` + 1 WHERE token = %s', (token,))
 
     # 1. Get user requests
     search_raw = request.args.get("search") or search_default
