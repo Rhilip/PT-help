@@ -292,7 +292,7 @@ $(document).ready(function () {
                     var _tag_name = torrent_data_raw.find("a[href*='hit']");
 
                     var _date, _tag_date = torrent_data_raw.find(".t_time");
-                    if (/[分时天月年]/.test(_tag_date.text())) {
+                    if (/[分时天月年(hours)(minutes)]/.test(_tag_date.text())) {
                         _date = _tag_date.children("span").attr("title");
                     } else {
                         _date = _tag_date.text();
