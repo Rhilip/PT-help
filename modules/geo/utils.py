@@ -190,8 +190,7 @@ class IpQuery(object):
             if v4 >= 0:
                 if ret != '':
                     ret += ' > '
-                else:
-                    ret += self.v4db.searchIp(v4)
+                ret += self.v4db.searchIp(v4)
         except Exception as e:
             err = "Internal server error"
         return {
