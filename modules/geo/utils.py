@@ -48,7 +48,7 @@ def parseIpv6(ip):
 
 def parseIp(ip):
     ip = ip.strip()
-    ip.replace('*', '0')
+    ip = ip.replace('*', '0')
     v4 = parseIpv4(ip)
     v6 = parseIpv6(ip)
     v2002 = v6 >> (3 * 16)
