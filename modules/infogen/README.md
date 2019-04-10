@@ -16,6 +16,7 @@ PT站点用简介生成工具
 ### 4) 请求参数:
 
 #### 参数:
+
 |字段名称       |字段说明         |类型            |必填            |说明     |
 | -------------|:--------------:|:--------------:|:--------------:|:------|
 | url | 资源链接 | string | N | 具体接收链接形式见下表 |
@@ -27,11 +28,16 @@ PT站点用简介生成工具
 如果两个传入类型均未发现，则会被重定向(301)到本页
 
 #### 可接收的url列表
-| 站点类型 | 网址示例 |
-|-------------|:--------------|
-| 豆瓣 Douban | https://movie.douban.com/subject/:d |
-| 番组计划| 	https://bgm.tv/subject/:d , http://bangumi.tv/subject/:d , http://chii.in/subject/:d |
-| Steam | https://steamcommunity.com/app/:d , http://store.steampowered.com/app/:d , http://store.steampowered.com/app/:d/:s |
+
+| 站点类型 | 站点标识 | 网址示例 |
+|-------------|:---:|:--------------|
+| 豆瓣 Douban | douban | https://movie.douban.com/subject/:d |
+| IMDb | imdb | https://www.imdb.com/title/tt:d |
+| 番组计划| bangumi | https://bgm.tv/subject/:d , http://bangumi.tv/subject/:d , http://chii.in/subject/:d |
+| Steam | steam | https://steamcommunity.com/app/:d , http://store.steampowered.com/app/:d , http://store.steampowered.com/app/:d/:s |
+
+> 注意：在`v0.4.0`之前，imdb链接会通过豆瓣查询并生成对应的豆瓣信息，而之后需要
+以 `&site=douban&sid=tt\d{7,8}`的形式传入查询参数时，才尝试从Douban查询对应IMDb号的豆瓣信息，
 
 ### 5) 请求返回结果示例:
 
@@ -90,6 +96,93 @@ PT站点用简介生成工具
  "year": "2010"
 }
 ```
+
+#### IMDb链接
+```json
+{
+  "@type":"Movie",
+  "actors":[
+    {
+      "name":"Tim Robbins",
+      "url":"/name/nm0000209/"
+    }
+  ],
+  "aka":[
+    {
+      "country":"(original title)",
+      "title":"The Shawshank Redemption"
+    }
+  ],
+  "contentRating":"R",
+  "copyright":"Powered by @Rhilip",
+  "creators":[
+    {
+      "name":"Stephen King",
+      "url":"/name/nm0000175/"
+    }
+  ],
+  "critic":213,
+  "datePublished":"1994-10-14",
+  "description":"The Shawshank Redemption is a movie starring Tim Robbins, Morgan Freeman, and Bob Gunton. Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+  "details":{
+    "Also Known As":"Rita Hayworth and Shawshank Redemption",
+    "Aspect Ratio":"1.85 : 1",
+    "Budget":"$25,000,000 (estimated)",
+    "Color":"Color",
+    "Country":"USA",
+    "Cumulative Worldwide Gross":"$58,500,000",
+    "Filming Locations":"St. Croix, U.S. Virgin Islands",
+    "Gross USA":"$28,341,469",
+    "Language":"English",
+    "Official Sites":"Official Facebook",
+    "Opening Weekend USA":"$727,326, 20 November 1994 , Limited Release",
+    "Production Co":"Castle Rock Entertainment",
+    "Release Date":"14 October 1994 (USA)",
+    "Runtime":"142 min",
+    "Sound Mix":"Dolby Digital | SDDS"
+  },
+  "directors":[
+    {
+      "name":"Frank Darabont",
+      "url":"/name/nm0001104/"
+    }
+  ],
+  "duration":"PT2H22M",
+  "error":null,
+  "format":"[img]https://m.media-amazon.com/images/M/MV5BMDFkYTc0MGEtZmNhMC00ZDIzLWFmNTEtODM1ZmRlYWMwMWFmXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg[/img]\n\nTitle: The Shawshank Redemption\nKeywords: wrongful imprisonment, escape from prison, based on the works of stephen king, prison, voice over narration\nDate Published: 1994-10-14\nIMDb Rating: 9.3/10 from 2071927 users\nIMDb Link: https://www.imdb.com/title/tt0111161/\nDirectors: Frank Darabont\nCreators: Stephen King / Frank Darabont\nActors: Tim Robbins / Morgan Freeman / Bob Gunton / William Sadler\n\nIntroduction\n    The Shawshank Redemption is a movie starring Tim Robbins, Morgan Freeman, and Bob Gunton. Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.\n",
+  "genre":"Drama",
+  "imdb_id":"tt0111161",
+  "imdb_link":"https://www.imdb.com/title/tt0111161/",
+  "imdb_rating":"9.3/10 from 2071927 users",
+  "imdb_rating_average":"9.3",
+  "imdb_votes":2071927,
+  "img":[
+    "https://m.media-amazon.com/images/M/MV5BMDFkYTc0MGEtZmNhMC00ZDIzLWFmNTEtODM1ZmRlYWMwMWFmXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg"
+  ],
+  "keywords":[
+    "wrongful imprisonment",
+    "escape from prison",
+    "based on the works of stephen king",
+    "prison",
+    "voice over narration"
+  ],
+  "metascore":"80",
+  "name":"The Shawshank Redemption",
+  "popularity":90,
+  "poster":"https://m.media-amazon.com/images/M/MV5BMDFkYTc0MGEtZmNhMC00ZDIzLWFmNTEtODM1ZmRlYWMwMWFmXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg",
+  "release_date":[
+    {
+      "country":"Canada",
+      "date":"10 September 1994"
+    }
+  ],
+  "reviews":6298,
+  "success":true,
+  "version":"0.3.8",
+  "year":"1994"
+}
+```
+
 
 #### Bangumi链接
 ```json

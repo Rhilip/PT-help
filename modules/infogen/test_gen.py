@@ -45,12 +45,17 @@ if __name__ == '__main__':
     ]
 
     dict_link_list = [
+        # Douban
         {'site': 'douban', 'sid': 3541415},  # Input dict object
-        {'site': 'douban', 'sid': 'tt0083662'}  # IMDb though Douban
+        {'site': 'douban', 'sid': 'tt0083662'},  # IMDb though Douban
+        # IMDb
+        {'site': 'imdb', 'sid': 83662},
+        {'site': 'imdb', 'sid': 'tt0083662'},
+        {'site': 'imdb', 'sid': 'tt0111161'}
     ]
 
     test_link_list = [
-
+        {'site': 'imdb', 'sid': 'tt0111161'}
     ]
     # test_link_list.extend(douban_link_list)
     # test_link_list.extend(imdb_link_list)
@@ -64,6 +69,8 @@ if __name__ == '__main__':
         gen = Gen(link).gen(_debug=True)
         if gen["success"]:
             print("Format text:\n", gen["format"])
+            import json
+            print(json.dumps(gen,ensure_ascii=False,sort_keys=True))
         else:
             print("Error : {}".format(gen["error"]))
         print("--------------------")

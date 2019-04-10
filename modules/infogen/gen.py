@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 from html2bbcode.parser import HTML2BBCode
 
-__version__ = "0.3.7"
+__version__ = "0.4.0"
 __author__ = "Rhilip"
 
 douban_format = [
@@ -33,6 +33,19 @@ douban_format = [
     ("tags", "\n◎标　　签　{}\n"),
     ("introduction", "\n◎简　　介  \n\n　　{}\n"),
     ("awards", "\n◎获奖情况  \n\n{}\n"),
+]
+
+imdb_format = [
+    ('poster', '[img]{}[/img]\n\n'),
+    ('name', 'Title: {}\n'),
+    ('keywords', 'Keywords: {}\n'),
+    ('datePublished', 'Date Published: {}\n'),
+    ('imdb_rating', 'IMDb Rating: {}\n'),
+    ('imdb_link', 'IMDb Link: {}\n'),
+    ('directors', 'Directors: {}\n'),
+    ('creators', 'Creators: {}\n'),
+    ('actors', 'Actors: {}\n'),
+    ('description', '\nIntroduction\n    {}\n')
 ]
 
 bangumi_format = [
@@ -89,6 +102,10 @@ def get_page(url: str, json_=False, jsonp_=False, bs_=False, text_=False, **kwar
 
 def html2ubb(html: str) -> str:
     return str(HTML2BBCode().feed(html))
+
+
+def get_num_from_string(raw):
+    return int(re.search('[\d,]+', raw).group(0).replace(',', ''))
 
 
 class Gen(object):
@@ -266,7 +283,134 @@ class Gen(object):
             self.ret.update(data)
 
     def _gen_imdb(self):
-        self.ret["error"] = "Not support now!"
+        # 处理imdb_id格式，self.sid 可能为 tt\d{7,8} 或者 \d{0,8}，
+        # 存库的应该是 tt\d{0,8} 而用户输入两种都有可能，但向imdb请求的应统一为 tt\d{7,8}
+        self.sid = str(self.sid)
+        if self.sid.startswith('tt'):
+            self.sid = self.sid[2:]
+
+        # 不足7位补齐到7位，如果是7、8位则直接使用
+        imdb_id = 'tt{}'.format(self.sid if len(self.sid) >= 7 else self.sid.rjust(7, '0'))
+
+        # 请求对应页面
+        imdb_url = "https://www.imdb.com/title/{}/".format(imdb_id)
+        imdb_page = get_page(imdb_url, bs_=True)
+        if imdb_page.title.text == '404 Error - IMDb':
+            self.ret["error"] = "The corresponding resource does not exist."
+        else:
+            data = {}
+            # 首先解析页面中的json信息，并从中获取数据  `<script type="application/ld+json">...</script>`
+            page_json_another = imdb_page.find('script', type='application/ld+json')
+            page_json = json.loads(page_json_another.text)
+
+            data['imdb_id'] = imdb_id
+            data['imdb_link'] = imdb_url
+
+            # 处理可以直接从page_json中复制过来的信息
+            for v in ['@type', 'name', 'genre', 'contentRating', "datePublished", 'description', 'duration']:
+                data[v] = page_json.get(v)
+
+            data['poster'] = page_json.get('image')
+            if page_json.get('image'):
+                self.img_list.append(page_json.get('image'))
+
+            if data.get('datePublished'):
+                data["year"] = data.get('datePublished')[0:4]
+
+            def filter_person(d):
+                return d['@type'] == 'Person'
+
+            def del_type_def(d):
+                del d['@type']
+                return d
+
+            for p in ['actor', 'director', 'creator']:
+                raw = page_json.get(p)
+                if raw:
+                    if isinstance(raw, dict):
+                        raw = [raw]
+                    data[p + 's'] = list(map(del_type_def, filter(filter_person, raw)))
+
+            data['keywords'] = page_json.get("keywords", '').split(',')
+            aggregate_rating = page_json.get("aggregateRating", {})
+            data['imdb_votes'] = aggregate_rating.get("ratingCount", 0)
+            data['imdb_rating_average'] = aggregate_rating.get("ratingValue", 0)
+            data['imdb_rating'] = '{}/10 from {} users'.format(data['imdb_rating_average'], data['imdb_votes'])
+
+            # 解析页面元素
+            # 第一部分： Metascore，Reviews，Popularity
+            mrp_bar = imdb_page.select('div.titleReviewBar > div.titleReviewBarItem')
+            for bar in mrp_bar:
+                if bar.text.find('Metascore') > -1:
+                    metascore_another = bar.find('div', class_='metacriticScore')
+                    data['metascore'] = metascore_another.get_text(strip=True) if metascore_another else None
+                elif bar.text.find('Reviews') > -1:
+                    reviews_another = bar.find('a', href=re.compile(r'^reviews'))
+                    critic_another = bar.find('a', href=re.compile(r'^externalreviews'))
+                    data['reviews'] = get_num_from_string(reviews_another.get_text()) if reviews_another else 0
+                    data['critic'] = get_num_from_string(critic_another.get_text()) if critic_another else 0
+                elif bar.text.find('Popularity') > -1:
+                    data['popularity'] = get_num_from_string(bar.text)
+
+            # 第二部分： Details
+            details_another = imdb_page.find('div', id='titleDetails')
+            title_anothers = details_another.find_all('div', class_='txt-block')
+
+            def get_title(raw):
+                title_raw = raw.get_text(' ', strip=True).replace('See more »', '').strip()
+                title_split = title_raw.split(': ', 1)
+                return {title_split[0]: title_split[1]} if len(title_split) > 1 else None
+
+            details_dict = {}
+            details_list_raw = list(filter(lambda x: x is not None, map(get_title, title_anothers)))
+            for d in details_list_raw:
+                for k,v in d.items():
+                    details_dict[k] = v
+
+            data['details'] = details_dict
+
+            # 请求附属信息
+            # 第一部分： releaseinfo
+            imdb_releaseinfo_page = get_page('https://www.imdb.com/title/{}/releaseinfo'.format(imdb_id), bs_=True)
+
+            release_date_items = imdb_releaseinfo_page.find_all('tr', class_='release-date-item')
+            release_date = []
+            for item in release_date_items:
+                country = item.find('td', class_='release-date-item__country-name')
+                date = item.find('td', class_='release-date-item__date')
+                if country and date:
+                    release_date.append({'country': country.get_text(strip=True), 'date': date.get_text(strip=True)})
+            data['release_date'] = release_date
+
+            aka_items = imdb_releaseinfo_page.find_all('tr', class_='aka-item')
+            aka = []
+            for item in aka_items:
+                country = item.find('td', class_='aka-item__name')
+                name = item.find('td', class_='aka-item__title')
+                if country and name:
+                    aka.append({'country': country.get_text(strip=True), 'title': name.get_text(strip=True)})
+            data['aka'] = aka
+
+            # TODO full cast to replace infoformation from page_json
+
+            # -*- 组合数据 -*-
+            descr = ""
+            for key, ft in imdb_format:
+                _data = data.get(key)
+                if _data:
+                    if key in ['directors', 'creators', 'actors']:
+                        _data = list(map(lambda x: x.get('name'), _data))
+                    if isinstance(_data, list):
+                        join_fix = " / "
+                        if key == "keywords":
+                            join_fix = ", "
+                        _data = join_fix.join(_data)
+
+                    descr += ft.format(_data)
+            self.ret["format"] = descr
+
+            # 将清洗的数据一并发出
+            self.ret.update(data)
 
     def _gen_steam(self):
         steam_chs_url = "http://store.steampowered.com/app/{}/?l=schinese".format(self.sid)
