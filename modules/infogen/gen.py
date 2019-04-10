@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 from html2bbcode.parser import HTML2BBCode
 
-__version__ = "0.3.5"
+__version__ = "0.3.6"
 __author__ = "Rhilip"
 
 douban_format = [
@@ -59,6 +59,8 @@ support_list = [
     ("bangumi", re.compile("(https?://)?(bgm\.tv|bangumi\.tv|chii\.in)/subject/(?P<sid>\d+)/?")),
 ]
 
+support_site_list = list(map(lambda x: x[0], support_list))
+
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                   'Chrome/61.0.3163.100 Safari/537.36 ',
@@ -93,17 +95,22 @@ class Gen(object):
     site = sid = url = ret = None
     img_list = []  # 临时存储图片信息
 
-    def __init__(self, url: str):
+    def __init__(self, url: str or dict):
         self.clear()
         self.pat(url)
 
-    def pat(self, url: str):
-        for site, pat in support_list:
-            search = pat.search(url)
-            if search:
-                self.sid = search.group("sid")
-                self.site = site
-        if not self.site:
+    def pat(self, url: str or dict):
+        if isinstance(url, dict):
+            self.site = url.get('site', '')
+            self.sid = url.get('sid', '')
+        else:
+            for site, pat in support_list:
+                search = pat.search(url)
+                if search:
+                    self.sid = search.group("sid")
+                    self.site = site
+                    return
+        if not self.site or self.site not in support_site_list:
             self.ret["error"] = "No support link."
 
     def clear(self):
