@@ -20,7 +20,7 @@ PT站点用简介生成工具
 |字段名称       |字段说明         |类型            |必填            |说明     |
 | -------------|:--------------:|:--------------:|:--------------:|:------|
 | url | 资源链接 | string | N | 具体接收链接形式见下表 |
-| site | 资源站点 | string | N | 资源站点，具体传入值见下表，在无url值传入时会使用 |
+| site | 站点标识 | string | N | 资源站点，具体传入值见下表，在无url值传入时会使用 |
 | sid | 资源id | string or int | N | 在对应资源站点的id值，在无url值传入时会使用 |
 | nocache | 禁用缓存 | string | N | 任何值均会导致已有缓存失效，如需禁用建议传入`nocache=1` |
 
@@ -37,7 +37,7 @@ PT站点用简介生成工具
 | Steam | steam | https://steamcommunity.com/app/:d , http://store.steampowered.com/app/:d , http://store.steampowered.com/app/:d/:s |
 
 > 注意：在`v0.4.0`之前，imdb链接会通过豆瓣查询并生成对应的豆瓣信息，而之后需要
-以 `&site=douban&sid=tt\d{7,8}`的形式传入查询参数时，才尝试从Douban查询对应IMDb号的豆瓣信息，
+以 `&site=douban&sid=tt\d{7,8}`的形式传入查询参数时，才会尝试从Douban查询对应IMDb号的豆瓣信息，
 
 ### 5) 请求返回结果示例:
 

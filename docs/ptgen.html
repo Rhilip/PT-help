@@ -109,6 +109,10 @@
                            id="input_value"/>
                 </div>
                 <button class="btn btn-success" id="query_btn">查询</button>
+                <div class="checkbox" id="force_douban_div" style="display: none;">
+                    <label for="force_douban" class="checkbox"></label>
+                    <input type="checkbox" class="form-control" id="force_douban"/> 通过豆瓣查询
+                </div>
             </div>
         </div>
         <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
@@ -172,6 +176,14 @@ $(function () {
         query_btn.html("查询");
     };
 
+   input_btn.on('input change',function () {
+       if (input_btn.val().match(/imdb/)) {
+           $('#force_douban_div').show();
+       } else {
+           $('#force_douban_div').hide();
+       }
+    })
+
     query_btn.click(function () {
         gen_help.hide();
         gen_out.show();
@@ -180,9 +192,19 @@ $(function () {
             alert("空字符，请检查输入");
         } else if (/^http/.test(input_value)) {
             query_btn.disable();
-            $.getJSON("https://api.rhilip.info/tool/movieinfo/gen", {
+
+            let param = {
                 url: input_value
-            }).success(function (data) {
+            };
+            if (input_value.match(/imdb/) && $('#force_douban').prop('checked')) {
+                let sid = input_value.match(/tt\d+/)[0];
+                param = {
+                    site: 'douban',
+                    sid: sid
+                }
+            }
+
+            $.getJSON("https://api.rhilip.info/tool/movieinfo/gen", param).success(function (data) {
                 out_textarea.val(data["success"] ? data["format"] : data["error"]);
             }).error(function () {
                 alert("Error occured!");
