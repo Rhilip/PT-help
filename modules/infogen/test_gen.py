@@ -44,6 +44,11 @@ if __name__ == '__main__':
         "http://jdaklvhgfad.com/adfad",  # No support link
     ]
 
+    dict_link_list = [
+        {'site': 'douban', 'sid': 3541415},  # Input dict object
+        {'site': 'douban', 'sid': 'tt0083662'}  # IMDb though Douban
+    ]
+
     test_link_list = [
 
     ]
@@ -51,6 +56,7 @@ if __name__ == '__main__':
     # test_link_list.extend(imdb_link_list)
     # test_link_list.extend(bgm_link_list)
     # test_link_list.extend(steam_link_list)
+    # test_link_list.extend(dict_link_list)
     # test_link_list.extend(other_link_list)
 
     for link in test_link_list:

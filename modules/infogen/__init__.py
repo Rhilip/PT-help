@@ -26,7 +26,11 @@ def get_key(key):
 @getinfo_blueprint.route("/gen", methods=["GET", "POST"])
 def gen():
     url = get_key("url")
-    nocache = get_key("nocache")
+    if url is None:
+        site = get_key('site')
+        sid = get_key('sid')
+        if site is not None and sid is not None:
+            url = {'site': site, 'sid': sid}
 
     if url:
         t0 = time.time()
@@ -35,6 +39,7 @@ def gen():
         def gen_data(uri):
             return Gen(url=uri).gen()
 
+        nocache = get_key("nocache")
         if nocache:
             cache.delete_memoized(gen_data, url)
 
