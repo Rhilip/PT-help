@@ -94,7 +94,8 @@ ul.timeline > li:before{content:' ';background:white;display:inline-block;positi
                     <a href="#" class="float-right">2019-04-10</a>
                     <p>1. 增加数据库缓存以及后台自动更新过期信息<br>
                         2. 上线IMDb格式，如果输入IMDb链接但要输出原格式，请勾选 <kbd>通过豆瓣查询</kbd><br>
-                        3. 感谢 <a href="https://www.ourbits.club" target="_blank">OurBits</a> 提供技术以及服务器支持
+                        3. 增加API请求频率限制，以<code>X-RATELIMIT-*</code>响应头展示。<br>
+                        4. 感谢 <a href="https://www.ourbits.club" target="_blank">OurBits</a> 提供技术以及服务器支持
                     </p>
                 </li>
                 <li>
@@ -174,7 +175,7 @@ $(function () {
        } else {
            $('#force_douban_div').hide();
        }
-    })
+    });
 
     query_btn.click(function () {
         gen_help.hide();
@@ -198,8 +199,8 @@ $(function () {
 
             $.getJSON("https://api.rhilip.info/tool/movieinfo/gen", param).success(function (data) {
                 out_textarea.val(data["success"] === false ? data["error"] : data["format"]);
-            }).error(function () {
-                alert("Error occured!");
+            }).fail(function (jqXHR) {
+                alert(jqXHR.status === 429 ? 'Met Rate Limit, Retry later~' : "Error occured!");
             }).complete(function () {
                 query_btn.enable();
             });
