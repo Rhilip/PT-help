@@ -90,30 +90,34 @@ ul.timeline > li:before{content:' ';background:white;display:inline-block;positi
             <hr>
             <h4>更新历史</h4>
             <ul class="timeline">
-				<li>
+                <li>
                     <a href="#" class="float-right">2019-04-10</a>
                     <p>1. 增加数据库缓存以及后台自动更新过期信息<br>
-                       2. 上线IMDb格式，如果输入IMDb链接但要输入原格式，请勾选 <kbd>通过豆瓣查询</kbd><br>
-                       3. 感谢 <a href="https://www.ourbits.club" target="_blank">OurBits</a> 提供技术以及服务器支持
+                        2. 上线IMDb格式，如果输入IMDb链接但要输出原格式，请勾选 <kbd>通过豆瓣查询</kbd><br>
+                        3. 感谢 <a href="https://www.ourbits.club" target="_blank">OurBits</a> 提供技术以及服务器支持
                     </p>
-				</li>
+                </li>
                 <li>
                     <a href="#" class="float-right">2019-02-23</a>
                     <p>修改CDN为jsDelivr</p>
-				</li>
-                 <li>
+                </li>
+                <li>
+                    <a href="#" class="float-right">2018-6-22</a>
+                    <p>增加前端豆瓣搜索（通过豆瓣API）支持</p>
+                </li>
+                <li>
                     <a href="#" class="float-right">2018-04-17</a>
-                    <p>增加Steam信息生成<p>
-				</li>
+                    <p>增加Steam信息生成</p>
+                </li>
                 <li>
                     <a href="#" class="float-right">2018-03-17</a>
-                    <p>上线前端页面<p>
-				</li>
+                    <p>上线前端页面</p>
+                </li>
                 <li>
                     <a href="#" class="float-right">2017-10-14</a>
                     <p>API初版上线，初版支持Douban以及Bangumi简介生成</p>
-				</li>
-			</ul>
+                </li>
+            </ul>
         </div>
     </div>
 
@@ -193,7 +197,7 @@ $(function () {
             }
 
             $.getJSON("https://api.rhilip.info/tool/movieinfo/gen", param).success(function (data) {
-                out_textarea.val(data["success"] ? data["format"] : data["error"]);
+                out_textarea.val(data["success"] === false ? data["error"] : data["format"]);
             }).error(function () {
                 alert("Error occured!");
             }).complete(function () {
