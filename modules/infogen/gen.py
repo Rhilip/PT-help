@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 from html2bbcode.parser import HTML2BBCode
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __author__ = "Rhilip"
 
 douban_format = [
@@ -21,8 +21,8 @@ douban_format = [
     ("genre", "◎类　　别　{}\n"),
     ("language", "◎语　　言　{}\n"),
     ("playdate", "◎上映日期　{}\n"),
-    ("imdb_rating", "◎IMDb评分　{}\n"),
-    ("imdb_link", "◎IMDb链接　{}\n"),
+    ("imdb_rating", "◎IMDb评分  {}\n"),
+    ("imdb_link", "◎IMDb链接  {}\n"),
     ("douban_rating", "◎豆瓣评分　{}\n"),
     ("douban_link", "◎豆瓣链接　{}\n"),
     ("episodes", "◎集　　数　{}\n"),
@@ -538,7 +538,7 @@ class Gen(object):
                 h2 = tag.find("h2")
                 char = (h2.find("span", class_="tip") or h2.find("a")).get_text().replace("/", "").strip()
                 cv = "、".join(map(lambda p: (p.find("small").get_text() or p.find("a").get_text()).strip(),
-                                  tag.select("> div.clearit > p")))
+                                  tag.select("div.clearit > p")))
                 return "{}:{}".format(char, cv)
 
             data["cast"] = list(map(cast_clean, cast_actors))[:9]  # Cast
