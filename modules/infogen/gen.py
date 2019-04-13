@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 from html2bbcode.parser import HTML2BBCode
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 __author__ = "Rhilip"
 
 douban_format = [
@@ -413,7 +413,7 @@ class Gen(object):
             self.ret.update(data)
 
     def _gen_steam(self):
-        steam_chs_url = "http://store.steampowered.com/app/{}/?l=schinese".format(self.sid)
+        steam_chs_url = "https://store.steampowered.com/app/{}/?l=schinese".format(self.sid)
         steam_page = requests.get(steam_chs_url,
                                   # 使用cookies避免 Steam 年龄认证
                                   cookies={"mature_content": "1", "birthtime": "157737601",
@@ -421,7 +421,7 @@ class Gen(object):
         if re.search("(欢迎来到|Welcome to) Steam", steam_page.text):  # 不存在的资源会被302到首页，故检查标题或r.history
             self.ret["error"] = "The corresponding resource does not exist."
         else:
-            data = {}
+            data = {'steam_id': self.sid, 'steam_link': steam_chs_url}
             steam_bs = BeautifulSoup(steam_page.text, "lxml")
             # 从网页中定位数据
             name_anchor = steam_bs.find("div", class_="apphub_AppName") or steam_bs.find("span", itemprop="name")  # 游戏名
@@ -480,7 +480,8 @@ class Gen(object):
 
             base_info = "中文名: {}\n".format(data["name_chs"]) if data.get("name_chs") else ""
             base_info += (data["detail"] + "\n") if data.get("detail") else ""
-            base_info += "官方网站： {}\n".format(data["linkbar"]) if data.get("linkbar") else ""
+            base_info += "官方网站: {}\n".format(data["linkbar"]) if data.get("linkbar") else ""
+            base_info += "Steam页面: https://store.steampowered.com/app/{}/\n".format(data['steam_id'])
             base_info += ("游戏语种: " + " | ".join(data["language"]) + "\n") if data.get("language") else ""
             base_info += ("标签: " + " | ".join(data["tags"]) + "\n") if data.get("tags") else ""
             base_info += ("\n".join(data["review"]) + "\n") if data.get("review") else ""
