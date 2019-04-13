@@ -62,66 +62,75 @@ ul.timeline > li:before{content:' ';background:white;display:inline-block;positi
 <div class="container-fluid main">
     <div class="row">
         <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
-            <div class="form-inline">
-                <div class="form-group">
-                    <label class="sr-only" for="input_value">Input value</label>
-                    <input type="text" class="form-control" placeholder="名称或豆瓣、IMDb、Bangumi、Steam等资源链接"
-                           id="input_value"/>
-                </div>
-                <button class="btn btn-success" id="query_btn">查询</button>
-                <div class="checkbox" id="force_douban_div" style="display: none;">
-                    <label for="force_douban" class="checkbox"></label>
-                    <input type="checkbox" class="form-control" id="force_douban" checked="checked"/> 通过豆瓣查询
+            <div>
+                <div class="form-inline">
+                    <div class="form-group">
+                        <label class="sr-only" for="input_value">Input value</label>
+                        <input type="text" class="form-control" placeholder="名称或豆瓣、IMDb、Bangumi、Steam等资源链接"
+                               id="input_value"/>
+                    </div>
+                    <button class="btn btn-success" id="query_btn">查询</button>
+                    <div class="checkbox" id="force_douban_div" style="display: none;">
+                        <label for="force_douban" class="checkbox"></label>
+                        <input type="checkbox" class="form-control" id="force_douban" checked="checked"/> 通过豆瓣查询
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
             <hr>
-        </div>
-        <div id="gen_help" class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3" style="display: none"></div>
-        <div id="gen_out" class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
-            <div class="zero-clipboard">
-                <button class="btn btn-clipboard" data-clipboard-target="#movie_info">复制</button>
+            <div id="gen_help" style="display: none"></div>
+            <div id="gen_out">
+                <div class="zero-clipboard">
+                    <button class="btn btn-clipboard" data-clipboard-target="#movie_info">复制</button>
+                </div>
+                <textarea class="form-control" rows=22 id="movie_info"></textarea>
             </div>
-            <textarea class="form-control" rows=22 id="movie_info"></textarea>
-        </div>
-
-        <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
             <hr>
-            <h4>更新历史</h4>
-            <ul class="timeline">
-                <li>
-                    <a href="#" class="float-right">2019-04-10</a>
-                    <p>1. 增加数据库缓存以及后台自动更新过期信息<br>
-                        2. 上线IMDb格式，如果输入IMDb链接但要输出原格式，请勾选 <kbd>通过豆瓣查询</kbd><br>
-                        3. 增加API请求频率限制，以<code>X-RATELIMIT-*</code>响应头展示。<br>
-                        4. 感谢 <a href="https://www.ourbits.club" target="_blank">OurBits</a> 提供技术以及服务器支持
-                    </p>
-                </li>
-                <li>
-                    <a href="#" class="float-right">2019-02-23</a>
-                    <p>修改CDN为jsDelivr</p>
-                </li>
-                <li>
-                    <a href="#" class="float-right">2018-6-22</a>
-                    <p>增加前端豆瓣搜索（通过豆瓣API）支持</p>
-                </li>
-                <li>
-                    <a href="#" class="float-right">2018-04-17</a>
-                    <p>增加Steam信息生成</p>
-                </li>
-                <li>
-                    <a href="#" class="float-right">2018-03-17</a>
-                    <p>上线前端页面</p>
-                </li>
-                <li>
-                    <a href="#" class="float-right">2017-10-14</a>
-                    <p>API初版上线，初版支持Douban以及Bangumi简介生成</p>
-                </li>
-            </ul>
+            <div id="gen_history">
+                <h4>更新历史</h4>
+                <ul class="timeline">
+                    <li>
+                        <a href="#" class="float-right">2019-04-10</a>
+                        <p>1. 增加数据库缓存以及后台自动更新过期信息<br>
+                            2. 上线IMDb格式，如果输入IMDb链接但要输出原格式，请勾选 <kbd>通过豆瓣查询</kbd><br>
+                            3. 增加API请求频率限制，以<code>X-RATELIMIT-*</code>响应头展示。<br>
+                            4. 感谢 <a href="https://www.ourbits.club" target="_blank">OurBits</a> 提供技术以及服务器支持
+                        </p>
+                    </li>
+                    <li>
+                        <a href="#" class="float-right">2019-02-23</a>
+                        <p>修改CDN为jsDelivr</p>
+                    </li>
+                    <li>
+                        <a href="#" class="float-right">2018-6-22</a>
+                        <p>增加前端豆瓣搜索（通过豆瓣API）支持</p>
+                    </li>
+                    <li>
+                        <a href="#" class="float-right">2018-04-17</a>
+                        <p>增加Steam信息生成</p>
+                    </li>
+                    <li>
+                        <a href="#" class="float-right">2018-03-17</a>
+                        <p>上线前端页面</p>
+                    </li>
+                    <li>
+                        <a href="#" class="float-right">2017-10-14</a>
+                        <p>API初版上线，初版支持Douban以及Bangumi简介生成</p>
+                    </li>
+                </ul>
+            </div>
+            <hr>
+            <div id="gen_replace">
+                <h4>相关替代</h4>
+                此处列出可以替代本平台的用户脚本，以便在 <code>Pt-Gen</code> 失效或返回数据陈旧时使用
+                <ul style="margin-top: 10px">
+                    <li>豆瓣： <a href="https://greasyfork.org/en/scripts/38878" target="_blank">电影信息查询脚本</a> 或
+                        <a href="https://greasyfork.org/scripts/329484" target="_blank">豆瓣资源下载大师</a></li>
+                    <li>Bangumi： Bangumi Info Export <a href="https://git.io/fjm3l" target="_blank">脚本</a>，
+                        <a href="https://bgm.tv/dev/app/103" target="_blank">应用平台</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-
 </div>
 
 <!-- Bootstrap core JavaScript
