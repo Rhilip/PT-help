@@ -19,6 +19,16 @@ if (GM_info && GM_info.script) {
     script_version = GM_info.script.version || script_version;
 }
 
+const doubanEntApiKeys = [
+    "0dad551ec0f84ed02907ff5c42e8ec70",
+    "02646d3fb69a52ff072d47bf23cef8fd",
+    "07c78782db00a121175696889101e363"
+];
+
+function getDoubanEntApiKey() {  // 随机获取一个key
+    return doubanEntApiKeys[Math.floor(Math.random() * doubanEntApiKeys.length)];
+}
+
 Date.prototype.format = function (format) {
     var o = {
         "M+": this.getMonth() + 1, //month
@@ -373,7 +383,7 @@ CKEDITOR.on('instanceReady', function (evt) {
                         //豆瓣评分，简介，海报，导演，编剧，演员，标签
                         $.ajax({
                             type: 'get',
-                            url: 'https://api.douban.com/v2/movie/' + movie_id,
+                            url: 'https://api.douban.com/v2/movie/' + movie_id + '?apikey=' + getDoubanEntApiKey(),
                             dataType: 'jsonp',
                             jsonpCallback: 'callback',
                             success: function (json) {
@@ -480,7 +490,7 @@ CKEDITOR.on('instanceReady', function (evt) {
             };
 
             if ([408, 401,410].indexOf(cat) > -1) {    // 电影区，剧集区，纪录区
-                Search_From_API("https://api.douban.com/v2/movie/search?q=" + subject_url, function (res, resj) {
+                Search_From_API("https://api.douban.com/v2/movie/search?q=" + subject_url + '&apikey=' + getDoubanEntApiKey(), function (res, resj) {
                     var search_html = "";
                     if (resj.total !== 0) {
                         search_html = "<hr>下面为可能的搜索结果，请确认<table id=\"gen_search_table\" style='width: 100%' align='center'><tr><td class=\"colhead\" align='center'>年代</td><td class=\"colhead\" align='center'>类别</td><td class=\"colhead\" align='center'>标题</td><td class=\"colhead\" align='center'>豆瓣链接</td><td class=\"colhead\" align='center'>行为</td></tr>";
