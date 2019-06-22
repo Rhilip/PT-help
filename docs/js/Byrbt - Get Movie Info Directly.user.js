@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Byrbt : Get Movie Info Directly
 // @namespace   http://blog.rhilip.info
-// @version     20190303
+// @version     20190622
 // @description 从其他信息站点（Douban、Bangumi）获取种子简介信息，并辅助表单信息填写与美化
 // @author      Rhilip
 // @include     /^https?:\/\/(bt\.byr\.cn|byr\.rhilip\.info)\/upload\.php\?type=4(08|01|04|10)/
@@ -524,6 +524,7 @@ CKEDITOR.on('instanceReady', function (evt) {
 
 /**
  * Created by Rhilip on 10/12/2017.
+ * 20190622: 增加豆瓣apikey
  * 20190303：增加纪录区支持
  * 20180401: 增加默认douban的评分值，防止无评分时出现`/10 from users`的情况
  * 20180308: 修复Firefox下不能正常填入简介的Bug。
