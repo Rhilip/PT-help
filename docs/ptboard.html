@@ -111,6 +111,11 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.11.1/dist/bootstrap-table.min.js" integrity="sha256-eXHLyyVI+v6X1wbfg9NB05IWqOqY4E9185nHZgeDIhg=" crossorigin="anonymous"></script>
 
 <script>
+    // 他人部署ptboard请移除此行
+    if (location.host != 'api.rhilip.info') {
+        location.href = 'https://api.rhilip.info/ptboard.html';
+    }
+    
     function initTable() {
         $('#table').bootstrapTable({
             classes: "table table-hover table-striped",
