@@ -6,6 +6,7 @@
 // @author       Rhilip
 // @match        http*://bt.byr.cn/edit.php*
 // @match        http*://bt.byr.cn/upload.php*
+// @match        http*://bt.byr.cn/offers.php*
 // @icon         http://bt.byr.cn/favicon.ico
 // @require      https://cdn.jsdelivr.net/npm/jquery-simplemodal@1.0.0/src/jquery.simplemodal.js
 // @updateURL    https://github.com/Rhilip/PT-help/raw/master/docs/js/Byrbt%20-%20Quote%20in%20CKEditor.user.js
